@@ -37,8 +37,11 @@ private:
 	void loadSpaces();
 	void initLocals();
 	void clearPolymorphicMethodCache();
+	unsigned long framePointerToStartWalkingTheStack();
+	unsigned long dereference(unsigned long pointer);
 	void follow(unsigned long pointer);
 	void follow(unsigned long pointer, int count, unsigned long start);
+	void followStack();
 
 };
 

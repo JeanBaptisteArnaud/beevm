@@ -7,10 +7,8 @@
 
 #include "GarbageCollector.h"
 // just until I fix my environment
-#define NULL 0
-#define nil 0
-#define MEM0x1002EC20 0
-#define  _strongPointersSize(pointer) 0
+
+
 
 #include <cstddef>
 #include <iostream>
@@ -47,7 +45,7 @@ void GarbageCollector::collect() {
 }
 
 void GarbageCollector::clearPolymorphicMethodCache() {
-	for (int index = 1; index <= 16384; index++) {
+	for (int index = 1; index <= 0x4000; index++) {
 		MEM0x1002EC20[index] = nil;
 	}
 }
@@ -86,9 +84,41 @@ void GarbageCollector::follow(unsigned long pointer, int count,
 
 }
 
+unsigned long GarbageCollector::framePointerToStartWalkingTheStack()
+{
+//| frame |
+//frame := globalFramePointerToWalkStack == nil
+//	ifTrue: [self _framePointer]
+//	ifFalse: [globalFramePointerToWalkStack].
+//^self dereference: frame
+}
+
+
+void GarbageCollector::followStack(){
+//	unsigned long frame = this->framePointerToStartWalkingTheStack();
+//	while(memoryAt(frame)){
+//		size = nextFrame - frame;
+//		basicAT
+//	}
+//
+//
+//			(frame _basicAt: 2) == debugFrameMarker
+//				ifTrue: [
+//					self follow: frame count: 5 startingAt: 3.
+//					start := 9]
+//				ifFalse: [start := 3].
+//			self followFrame: frame count: size startingAt: start.
+//			frame := nextFrame]
+}
+
 void GarbageCollector::follow(unsigned long pointer) {
 	// TODO self rememberIfWeak: pointer.
 	this->follow(pointer,  _strongPointersSize(pointer) , 0);
+}
+
+
+unsigned long GarbageCollector::dereference(unsigned long pointer) {
+	return memoryAt(pointer);
 }
 
 void GarbageCollector::loadSpaces() {

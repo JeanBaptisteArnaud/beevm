@@ -8,10 +8,7 @@
 #include "GenerationalGC.h"
 
 // TODO nil
-#define nil 0
-#define MEM0x1003EC48 0
-#define MEM0x10041710 0
-#define MEM0x10041714 0
+
 
 //using namespace std;
 using namespace Bee;
@@ -30,11 +27,7 @@ bool GenerationalGC::hasToPurge(unsigned long pointer) {
 	return false;
 
 }
-bool GenerationalGC::dereference(unsigned long pointer) {
-	// TODO
-	return false;
 
-}
 
 void GenerationalGC::purgeLiteralsReference(){
 	long kept, offset, literal = 0;
@@ -101,12 +94,12 @@ void GenerationalGC::moveToOldAll(ReferencedVMArray objects) {
 
 
 void GenerationalGC::followCodeCacheReferences(){
-		if(this->dereference(MEM0x1003EC48)) {
+		if(this->dereference(0x1003EC48)) {
 			MEM0x1003EC48 = 0;
 			this->clearPolymorphicMethodCache();
 			}
-		if(this->dereference(MEM0x10041710))moveClassCheckReferences();
-		if(this->dereference(MEM0x10041714))
+		if(this->dereference(0x10041710)) this->moveClassCheckReferences();
+		if(this->dereference(0x10041714))
 			{MEM0x10041714 = 0;
 			this->moveToOldAll(nativizedMethods);
 			}
