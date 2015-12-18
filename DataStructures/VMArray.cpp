@@ -12,14 +12,4 @@ using namespace Bee;
 VMArray::VMArray() {
 }
 
-VMArray VMArray::currentFrom() {
-	return VMArray();
-}
-
-VMArray VMArray::currentTo() {
-	return VMArray();
-}
-VMArray VMArray::old() {
-	return VMArray();
-}
 

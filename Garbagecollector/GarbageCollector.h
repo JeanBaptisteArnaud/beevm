@@ -23,8 +23,8 @@ class GarbageCollector {
 	ReferencedVMArray classCheckReferences;
 	VMArray stack;
 	VMArray unknowns;
-
 public:
+
 	GarbageCollector();
 
 	static GarbageCollector* currentFlipper();
@@ -35,6 +35,11 @@ private:
 	static GarbageCollector *flipper;
 
 	void loadSpaces();
+	void initLocals();
+	void clearPolymorphicMethodCache();
+	void follow(unsigned long pointer);
+	void follow(unsigned long pointer, int count, unsigned long start);
+
 };
 
 extern "C" {

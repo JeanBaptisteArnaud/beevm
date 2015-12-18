@@ -12,9 +12,9 @@ namespace Bee {
 class VMArray {
 public:
 	VMArray();
-	static VMArray currentFrom();
-	static VMArray currentTo();
-	static VMArray old();
+	long size();
+	long size(long);
+
 };
 
 }

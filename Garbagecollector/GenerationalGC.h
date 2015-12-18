@@ -15,7 +15,17 @@ public:
 	void collect();
 
 private:
+	bool hasToPurge(unsigned long pointer);
+	bool arenaIncludes(unsigned long pointer);
+	bool dereference(unsigned long pointer);
+	void moveToOldAll(ReferencedVMArray object);
+	void followRememberSet();
 
+	void purgeLiteralsReference();
+	void purgeRememberSet();
+	void followCodeCacheReferences();
+	void moveClassCheckReferences();
+	void followRoots();
 };
 
 extern "C" {
