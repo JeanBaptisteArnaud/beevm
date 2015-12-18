@@ -5,38 +5,15 @@
  *      Author: javier
  */
 
-#include "main.h"
-
 #include <cstddef>
 #include <iostream>
+#include "GarbageCollector.h"
 
-using namespace std;
+//using namespace std;
 using namespace Bee;
 
-
-GarbageCollector* GarbageCollector::flipper = NULL;
-
-
-GarbageCollector::GarbageCollector()
-{
-
-}
-
-GarbageCollector* GarbageCollector::currentFlipper()
-{
-	if (flipper == NULL)
-		flipper = new GarbageCollector();
-	return flipper;
-}
-
-void GarbageCollector::collect()
-{
-	cout << "recolectando!" << endl;
-}
-
 extern "C" {
-void collect(int val)
-{
+void collect(int val) {
 	GarbageCollector::currentFlipper()->collect();
 }
 }
