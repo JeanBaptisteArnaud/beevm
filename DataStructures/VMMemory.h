@@ -21,11 +21,12 @@ unsigned long MEM0x10041714 = 0;
 unsigned long MEM0x1002EC20 = 0;
 unsigned long MEM0x1002E820 = 0;
 unsigned long nil = 0;
-unsigned long NULL = 0;
 
 unsigned long memoryAt(unsigned long pointer);
 void memoryAtPut(unsigned long pointer, unsigned long value);
 bool isProxy(unsigned long pointer);
 bool proxee(unsigned long pointer);
-
+unsigned long basicAt(unsigned long object, int index);
+unsigned long basicAtPut(unsigned long object, int index, unsigned long value);
+int size(unsigned long object);
 #endif /* DATASTRUCTURES_VMMEMORY_H_ */

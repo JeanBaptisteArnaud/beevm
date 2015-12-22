@@ -7,8 +7,6 @@
 
 #include "GenerationalGC.h"
 
-// TODO nil
-
 //using namespace std;
 using namespace Bee;
 
@@ -21,6 +19,7 @@ bool GenerationalGC::arenaIncludes(unsigned long pointer) {
 	return false;
 
 }
+
 bool GenerationalGC::hasToPurge(unsigned long pointer) {
 	// TODO
 	return false;
@@ -36,6 +35,22 @@ void GenerationalGC::purgeLiteralsReference() {
 			offset = literalsReferences[index + 1];
 			literalsReferences[kept - 1] = literal;
 			literalsReferences[kept] = offset;
+		}
+	}
+}
+
+void GenerationalGC::fixReferencesOrSetTombstone(unsigned long weakContainer) {
+	// care it is object size !!!!
+	unsigned long instance, referenceOrThombstone;
+	for (int index = 1; index <= size(weakContainer); index++) {
+		instance = basicAt(weakContainer, index);
+		if (this->arenaIncludes(instance)) {
+			if (isProxy(instance)) {
+				referenceOrThombstone = proxee(instance);
+			} else {
+				referenceOrThombstone = residueObject;
+			}
+			basicAtPut(weakContainer, index, referenceOrThombstone);
 		}
 	}
 }

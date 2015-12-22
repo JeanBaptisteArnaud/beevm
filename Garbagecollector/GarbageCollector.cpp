@@ -149,10 +149,12 @@ void GarbageCollector::follow(unsigned long pointer) {
 	//this->follow(pointer, _strongPointersSize(pointer), 0);
 }
 
+
 void GarbageCollector::fixWeakContainers() {
-	//weakContainers
-	//do: [:weakContainer | self fixReferencesOrSetTombstone: weakContainer];
-	//reset
+	for (int index = 1; index <= weakContainers.size(); index++) {
+	this.fixReferencesOrSetTombstone(weakContainers[index]);
+	}
+	weakContainers.reset();
 }
 
 unsigned long GarbageCollector::dereference(unsigned long pointer) {

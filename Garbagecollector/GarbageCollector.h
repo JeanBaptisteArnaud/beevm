@@ -23,6 +23,7 @@ class GarbageCollector {
 	ReferencedVMArray classCheckReferences;
 	VMArray stack;
 	VMArray unknowns;
+	unsigned long residueObject = 0;
 public:
 
 	GarbageCollector();
