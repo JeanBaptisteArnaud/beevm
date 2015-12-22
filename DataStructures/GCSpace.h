@@ -16,6 +16,10 @@ public:
 	static GCSpace currentFrom();
 	static GCSpace currentTo();
 	static GCSpace old();
+	bool includes(unsigned long pointer);
+	void loadFrom(GCSpace from);
+	void reset();
+	unsigned long shallowCopy(unsigned long pointer);
 
 };
 

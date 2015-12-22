@@ -78,15 +78,40 @@ void GenerationalGC::moveClassCheckReferences() {
 }
 
 void GenerationalGC::moveToOldAll(ReferencedVMArray objects) {
+	unsigned long moved, object = 0;
+	for (int index = 1; index < objects.size(); index++) {
+		object = objects[index];
+		if (this->arenaIncludes(object)) {
+			if (isProxy(object)) {
+				moved = proxee(object);
+			} else {
+				moved = this->moveToOldSpace(object);
+			}
+			objects[index] = moved;
+		}
+	}
 
-//	1 to: objects size do: [:index | | object |
-//		object := objects at: index.
-//		(self arenaIncludes: object) ifTrue: [| moved |
-//			moved := object _isProxy
-//				ifTrue: [object _proxee]
-//				ifFalse: [self moveToOldSpace: object].
-//			objects at: index put: moved]]
+}
 
+unsigned long GenerationalGC::moveToOldSpace(unsigned long object) {
+	unsigned long copy;
+	copy = this->copyTo(object, oldSpace);
+	this->holdReferenceTo(copy);
+	return copy;
+}
+
+unsigned long GenerationalGC::holdReferenceTo(unsigned long object) {
+	//object _isInRememberSet ifFalse: [
+	//	object _beInRememberSet.
+	//	self addRoot: object]
+
+}
+
+unsigned long GenerationalGC::copyTo(unsigned long object, GCSpace to) {
+	unsigned long copy = 0;
+	copy = to.shallowCopy(object);
+	object = proxee(copy);
+	return copy;
 }
 
 void GenerationalGC::followCodeCacheReferences() {
@@ -104,13 +129,10 @@ void GenerationalGC::followCodeCacheReferences() {
 }
 
 void GenerationalGC::flipSpaces() {
-	auxSpace
-	loadFrom: toSpace;
-	toSpace
-	loadFrom: fromSpace;
-	fromSpace
-	loadFrom: auxSpace;
-	toSpace reset;
+	auxSpace.loadFrom(toSpace);
+	toSpace.loadFrom(fromSpace);
+	fromSpace.loadFrom(auxSpace);
+	toSpace.reset();
 	this->updateSpacesDelta();
 }
 
@@ -122,24 +144,27 @@ void GenerationalGC::updateSpacesDelta() {
 }
 
 void GenerationalGC::fixReferencesFromNativeMethods() {
-
-//	1 to: literalsReferences size by: 2 do: [:index | | literal offset reference |
-//		literal := literalsReferences at: index.
-//		offset := literalsReferences at: index + 1.
-//		reference := self codeCacheAtOffset: offset.
-//		reference _basicAt: 1 put: literal]
+	unsigned long literal, offset, reference = 0;
+	for (int index = 0; index < literalsReferences.size(); index++++) {
+		literal = literalsReferences[index];
+		offset = literalsReferences[index + 1];
+		reference = memoryAt(MEM0x1002E820 * 2 + offset);
+		memoryAtPut(reference, literal);
+	}
 }
 
 void GenerationalGC::cleanRememberSet() {
-	//| kept |
-	//kept := 0.
-	//1 to: rememberSet size do: [:index | | object |
-	//	object := rememberSet at: index.
-	//	rememberSet at: index put: nil.
-	//	(toSpace includes: object) ifFalse: [
-	//		kept := kept + 1.
-	//		rememberSet at: kept put: object]].
-	//rememberSet size: kept
+	int kept = 0;
+	unsigned long object = 0;
+	for (int index = 0; index < rememberSet.size(); index++) {
+		object = rememberSet[index];
+		rememberSet[index] = nil;
+		if (!toSpace.includes(object)) {
+			kept++;
+			rememberSet[kept] = object;
+		}
+	}
+	rememberSet.size(kept);
 }
 
 void GenerationalGC::addInterrupt() {
@@ -147,8 +172,8 @@ void GenerationalGC::addInterrupt() {
 }
 
 void GenerationalGC::collect() {
-	this->loadSpaces();
-	this->initLocals();
+	this->loadSpaces(); // need to be change
+	this->initLocals(); // need to be change
 	//Thinks we do not need that:: this->useNativeObjects();
 	this->purgeLiteralsReference();
 	this->purgeRememberSet();
@@ -161,8 +186,8 @@ void GenerationalGC::collect() {
 	this->flipSpaces();
 	this->fixReferencesFromNativeMethods();
 	this->cleanRememberSet();
-	this->forgetNativeObjects();
-	this->addInterrupt();
-	this->saveSpaces();
+	////Thinks we do not need that:: this->forgetNativeObjects();
+	////Thinks we do not need that:: this->addInterrupt();
+	////Thinks we do not need that:: this->saveSpaces();
 }
 

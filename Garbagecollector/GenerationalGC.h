@@ -29,6 +29,9 @@ protected:
 	void fixReferencesFromNativeMethods();
 	void flipSpaces();
 	void updateSpacesDelta();
+	unsigned long copyTo(unsigned long object, GCSpace to);
+	unsigned long moveToOldSpace(unsigned long object);
+	unsigned long holdReferenceTo(unsigned long object);
 };
 
 extern "C" {
