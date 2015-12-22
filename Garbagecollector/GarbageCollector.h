@@ -31,7 +31,7 @@ public:
 
 	void collect();
 
-private:
+protected:
 	static GarbageCollector *flipper;
 
 	void loadSpaces();
@@ -42,6 +42,14 @@ private:
 	void follow(unsigned long pointer);
 	void follow(unsigned long pointer, int count, unsigned long start);
 	void followStack();
+	void rescueEphemerons();
+	bool followEphemeronsCollectingUnknowns();
+	void rescueEphemeron(unsigned long ephemeron);
+	void someEphemeronsRescued();
+	void makeRescuedEphemeronsNonWeak();
+	void fixWeakContainers();
+	void forgetNativeObjects();
+	void saveSpaces();
 
 };
 

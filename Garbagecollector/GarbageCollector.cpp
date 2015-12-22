@@ -7,8 +7,7 @@
 
 #include "GarbageCollector.h"
 // just until I fix my environment
-
-
+#define NULL 0
 
 #include <cstddef>
 #include <iostream>
@@ -42,6 +41,42 @@ GarbageCollector* GarbageCollector::currentFlipper() {
 
 void GarbageCollector::collect() {
 
+}
+
+bool GarbageCollector::followEphemeronsCollectingUnknowns() {
+	return false;
+}
+
+void GarbageCollector::rescueEphemeron(unsigned long ephemeron) {
+	//self follow: ephemeron count: ephemeron _extendedSize startingAt: 1.
+	//rescuedEphemerons add: ephemeron
+	return;
+}
+
+void GarbageCollector::someEphemeronsRescued() {
+	//self holdReferenceTo: rescuedEphemerons contents
+}
+
+void GarbageCollector::rescueEphemerons() {
+	bool rescued, rescan = 0;
+	// need to check probably here.
+	// copy or value
+	VMArray aux;
+	while (!ephemerons.isEmpty()) {
+		if (this->followEphemeronsCollectingUnknowns()) {
+			aux = ephemerons;
+			ephemerons = unknowns;
+			unknowns = aux;
+		} else {
+			for (int ephemeronIndex = 0; ephemeronIndex <= ephemerons.size();
+					ephemeronIndex++)
+				this->rescueEphemeron(unknowns[ephemeronIndex]);
+			rescued = true;
+		}
+		unknowns.reset();
+	}
+	if (rescued)
+		this->someEphemeronsRescued();
 }
 
 void GarbageCollector::clearPolymorphicMethodCache() {
@@ -84,8 +119,7 @@ void GarbageCollector::follow(unsigned long pointer, int count,
 
 }
 
-unsigned long GarbageCollector::framePointerToStartWalkingTheStack()
-{
+unsigned long GarbageCollector::framePointerToStartWalkingTheStack() {
 //| frame |
 //frame := globalFramePointerToWalkStack == nil
 //	ifTrue: [self _framePointer]
@@ -93,8 +127,7 @@ unsigned long GarbageCollector::framePointerToStartWalkingTheStack()
 //^self dereference: frame
 }
 
-
-void GarbageCollector::followStack(){
+void GarbageCollector::followStack() {
 //	unsigned long frame = this->framePointerToStartWalkingTheStack();
 //	while(memoryAt(frame)){
 //		size = nextFrame - frame;
@@ -113,12 +146,35 @@ void GarbageCollector::followStack(){
 
 void GarbageCollector::follow(unsigned long pointer) {
 	// TODO self rememberIfWeak: pointer.
-	this->follow(pointer,  _strongPointersSize(pointer) , 0);
+	//this->follow(pointer, _strongPointersSize(pointer), 0);
 }
 
+void GarbageCollector::fixWeakContainers() {
+	//weakContainers
+	//do: [:weakContainer | self fixReferencesOrSetTombstone: weakContainer];
+	//reset
+}
 
 unsigned long GarbageCollector::dereference(unsigned long pointer) {
 	return memoryAt(pointer);
+}
+
+void GarbageCollector::forgetNativeObjects() {
+//	rememberSet forget.
+//	literalsReferences forget.
+//	rescuedEphemerons forget.
+//	classCheckReferences forget.
+//	nativizedMethods forget.
+//	residueObject := globalFramePointerToWalkStack := nil
+}
+
+void GarbageCollector::saveSpaces() {
+	//fromSpace save.
+	//oldSpace save.
+	//toSpace save
+}
+void GarbageCollector::makeRescuedEphemeronsNonWeak() {
+//	rescuedEphemerons do: [:ephemeron | ephemeron _haveNoWeaks]
 }
 
 void GarbageCollector::loadSpaces() {

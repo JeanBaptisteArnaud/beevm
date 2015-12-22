@@ -14,7 +14,7 @@ public:
 	GenerationalGC();
 	void collect();
 
-private:
+protected:
 	bool hasToPurge(unsigned long pointer);
 	bool arenaIncludes(unsigned long pointer);
 	void moveToOldAll(ReferencedVMArray object);
@@ -24,6 +24,11 @@ private:
 	void followCodeCacheReferences();
 	void moveClassCheckReferences();
 	void followRoots();
+	void cleanRememberSet();
+	void addInterrupt();
+	void fixReferencesFromNativeMethods();
+	void flipSpaces();
+	void updateSpacesDelta();
 };
 
 extern "C" {

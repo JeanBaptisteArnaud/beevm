@@ -14,7 +14,9 @@ public:
 	VMArray();
 	long size();
 	long size(long);
-
+	bool isEmpty();
+	void reset();
+	unsigned long operator[](int i);
 };
 
 }
