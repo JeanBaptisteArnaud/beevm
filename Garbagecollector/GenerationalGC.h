@@ -33,6 +33,9 @@ protected:
 	unsigned long moveToOldSpace(unsigned long object);
 	unsigned long holdReferenceTo(unsigned long object);
 	void fixReferencesOrSetTombstone(unsigned long weakContainer);
+	void spacesDelta(unsigned long delta);
+	unsigned long spacesDelta();
+
 };
 
 extern "C" {

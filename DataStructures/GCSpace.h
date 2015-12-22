@@ -20,6 +20,7 @@ public:
 	void loadFrom(GCSpace from);
 	void reset();
 	unsigned long shallowCopy(unsigned long pointer);
+	unsigned long base();
 
 };
 

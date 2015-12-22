@@ -29,5 +29,6 @@ bool proxee(unsigned long pointer);
 unsigned long basicAt(unsigned long object, int index);
 unsigned long basicAtPut(unsigned long object, int index, unsigned long value);
 int size(unsigned long object);
+unsigned long framePointer();
 
 #endif /* DATASTRUCTURES_VMMEMORY_H_ */

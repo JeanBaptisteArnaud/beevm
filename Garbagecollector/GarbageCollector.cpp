@@ -44,6 +44,7 @@ void GarbageCollector::collect() {
 }
 
 bool GarbageCollector::followEphemeronsCollectingUnknowns() {
+	//TODO
 	return false;
 }
 
@@ -120,11 +121,13 @@ void GarbageCollector::follow(unsigned long pointer, int count,
 }
 
 unsigned long GarbageCollector::framePointerToStartWalkingTheStack() {
-//| frame |
-//frame := globalFramePointerToWalkStack == nil
-//	ifTrue: [self _framePointer]
-//	ifFalse: [globalFramePointerToWalkStack].
-//^self dereference: frame
+	unsigned long frame;
+	if (globalFramePointerToWalkStack == nil) {
+		frame = framePointer();
+	} else {
+		frame = globalFramePointerToWalkStack;
+	}
+	return frame;
 }
 
 void GarbageCollector::followStack() {
@@ -145,14 +148,13 @@ void GarbageCollector::followStack() {
 }
 
 void GarbageCollector::follow(unsigned long pointer) {
-	// TODO self rememberIfWeak: pointer.
-	//this->follow(pointer, _strongPointersSize(pointer), 0);
+// TODO self rememberIfWeak: pointer.
+//this->follow(pointer, _strongPointersSize(pointer), 0);
 }
-
 
 void GarbageCollector::fixWeakContainers() {
 	for (int index = 1; index <= weakContainers.size(); index++) {
-	this.fixReferencesOrSetTombstone(weakContainers[index]);
+		this.fixReferencesOrSetTombstone(weakContainers[index]);
 	}
 	weakContainers.reset();
 }
@@ -171,9 +173,9 @@ void GarbageCollector::forgetNativeObjects() {
 }
 
 void GarbageCollector::saveSpaces() {
-	//fromSpace save.
-	//oldSpace save.
-	//toSpace save
+//fromSpace save.
+//oldSpace save.
+//toSpace save
 }
 void GarbageCollector::makeRescuedEphemeronsNonWeak() {
 //	rescuedEphemerons do: [:ephemeron | ephemeron _haveNoWeaks]

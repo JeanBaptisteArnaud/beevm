@@ -158,10 +158,19 @@ void GenerationalGC::flipSpaces() {
 }
 
 void GenerationalGC::updateSpacesDelta() {
-//	| delta |
-//	self spacesDelta == 0 _asPointer ifFalse: [
-//		delta := toSpace base - fromSpace base.
-//		self spacesDelta: delta]
+	unsigned long delta;
+	if (!this->spacesDelta()) {
+		delta = toSpace.base() - fromSpace.base();
+		this->spacesDelta(delta);
+	}
+}
+
+unsigned long  GenerationalGC::spacesDelta() {
+	return memoryAt(0x1004175C);
+}
+
+void GenerationalGC::spacesDelta(unsigned long delta) {
+	memoryAtPut(0x1004175C, delta);
 }
 
 void GenerationalGC::fixReferencesFromNativeMethods() {

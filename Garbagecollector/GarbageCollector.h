@@ -24,6 +24,7 @@ class GarbageCollector {
 	VMArray stack;
 	VMArray unknowns;
 	unsigned long residueObject = 0;
+	unsigned long globalFramePointerToWalkStack;
 public:
 
 	GarbageCollector();
