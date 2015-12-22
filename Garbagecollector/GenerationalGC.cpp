@@ -81,15 +81,21 @@ void GenerationalGC::followRememberSet() {
 }
 
 void GenerationalGC::moveClassCheckReferences() {
-//classCheckReferences do: [:offset | | object reference |
-//	reference := self codeCacheAtOffset: offset.
-//	object := reference _basicAt: 1.
-//	(self arenaIncludes: object) ifTrue: [| moved |
-//		moved := object _isProxy
-//			ifTrue: [object _proxee]
-//			ifFalse: [self moveToOldSpace: object].
-//		reference _basicAt: 1 put: moved]].
-//self checkClassCheckReferences: false
+	unsigned long reference, object, moved;
+	for (int index = 1; index < classCheckReferences.size(); index++) {
+		reference = memoryAt(MEM0x1002E820 * 2 + (classCheckReferences[index]));
+		object = basicAt(reference, 1);
+		if (this->arenaIncludes(object)) {
+			if (isProxy(object)) {
+				moved = proxee(object);
+			} else {
+				moved = moveToOldSpace(object);
+			}
+			basicAtPut(reference, 1, moved);
+		}
+	}
+	// 0 asObject // a reflechir
+	basicAtPut(MEM0x10041710, 1, 0);
 }
 
 void GenerationalGC::moveToOldAll(ReferencedVMArray objects) {
