@@ -22,6 +22,7 @@ class ReferencedVMArray1 {
 
 
 class GarbageCollector {
+protected:
 	GCSpace fromSpace;
 	GCSpace toSpace;
 	GCSpace oldSpace;

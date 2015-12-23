@@ -16,7 +16,6 @@ public:
 	static ReferencedVMArray currentTo();
 	static ReferencedVMArray old();
 
-	long size();
 };
 
 }
