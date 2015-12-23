@@ -11,8 +11,10 @@
 // this should manage all the raw access memory
 
 #define NULL 0
-
 #define  _strongPointersSize(pointer) 0
+
+typedef unsigned long ulong;
+
 
 unsigned long *debugFrameMarker = (unsigned long *)0x1001B633;
 unsigned long *MEM_anyCompiledMethodInFromSpace     = (unsigned long *)0x10041710;
@@ -28,13 +30,15 @@ unsigned long *stFalse                    = (unsigned long*)0x10026080;
 unsigned long memoryAt(unsigned long pointer);
 void memoryAtPut(unsigned long pointer, unsigned long value);
 
-bool isProxy(unsigned long pointer);
-bool proxee(unsigned long pointer);
+bool _isProxy(unsigned long *object);
+unsigned long* _proxee(unsigned long *object);
+ulong _size(unsigned long *object);
+void _beNotInRememberedSet(ulong *object);
 
-unsigned long basicAt(unsigned long object, int index);
-unsigned long basicAtPut(unsigned long object, int index, unsigned long value);
 
-int size(unsigned long object);
+unsigned long basicAt(unsigned long *object, int index);
+unsigned long basicAtPut(unsigned long *object, int index, unsigned long value);
+
 unsigned long framePointer();
 
 #endif /* DATASTRUCTURES_VMMEMORY_H_ */

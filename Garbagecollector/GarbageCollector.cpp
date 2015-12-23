@@ -41,7 +41,7 @@ bool GarbageCollector::followEphemeronsCollectingUnknowns() {
 	return false;
 }
 
-void GarbageCollector::rescueEphemeron(unsigned long ephemeron) {
+void GarbageCollector::rescueEphemeron(unsigned long *ephemeron) {
 	//self follow: ephemeron count: ephemeron _extendedSize startingAt: 1.
 	//rescuedEphemerons add: ephemeron
 	return;
@@ -52,7 +52,7 @@ void GarbageCollector::someEphemeronsRescued() {
 }
 
 void GarbageCollector::rescueEphemerons() {
-	bool rescued, rescan = 0;
+	bool rescued;//, rescan = 0;
 	// need to check probably here.
 	// copy or value
 	VMArray aux;
@@ -62,7 +62,7 @@ void GarbageCollector::rescueEphemerons() {
 			ephemerons = unknowns;
 			unknowns = aux;
 		} else {
-			for (int ephemeronIndex = 0; ephemeronIndex <= ephemerons.size();
+			for (ulong ephemeronIndex = 0; ephemeronIndex <= ephemerons.size();
 					ephemeronIndex++)
 				this->rescueEphemeron(unknowns[ephemeronIndex]);
 			rescued = true;
@@ -75,11 +75,11 @@ void GarbageCollector::rescueEphemerons() {
 
 void GarbageCollector::clearPolymorphicMethodCache() {
 	for (int index = 1; index <= 0x4000; index++) {
-		MEM_JIT_globalMethodCache[index] = (unsigned long*) nil;
+		MEM_JIT_globalMethodCache[index] = nil;
 	}
 }
 
-void GarbageCollector::follow(unsigned long pointer, int count,
+void GarbageCollector::follow(unsigned long *pointer, int count,
 		unsigned long start) {
 //	| index objects limit |
 //	stack := self localStack.
@@ -132,21 +132,18 @@ void GarbageCollector::followStack() {
 //			frame := nextFrame]
 }
 
-void GarbageCollector::follow(unsigned long pointer) {
+void GarbageCollector::follow(unsigned long *pointer) {
 // TODO self rememberIfWeak: pointer.
 //this->follow(pointer, _strongPointersSize(pointer), 0);
 }
 
 void GarbageCollector::fixWeakContainers() {
-	for (int index = 1; index <= weakContainers.size(); index++) {
+	for (ulong index = 1; index <= weakContainers.size(); index++) {
 		this->fixReferencesOrSetTombstone(weakContainers[index]);
 	}
 	weakContainers.reset();
 }
 
-unsigned long GarbageCollector::dereference(unsigned long pointer) {
-	return memoryAt(pointer);
-}
 
 void GarbageCollector::forgetNativeObjects() {
 //	rememberSet forget.

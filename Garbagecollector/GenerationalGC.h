@@ -17,10 +17,10 @@ public:
 	void collect();
 
 protected:
-	bool hasToPurge(unsigned long pointer);
-	bool arenaIncludes(unsigned long pointer);
+	bool hasToPurge(unsigned long *pointer);
+	bool arenaIncludes(unsigned long *pointer);
 	unsigned long* codeCacheAtOffset(unsigned long offset);
-	void moveToOldAll(ReferencedVMArray object);
+	void moveToOldAll(ReferencedVMArray &objects);
 	void followRememberSet();
 	void purgeLiteralsReference();
 	void purgeRememberSet();
@@ -32,14 +32,14 @@ protected:
 	void fixReferencesFromNativeMethods();
 	void flipSpaces();
 	void updateSpacesDelta();
-	unsigned long copyTo(unsigned long object, GCSpace to);
-	unsigned long moveToOldSpace(unsigned long object);
-	unsigned long holdReferenceTo(unsigned long object);
+	unsigned long* copyTo(unsigned long *object, GCSpace &to);
+	unsigned long* moveToOldSpace(unsigned long *object);
+	unsigned long holdReferenceTo(unsigned long *object);
 	void spacesDelta(unsigned long delta);
 	unsigned long spacesDelta();
 
-	unsigned long framePointerToStartWalkingTheStack();
-	void fixReferencesOrSetTombstone(unsigned long weakContainer);
+	unsigned long* framePointerToStartWalkingTheStack();
+	void fixReferencesOrSetTombstone(unsigned long *weakContainer);
 };
 
 extern "C" {

@@ -15,12 +15,6 @@
 
 namespace Bee {
 
-class ReferencedVMArray1 {
-
-	long size();
-};
-
-
 class GarbageCollector {
 protected:
 	GCSpace fromSpace;
@@ -36,7 +30,7 @@ protected:
 	ReferencedVMArray classCheckReferences;
 	VMArray stack;
 	VMArray unknowns;
-	unsigned long residueObject;
+	unsigned long *residueObject;
 public:
 
 	GarbageCollector();
@@ -52,21 +46,20 @@ protected:
 	void loadSpaces();
 	void initLocals();
 	void clearPolymorphicMethodCache();
-	unsigned long dereference(unsigned long pointer);
-	void follow(unsigned long pointer);
-	void follow(unsigned long pointer, int count, unsigned long start);
+	void follow(unsigned long* pointer);
+	void follow(unsigned long* pointer, int count, unsigned long start);
 	void followStack();
 	void rescueEphemerons();
 	bool followEphemeronsCollectingUnknowns();
-	void rescueEphemeron(unsigned long ephemeron);
+	void rescueEphemeron(unsigned long *ephemeron);
 	void someEphemeronsRescued();
 	void makeRescuedEphemeronsNonWeak();
 	void fixWeakContainers();
 	void forgetNativeObjects();
 	void saveSpaces();
 
-	virtual unsigned long framePointerToStartWalkingTheStack() = 0;
-	virtual void fixReferencesOrSetTombstone(unsigned long) = 0;
+	virtual unsigned long* framePointerToStartWalkingTheStack() = 0;
+	virtual void fixReferencesOrSetTombstone(unsigned long *weakArray) = 0;
 };
 
 extern "C" {

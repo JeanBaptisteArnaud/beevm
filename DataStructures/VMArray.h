@@ -1,7 +1,7 @@
 /*
  * VMArray.h
  *
- *  Created on: 18 déc. 2015
+ *  Created on: 18 dï¿½c. 2015
  *      Author: Arnaud Jean-Baptiste
  */
 
@@ -12,11 +12,14 @@ namespace Bee {
 class VMArray {
 public:
 	VMArray();
-	long size();
-	long size(long);
+	unsigned long size();
+	unsigned long size(unsigned long);
 	bool isEmpty();
 	void reset();
-	unsigned long operator[](int i);
+	unsigned long*& operator[](int i);
+
+private:
+	unsigned long *contents;
 };
 
 }
