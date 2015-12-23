@@ -14,6 +14,13 @@
 #include "../DataStructures/VMMemory.h"
 
 namespace Bee {
+
+class ReferencedVMArray1 {
+
+	long size();
+};
+
+
 class GarbageCollector {
 	GCSpace fromSpace;
 	GCSpace toSpace;
@@ -28,10 +35,11 @@ class GarbageCollector {
 	ReferencedVMArray classCheckReferences;
 	VMArray stack;
 	VMArray unknowns;
-	unsigned long residueObject = 0;
+	unsigned long residueObject;
 public:
 
 	GarbageCollector();
+	virtual ~GarbageCollector() {};
 
 	static GarbageCollector* currentFlipper();
 
@@ -43,7 +51,6 @@ protected:
 	void loadSpaces();
 	void initLocals();
 	void clearPolymorphicMethodCache();
-	virtual unsigned long framePointerToStartWalkingTheStack() = 0;
 	unsigned long dereference(unsigned long pointer);
 	void follow(unsigned long pointer);
 	void follow(unsigned long pointer, int count, unsigned long start);
@@ -54,10 +61,11 @@ protected:
 	void someEphemeronsRescued();
 	void makeRescuedEphemeronsNonWeak();
 	void fixWeakContainers();
-	virtual void fixReferencesOrSetTombstone(unsigned long) = 0;
 	void forgetNativeObjects();
 	void saveSpaces();
 
+	virtual unsigned long framePointerToStartWalkingTheStack() = 0;
+	virtual void fixReferencesOrSetTombstone(unsigned long) = 0;
 };
 
 extern "C" {

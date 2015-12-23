@@ -8,6 +8,8 @@
 #ifndef GARBAGECOLLECTOR_GENERATIONALGC_H_
 #define GARBAGECOLLECTOR_GENERATIONALGC_H_
 
+#include "GarbageCollector.h"
+
 namespace Bee {
 class GenerationalGC: public GarbageCollector {
 public:
@@ -17,7 +19,7 @@ public:
 protected:
 	bool hasToPurge(unsigned long pointer);
 	bool arenaIncludes(unsigned long pointer);
-	unsigned long codeCacheAtOffset(unsigned long offset);
+	unsigned long* codeCacheAtOffset(unsigned long offset);
 	void moveToOldAll(ReferencedVMArray object);
 	void followRememberSet();
 	void purgeLiteralsReference();
@@ -33,10 +35,11 @@ protected:
 	unsigned long copyTo(unsigned long object, GCSpace to);
 	unsigned long moveToOldSpace(unsigned long object);
 	unsigned long holdReferenceTo(unsigned long object);
-	void fixReferencesOrSetTombstone(unsigned long weakContainer);
 	void spacesDelta(unsigned long delta);
 	unsigned long spacesDelta();
 
+	unsigned long framePointerToStartWalkingTheStack();
+	void fixReferencesOrSetTombstone(unsigned long weakContainer);
 };
 
 extern "C" {

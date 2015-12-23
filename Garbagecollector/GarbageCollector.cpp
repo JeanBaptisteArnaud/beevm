@@ -6,6 +6,7 @@
  */
 
 #include "GarbageCollector.h"
+#include "GenerationalGC.h"
 
 // just until I fix my environment
 #define NULL 0
@@ -22,6 +23,7 @@ GarbageCollector::GarbageCollector() {
 	fromSpace = GCSpace::currentFrom();
 	toSpace = GCSpace::currentTo();
 	oldSpace = GCSpace::old();
+	residueObject = 0;
 }
 
 GarbageCollector* GarbageCollector::currentFlipper() {
