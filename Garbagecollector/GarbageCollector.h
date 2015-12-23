@@ -8,6 +8,11 @@
 #ifndef GARBAGECOLLECTOR_H_
 #define GARBAGECOLLECTOR_H_
 
+#include "../DataStructures/VMArray.h"
+#include "../DataStructures/GCSpace.h"
+#include "../DataStructures/ReferencedVMArray.h"
+#include "../DataStructures/VMMemory.h"
+
 namespace Bee {
 class GarbageCollector {
 	GCSpace fromSpace;
@@ -50,6 +55,7 @@ protected:
 	void someEphemeronsRescued();
 	void makeRescuedEphemeronsNonWeak();
 	void fixWeakContainers();
+	void fixReferencesOrSetTombstone(unsigned long) {};
 	void forgetNativeObjects();
 	void saveSpaces();
 

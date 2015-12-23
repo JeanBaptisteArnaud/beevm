@@ -1,11 +1,12 @@
 /*
  * GarbageCollector.cpp
  *
- *  Created on: 18 déc. 2015
+ *  Created on: 18 dï¿½c. 2015
  *      Author: Arnaud Jean-Baptiste
  */
 
 #include "GarbageCollector.h"
+
 // just until I fix my environment
 #define NULL 0
 
@@ -21,16 +22,6 @@ GarbageCollector::GarbageCollector() {
 	fromSpace = GCSpace::currentFrom();
 	toSpace = GCSpace::currentTo();
 	oldSpace = GCSpace::old();
-	auxSpace = new GCSpace();
-	ephemerons = new VMArray();
-	weakContainers = new VMArray();
-	rescuedEphemerons = new ReferencedVMArray();
-	rememberSet = new ReferencedVMArray();
-	literalsReferences = new ReferencedVMArray();
-	nativizedMethods = new ReferencedVMArray();
-	classCheckReferences = new ReferencedVMArray();
-	stack = new VMArray();
-	unknowns = new VMArray();
 }
 
 GarbageCollector* GarbageCollector::currentFlipper() {
@@ -82,7 +73,7 @@ void GarbageCollector::rescueEphemerons() {
 
 void GarbageCollector::clearPolymorphicMethodCache() {
 	for (int index = 1; index <= 0x4000; index++) {
-		MEM0x1002EC20[index] = nil;
+		MEM_JIT_globalMethodCache[index] = nil;
 	}
 }
 

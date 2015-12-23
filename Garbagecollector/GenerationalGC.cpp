@@ -1,7 +1,7 @@
 /*
  * GenerationalGC.cpp
  *
- *  Created on: 18 déc. 2015
+ *  Created on: 18 dï¿½c. 2015
  *      Author: Arnaud Jean-Baptiste
  */
 
@@ -83,7 +83,7 @@ void GenerationalGC::followRememberSet() {
 void GenerationalGC::moveClassCheckReferences() {
 	unsigned long reference, object, moved;
 	for (int index = 1; index < classCheckReferences.size(); index++) {
-		reference = memoryAt(MEM0x1002E820 * 2 + (classCheckReferences[index]));
+		reference = memoryAt(MEM0x1002E820 * 2 + (classCheckReferences[index]);
 		object = basicAt(reference, 1);
 		if (this->arenaIncludes(object)) {
 			if (isProxy(object)) {
@@ -95,7 +95,7 @@ void GenerationalGC::moveClassCheckReferences() {
 		}
 	}
 	// 0 asObject // a reflechir
-	basicAtPut(MEM0x10041710, 1, 0);
+	basicAtPut(MEM_anyCompiledMethodInFromSpace, 1, 0);
 }
 
 void GenerationalGC::moveToOldAll(ReferencedVMArray objects) {
