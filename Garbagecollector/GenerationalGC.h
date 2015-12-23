@@ -1,7 +1,7 @@
 /*
  * GenerationalGC.h
  *
- *  Created on: 18 déc. 2015
+ *  Created on: 18 dï¿½c. 2015
  *      Author: Arnaud Jean-Baptiste
  */
 
@@ -17,6 +17,7 @@ public:
 protected:
 	bool hasToPurge(unsigned long pointer);
 	bool arenaIncludes(unsigned long pointer);
+	unsigned long codeCacheAtOffset(unsigned long offset);
 	void moveToOldAll(ReferencedVMArray object);
 	void followRememberSet();
 	void purgeLiteralsReference();

@@ -1,7 +1,7 @@
 /*
  * ReferencedVMArray.h
  *
- *  Created on: 18 déc. 2015
+ *  Created on: 18 dï¿½c. 2015
  *      Author: Arnaud Jean-Baptiste
  */
 
@@ -15,6 +15,8 @@ public:
 	static ReferencedVMArray currentFrom();
 	static ReferencedVMArray currentTo();
 	static ReferencedVMArray old();
+
+	long size();
 };
 
 }

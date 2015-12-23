@@ -80,10 +80,20 @@ void GenerationalGC::followRememberSet() {
 	}
 }
 
+unsigned long GarbageCollector::framePointerToStartWalkingTheStack() {
+	return MEM_globalFramePointerToWalkStack;
+}
+
+unsigned long* GenerationalGC::codeCacheAtOffset(unsigned long offset)
+{
+	return (*MEM_JIT_codeCachePointer) + offset;
+}
+
 void GenerationalGC::moveClassCheckReferences() {
 	unsigned long reference, object, moved;
 	for (int index = 1; index < classCheckReferences.size(); index++) {
-		reference = memoryAt(MEM0x1002E820 * 2 + (classCheckReferences[index]);
+		unsigned long offset = classCheckReferences[index];
+		reference = codeCacheAtOffset(offset);
 		object = basicAt(reference, 1);
 		if (this->arenaIncludes(object)) {
 			if (isProxy(object)) {
@@ -94,8 +104,8 @@ void GenerationalGC::moveClassCheckReferences() {
 			basicAtPut(reference, 1, moved);
 		}
 	}
-	// 0 asObject // a reflechir
-	basicAtPut(MEM_anyCompiledMethodInFromSpace, 1, 0);
+
+	*MEM_anyCompiledMethodInFromSpace = 0;
 }
 
 void GenerationalGC::moveToOldAll(ReferencedVMArray objects) {
@@ -135,15 +145,19 @@ unsigned long GenerationalGC::copyTo(unsigned long object, GCSpace to) {
 	return copy;
 }
 
-void GenerationalGC::followCodeCacheReferences() {
-	if (this->dereference(0x1003EC48)) {
-		MEM0x1003EC48 = 0;
+void GenerationalGC::followCodeCacheReferences()
+{
+	if (*MEM_polymorphicMethodCacheReferesToNewCM)
+	{
+		*MEM_polymorphicMethodCacheReferesToNewCM = false;
 		this->clearPolymorphicMethodCache();
 	}
-	if (this->dereference(0x10041710))
+
+	if (*MEM_anyCompiledMethodInFromSpace)
 		this->moveClassCheckReferences();
-	if (this->dereference(0x10041714)) {
-		MEM0x10041714 = 0;
+
+	if (*MEM_checkNewNativizedCompiledMethods) {
+		*MEM_checkNewNativizedCompiledMethods = false;
 		this->moveToOldAll(nativizedMethods);
 	}
 	this->moveToOldAll(literalsReferences);
@@ -178,7 +192,7 @@ void GenerationalGC::fixReferencesFromNativeMethods() {
 	for (int index = 0; index < literalsReferences.size(); index++++) {
 		literal = literalsReferences[index];
 		offset = literalsReferences[index + 1];
-		reference = memoryAt(MEM0x1002E820 * 2 + offset);
+		reference = memoryAt(codeCacheAtOffset(offset));
 		memoryAtPut(reference, literal);
 	}
 }

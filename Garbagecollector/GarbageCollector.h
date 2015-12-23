@@ -29,7 +29,6 @@ class GarbageCollector {
 	VMArray stack;
 	VMArray unknowns;
 	unsigned long residueObject = 0;
-	unsigned long globalFramePointerToWalkStack;
 public:
 
 	GarbageCollector();
@@ -44,7 +43,7 @@ protected:
 	void loadSpaces();
 	void initLocals();
 	void clearPolymorphicMethodCache();
-	unsigned long framePointerToStartWalkingTheStack();
+	virtual unsigned long framePointerToStartWalkingTheStack() = 0;
 	unsigned long dereference(unsigned long pointer);
 	void follow(unsigned long pointer);
 	void follow(unsigned long pointer, int count, unsigned long start);
@@ -55,7 +54,7 @@ protected:
 	void someEphemeronsRescued();
 	void makeRescuedEphemeronsNonWeak();
 	void fixWeakContainers();
-	void fixReferencesOrSetTombstone(unsigned long) {};
+	virtual void fixReferencesOrSetTombstone(unsigned long) = 0;
 	void forgetNativeObjects();
 	void saveSpaces();
 

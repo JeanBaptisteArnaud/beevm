@@ -15,11 +15,12 @@
 #define  _strongPointersSize(pointer) 0
 
 unsigned long *debugFrameMarker = (unsigned long *)0x1001B633;
-unsigned long *MEM0x1003EC48    = (unsigned long *)0x1003EC48;
 unsigned long *MEM_anyCompiledMethodInFromSpace     = (unsigned long *)0x10041710;
 unsigned long *MEM_checkNewNativizedCompiledMethods = (unsigned long *)0x10041714;
+unsigned long *MEM_polymorphicMethodCacheReferesToNewCM = (unsigned long *)0x1003EC48;
 unsigned long **MEM_JIT_globalMethodCache = (unsigned long **)0x1002EC20;
-unsigned long *MEM_JIT_codeCacheData      = (unsigned long *)0x1002E820;
+unsigned long *MEM_JIT_codeCachePointer      = (unsigned long*)0x1002E820;
+unsigned long *MEM_globalFramePointerToWalkStack = (unsigned long*)0x100407C4;
 unsigned long *nil                        = (unsigned long*)0x10026060;
 unsigned long *stTrue                     = (unsigned long*)0x10026070;
 unsigned long *stFalse                    = (unsigned long*)0x10026080;

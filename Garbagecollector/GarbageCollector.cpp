@@ -26,7 +26,7 @@ GarbageCollector::GarbageCollector() {
 
 GarbageCollector* GarbageCollector::currentFlipper() {
 	if (flipper == NULL)
-		flipper = new GarbageCollector();
+		flipper = new GenerationalGC();
 	return flipper;
 }
 
@@ -73,7 +73,7 @@ void GarbageCollector::rescueEphemerons() {
 
 void GarbageCollector::clearPolymorphicMethodCache() {
 	for (int index = 1; index <= 0x4000; index++) {
-		MEM_JIT_globalMethodCache[index] = nil;
+		MEM_JIT_globalMethodCache[index] = (unsigned long*) nil;
 	}
 }
 
@@ -111,15 +111,7 @@ void GarbageCollector::follow(unsigned long pointer, int count,
 
 }
 
-unsigned long GarbageCollector::framePointerToStartWalkingTheStack() {
-	unsigned long frame;
-	if (globalFramePointerToWalkStack == nil) {
-		frame = framePointer();
-	} else {
-		frame = globalFramePointerToWalkStack;
-	}
-	return frame;
-}
+
 
 void GarbageCollector::followStack() {
 //	unsigned long frame = this->framePointerToStartWalkingTheStack();
@@ -145,7 +137,7 @@ void GarbageCollector::follow(unsigned long pointer) {
 
 void GarbageCollector::fixWeakContainers() {
 	for (int index = 1; index <= weakContainers.size(); index++) {
-		this.fixReferencesOrSetTombstone(weakContainers[index]);
+		this->fixReferencesOrSetTombstone(weakContainers[index]);
 	}
 	weakContainers.reset();
 }
