@@ -28,7 +28,7 @@ unsigned long *stTrue                     = (unsigned long*)0x10026070;
 unsigned long *stFalse                    = (unsigned long*)0x10026080;
 
 unsigned long memoryAt(unsigned long pointer);
-void memoryAtPut(unsigned long pointer, unsigned long value);
+void memoryAtPut(unsigned long * pointer, unsigned long value);
 
 bool _isProxy(unsigned long *object);
 unsigned long* _proxee(unsigned long *object);

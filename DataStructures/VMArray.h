@@ -12,8 +12,12 @@ namespace Bee {
 class VMArray {
 public:
 	VMArray();
-	unsigned long size();
-	unsigned long size(unsigned long);
+	long nextFree();
+	long nextFree(unsigned long newSize);
+
+	long size();
+	long size(unsigned long newSize);
+
 	bool isEmpty();
 	void reset();
 	unsigned long*& operator[](int i);

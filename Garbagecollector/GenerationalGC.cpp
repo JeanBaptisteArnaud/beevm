@@ -103,7 +103,7 @@ void GenerationalGC::moveClassCheckReferences() {
 			} else {
 				moved = moveToOldSpace(object);
 			}
-			*reference = moved;
+			*reference = (unsigned long)moved;
 		}
 	}
 
@@ -186,22 +186,24 @@ unsigned long  GenerationalGC::spacesDelta() {
 }
 
 void GenerationalGC::spacesDelta(unsigned long delta) {
-	memoryAtPut(0x1004175C, delta);
+	memoryAtPut((unsigned long *)0x1004175C,delta);
 }
 
 void GenerationalGC::fixReferencesFromNativeMethods() {
-	unsigned long literal, offset, reference = 0;
+
 	for (int index = 0; index < literalsReferences.size(); index = index + 2) {
-		literal = literalsReferences[index];
-		offset = literalsReferences[index + 1];
-		reference = *codeCacheAtOffset(offset);
+		unsigned long literal , *reference = 0;
+		unsigned long offset =0;
+		literal = (unsigned long)literalsReferences[index];
+		offset = (unsigned long)literalsReferences[index + 1];
+		reference = codeCacheAtOffset(offset);
 		memoryAtPut(reference, literal);
 	}
 }
 
 void GenerationalGC::cleanRememberSet() {
 	int kept = 0;
-	unsigned long object = 0;
+	unsigned long *object = 0;
 	for (int index = 0; index < rememberSet.size(); index++) {
 		object = rememberSet[index];
 		rememberSet[index] = nil;
