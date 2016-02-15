@@ -15,6 +15,7 @@
 #include "../DataStructures/ReferencedVMArray.h"
 #include "../DataStructures/ObjectFormat.h"
 #include "../DataStructures/KnownObjects.h"
+#include "../DataStructures/Memory.h"
 
 
 // just until I fix my environment
@@ -23,26 +24,43 @@
 using namespace std;
 using namespace Bee;
 
-GarbageCollector* GarbageCollector::flipper = NULL;
 
-GarbageCollector::GarbageCollector() {
-	fromSpace = GCSpace::currentFrom();
-	toSpace = GCSpace::currentTo();
-	oldSpace = GCSpace::old();
+GarbageCollector::GarbageCollector()
+{
 	residueObject = 0;
 }
 
-void GarbageCollector::collect() {
+void GarbageCollector::useOwnVMVariables()
+{
+	vm.initializeFor(new VMVariables());
+}
+
+void GarbageCollector::useHostVMVariables()
+{
+	vm.initializeForHostVM();
+}
+
+void GarbageCollector::updateFromMemory()
+{
+	fromSpace.loadFrom(*memory->fromSpace);
+	toSpace  .loadFrom(*memory->toSpace);
+	oldSpace .loadFrom(*memory->oldSpace);
+}
+
+void GarbageCollector::collect()
+{
 
 }
 
-void GarbageCollector::rescueEphemeron(oop_t *ephemeron) {
+void GarbageCollector::rescueEphemeron(oop_t *ephemeron)
+{
 	this->followCountStartingAt((slot_t*)ephemeron, ephemeron->_extendedSize(), 1);
 	rescuedEphemerons.add(ephemeron);
 	return;
 }
 
-bool GarbageCollector::followEphemeronsCollectingUnknowns() {
+bool GarbageCollector::followEphemeronsCollectingUnknowns()
+{
 	bool rescan = false;
 	while (!ephemerons.isEmpty()) {
 		oop_t *ephemeron = ephemerons.pop();
@@ -58,7 +76,8 @@ bool GarbageCollector::followEphemeronsCollectingUnknowns() {
 	return rescan;
 }
 
-void GarbageCollector::rescueEphemerons() {
+void GarbageCollector::rescueEphemerons()
+{
 	bool rescued = false;
 	VMArray aux;
 	while (!ephemerons.isEmpty()) {
@@ -78,13 +97,15 @@ void GarbageCollector::rescueEphemerons() {
 		this->someEphemeronsRescued();
 }
 
-void GarbageCollector::clearPolymorphicMethodCache() {
+void GarbageCollector::clearPolymorphicMethodCache()
+{
 	for (int index = 1; index <= 0x4000; index++) {
 		vm.globalLookupCacheAtPut(index, KnownObjects::nil);
 	}
 }
 
-void GarbageCollector::followStack() {
+void GarbageCollector::followStack()
+{
 	ulong *frame = this->framePointerToStartWalkingTheStack();
 	ulong nextFrame = *frame;
 	while (nextFrame) {
@@ -101,7 +122,8 @@ void GarbageCollector::followStack() {
 	}
 }
 
-void GarbageCollector::followFrameCountStartingAt(slot_t *frame, ulong count, ulong start) {
+void GarbageCollector::followFrameCountStartingAt(slot_t *frame, ulong count, ulong start)
+{
 	cerr << "Need to implement " << "followCountStartingAt" << endl;
 //	followFrame: frame count: size startingAt: startIndex
 //		| start index gapMarker callbackFrame |

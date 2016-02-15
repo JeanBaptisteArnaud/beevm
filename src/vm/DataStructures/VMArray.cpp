@@ -1,15 +1,17 @@
 /*
  * VMArray.cpp
  *
- *  Created on: 18 d�c. 2015
+ *  Created on: 18 dic. 2015
  *      Author: Arnaud Jean-Baptiste
  */
+
+#include <iostream>
 
 #include "VMArray.h"
 #include "Memory.h"
 #include "ObjectFormat.h"
+#include "KnownObjects.h"
 
-#include <iostream>
 
 using namespace Bee;
 using namespace std;
@@ -30,6 +32,13 @@ void VMArray::emptyWith(oop_t * array)
 {
 	contents = array;
 	this->size(0);
+}
+
+void VMArray::emptyReserving(ulong size)
+{
+	oop_t * array = space->shallowCopyGrowingTo(KnownObjects::emptyArray, size);
+	array->_beFullUnseenInSpace();
+	this->emptyWith(array);
 }
 
 void VMArray::grow()
@@ -54,7 +63,7 @@ oop_t* VMArray::size()
 
 void VMArray::nextFree(oop_t *newSize)
 {
-	contents->setSlot(0, newSize->smiPlusNative(1));
+	contents->slot(0) = newSize->smiPlusNative(1);
 }
 
 

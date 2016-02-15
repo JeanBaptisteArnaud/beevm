@@ -25,24 +25,23 @@ void ObjectFormatTest::setUp()
 
 void ObjectFormatTest::tearDown()
 {
-	Memory::current()->releaseEverything();
 }
 
 void ObjectFormatTest::testHeaderOf()
 {
-	oop_t *object = mockedObjects.mockArray(1);
+	oop_t *object = mockedObjects.newArray(1);
 	basic_header_t * h = object->basic_header();
 
 	ASSERTM("Array 1 : Size",     h->size == 3);
 	ASSERTM("Array 1 : Hash",     h->hash == 0x37F8);
-	ASSERTM("Array 1 : Flags",    h->flags == basic_header_t::ObjectFlag_reserved1);
+	ASSERTM("Array 1 : Flags",    h->flags == basic_header_t::Flag_unseenInSpace);
 	ASSERTM("Array 1 : behavior", h->behavior == (oop_t*)0x0A0792F0);
 
-	object = mockedObjects.mockArray(3);
+	object = mockedObjects.newArray(3);
 	h = object->basic_header();
 	ASSERTM("Array 2 : Size",     h->size == 3);
 	ASSERTM("Array 2 : Hash",     h->hash == 0x0000);
-	ASSERTM("Array 2 : Flags",    h->flags == basic_header_t::ObjectFlag_reserved1);
+	ASSERTM("Array 2 : Flags",    h->flags == basic_header_t::Flag_unseenInSpace);
 	ASSERTM("Array 2 : behavior", h->behavior == (oop_t*)0x0A0792F0);
 
 	object = KnownObjects::stTrue;
@@ -50,30 +49,30 @@ void ObjectFormatTest::testHeaderOf()
 	
 	ASSERTM("True : Size",     h->size == 0);
 	ASSERTM("True : Hash",     h->hash == 0x0000);
-	ASSERTM("True : Flags",    h->flags ==  (basic_header_t::ObjectFlag_reserved1 |
-											 basic_header_t::ObjectFlag_notIndexed |
-											 basic_header_t::ObjectFlag_zeroTermOrNamed));
+	ASSERTM("True : Flags",    h->flags ==  (basic_header_t::Flag_unseenInSpace |
+											 basic_header_t::Flag_notIndexed |
+											 basic_header_t::Flag_zeroTermOrNamed));
 	ASSERTM("True : behavior", h->behavior == (oop_t*)0x0A0B6BA0);
 
 	object = KnownObjects::nil;
 	h = object->basic_header();
 	ASSERTM("Nil : Size",  h->size == 0);
 	ASSERTM("Nil : Hash",  h->hash == 0x3445);
-	ASSERTM("Nil : Flags", h->flags == (basic_header_t::ObjectFlag_reserved1 |
-										basic_header_t::ObjectFlag_notIndexed |
-										basic_header_t::ObjectFlag_zeroTermOrNamed));
+	ASSERTM("Nil : Flags", h->flags == (basic_header_t::Flag_unseenInSpace |
+										basic_header_t::Flag_notIndexed |
+										basic_header_t::Flag_zeroTermOrNamed));
 	ASSERTM("Nil : behavior", h->behavior == (oop_t*)0x0A0DDC10);
 
 }
 
 void ObjectFormatTest::testBasicSize()
 {
-	oop_t *object = mockedObjects.mockArray(1);
+	oop_t *object = mockedObjects.newArray(1);
 	ASSERTM("size ", (object->_basicSize() == 3));
 	object->_basicSize(122);
 	ASSERTM("size ", (object->_basicSize() == 122));
 
-	object = mockedObjects.mockArray(1024);
+	object = mockedObjects.newArray(1024);
 	ASSERTM("size ", (object->_size() == 1024));
 	object->_extendedSize(122);
 	ASSERTM("size ", (object->_size() == 122));
@@ -82,17 +81,18 @@ void ObjectFormatTest::testBasicSize()
 
 void ObjectFormatTest::testBeExtended()
 {
-	oop_t *object = mockedObjects.mockArray(1024);
+	oop_t *object = mockedObjects.newArray(1024);
 	object->_beExtended();
 	extended_header_t *h = object->extended_header();
 	ASSERTM("sizeInWordBis", (h->basicSize == 4));
 	ASSERTM("sizeInWord", (h->basic_header.size == 4));
-	ASSERTM("flags",    h->basic_header.flags == (basic_header_t::ObjectFlag_reserved1 | basic_header_t::ObjectFlag_isExtended));
-	ASSERTM("flagsBis", h->flags == (basic_header_t::ObjectFlag_reserved1 | basic_header_t::ObjectFlag_isExtended));
+	ASSERTM("flags",    h->basic_header.flags == (basic_header_t::Flag_unseenInSpace | basic_header_t::Flag_isExtended));
+	ASSERTM("flagsBis", h->flags == (basic_header_t::Flag_unseenInSpace | basic_header_t::Flag_isExtended));
 	ASSERTM("real size", (h->size == 1024));
 }
 
-void ObjectFormatTest::testRotateLeft() {
+void ObjectFormatTest::testRotateLeft()
+{
 	ulong i = 1;
 	i = rotateLeft(i, 1);
 	ASSERTM("2", i == 2);
@@ -166,33 +166,30 @@ void ObjectFormatTest::testRotateLeft() {
 
 void ObjectFormatTest::testObjectFlagManipulation()
 {
-	oop_t *object = mockedObjects.mockArray(1);
+	oop_t *object = mockedObjects.newArray(1);
 
-	ASSERTM("check reserved1", !object->testFlags(basic_header_t::ObjectFlag_isEphemeron));
-	object->setFlags(basic_header_t::ObjectFlag_isEphemeron);
-	ASSERTM("set reserved1", object->testFlags(basic_header_t::ObjectFlag_isEphemeron));
-	object->unsetFlags(basic_header_t::ObjectFlag_isEphemeron);
-	ASSERTM("unset reserved1", !object->testFlags(basic_header_t::ObjectFlag_isEphemeron));
+	ASSERTM("check reserved1", !object->testFlags(basic_header_t::Flag_isEphemeron));
+	object->setFlags(basic_header_t::Flag_isEphemeron);
+	ASSERTM("set reserved1", object->testFlags(basic_header_t::Flag_isEphemeron));
+	object->unsetFlags(basic_header_t::Flag_isEphemeron);
+	ASSERTM("unset reserved1", !object->testFlags(basic_header_t::Flag_isEphemeron));
 
-	object->setFlags(basic_header_t::ObjectFlag_isBytes);
+	object->setFlags(basic_header_t::Flag_isBytes);
 	ASSERTM("_isBytes", object->_isBytes());
 
 	object->_beExtended();
 	ASSERTM("_isExtended", object->_isExtended());
-	object->unsetFlags(basic_header_t::ObjectFlag_isExtended);
+	object->unsetFlags(basic_header_t::Flag_isExtended);
 	ASSERTM("_isExtended", !object->_isExtended());
 
-	object->setFlags(basic_header_t::ObjectFlag_zeroTermOrNamed);
+	object->setFlags(basic_header_t::Flag_zeroTermOrNamed);
 	ASSERTM("_isZeroTerminated", object->_isZeroTerminated());
 
-	GenerationalGC * flipper = new GenerationalGC();
-	Memory::current()->setGC(flipper);
-	GCSpace local = GCSpace::dynamicNew(1024 * 1024 * 4 * 6);
 
-	oop_t *ephemeron = mockedObjects.mockEphemeronFrom(object, object);
+	oop_t *ephemeron = mockedObjects.newEphemeron(object, object);
 	ASSERTM("Ephemeron", ephemeron->_isActiveEphemeron());
 
-	oop_t *weakArray = mockedObjects.mockWeakArray();
+	oop_t *weakArray = mockedObjects.newWeakArray();
 	ASSERTM("should not be Ephemeron", !weakArray->_isEphemeron());
 	ASSERTM("but should weak", weakArray->_hasWeaks());
 
@@ -218,31 +215,32 @@ void ObjectFormatTest::testVirtualBehavior()
 
 void ObjectFormatTest::testProxying()
 {
-	GenerationalGC * flipper = new GenerationalGC();
-	Memory::current()->setGC(flipper);
-	GCSpace local = GCSpace::dynamicNew(1024 * 1024 * 4 * 6);
-	flipper->localSpace = local;
-	flipper->initLocals();
-	flipper->initNonLocals();
-	oop_t *object = flipper->fromSpace.shallowCopy(mockedObjects.mockArray(1024));
-	oop_t *copy = flipper->copyTo(object, flipper->toSpace);
+	//GenerationalGC * flipper = new GenerationalGC();
+	//Memory::current()->setGC(flipper);
+	//GCSpace local = GCSpace::dynamicNew(1024 * 1024 * 4 * 6);
+	//flipper->localSpace = local;
+	//flipper->initLocals();
+	//flipper->initNonLocals();
+	//oop_t *object = flipper->fromSpace.shallowCopy(mockedObjects.newArray(1024));
+	//oop_t *copy = flipper->copyTo(object, flipper->toSpace);
 	//cerr << object[-2] << endl;
 	//cerr << rotateLeft(object[-2],8) << endl;
-	cerr << (ulong) copy << endl;
-	cerr << rotateRight((ulong)copy, 8) << endl;	
+	//cerr << (ulong) copy << endl;
+	//cerr << rotateRight((ulong)copy, 8) << endl;	
 }
 
 void ObjectFormatTest::testMulti()
 {
-	GenerationalGC * flipper = new GenerationalGC();
-	Memory::current()->setGC(flipper);
-	Memory::current()->releaseEverything();
-	mockedObjects.mockVMValue();
-	flipper = new GenerationalGC();
-	Memory::current()->setGC(flipper);
+	//GenerationalGC * flipper = new GenerationalGC();
+	//Memory::current()->setGC(flipper);
+	//Memory::current()->releaseEverything();
+	//mockedObjects.mockVMValue();
+	//flipper = new GenerationalGC();
+	//Memory::current()->setGC(flipper);
 }
 
-cute::suite make_suite_VMMemoryTest() {
+cute::suite make_suite_VMMemoryTest()
+{
 	cute::suite s;
 //	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testHeaderOf));
 //	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testBasicSize));
@@ -251,7 +249,7 @@ cute::suite make_suite_VMMemoryTest() {
 //	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testObjectFlagManipulation));
 //	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testVirtualBehavior));
 //	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testProxying));
-	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testMulti));
+//	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testMulti));
 	return s;
 }
 

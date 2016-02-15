@@ -12,6 +12,7 @@
 #include "../DataStructures/GCSpace.h"
 #include "../DataStructures/ReferencedVMArray.h"
 #include "../DataStructures/VMArray.h"
+#include "../DataStructures/VMVariables.h"
 
 
 #include <iostream>
@@ -24,21 +25,15 @@ class GarbageCollector {
 public:
 	GarbageCollector();
 	virtual ~GarbageCollector() {};
-	static GarbageCollector* currentFlipper();
-	void collect();
-	GCSpace localSpace;
-	GCSpace fromSpace;
-	GCSpace toSpace;
 
-	GCSpace oldSpace;
-	ReferencedVMArray rememberSet;
+	void useOwnVMVariables();
+	void useHostVMVariables();
+
+	void updateFromMemory();
+	void collect();
 	void tombstone(oop_t *object);
 	void rescueEphemerons();
 	void rememberIfWeak (oop_t *object);
-	VMArray stack;
-
-	ReferencedVMArray literalsReferences;
-	ReferencedVMArray rescuedEphemerons;
 
 	void fixWeakContainers();
 
@@ -66,25 +61,38 @@ protected:
 	virtual void someEphemeronsRescued() = 0;
 	virtual void fixReferencesOrSetTombstone(oop_t *weakArray) = 0;
 
+public: // for testing
+
 	// instance variables
-
+	Memory *memory;
+	GCSpace fromSpace;
+	GCSpace toSpace;
+	GCSpace oldSpace;
 	GCSpace auxSpace;
-	VMArray ephemerons;
-	VMArray weakContainers;
-	VMArray unknowns;
+	GCSpace localSpace;
 
+	oop_t* residueObject;
+	VMVariablesProxy vm;
+
+	// referenced arrays, their referers need to be updated when the internal content is moved
+	ReferencedVMArray rememberedSet;
+	ReferencedVMArray literalsReferences;
+	ReferencedVMArray rescuedEphemerons;
 	ReferencedVMArray nativizedMethods;
 	ReferencedVMArray classCheckReferences;
 
-	oop_t* residueObject;
+	// temporary growable arrays, they are discarded when GC finishes
+	// we may want to converte these to std::vectors or similar in the future
+	VMArray weakContainers;
+	VMArray ephemerons;
+	VMArray stack;
+	VMArray unknowns;
 
-	HostVMVariables vm;
-	static GarbageCollector *flipper;
 
 };
 
 extern "C" {
-__declspec(dllexport) void collect(int val);
+//__declspec(dllexport) void collect(int val);
 }
 
 }

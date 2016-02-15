@@ -19,54 +19,25 @@
 namespace Bee
 {
 
+class Memory;
+
 class KnownObjects
 {
 public:
-	static oop_t*  nil;
-	static oop_t*  stTrue;
-	static oop_t*  stFalse;
+	static oop_t *nil;
+	static oop_t *stTrue;
+	static oop_t *stFalse;
 
-	static oop_t*  Array_behavior;
+	static oop_t *emptyArray;
+
+	static oop_t *Array_behavior;
+	static Memory *currentMemory;
+
 };
 
-class HostVMVariables
-{
-public:
-	HostVMVariables();
+void initializeKnownObjects(oop_t *aNil, oop_t *aTrue, oop_t *aFalse, oop_t *emptyArray, Memory *aMemory);
+void initializeKnownObjectsOnHostVM(Memory *aMemory);
 
-	bool globalCacheHasPointersToFrom();
-	void globalCacheHasPointersToFrom(bool value);
-
-	bool anyCompiledMethodInFromSpace();
-	void anyCompiledMethodInFromSpace(bool value);
-
-	bool anyNativizedCompiledMethodInFromSpace();
-	void anyNativizedCompiledMethodInFromSpace(bool value);
-
-	ulong spacesDelta();
-	void spacesDelta(ulong delta);
-
-	ulong* framePointerToStartWalkingTheStack();
-	void framePointerToStartWalkingTheStack(ulong *value);
-
-	char* codeCache();
-	oop_t* globalLookupCacheAt(ulong index);
-	void globalLookupCacheAtPut(ulong index, oop_t *value);
-
-
-	oop_t**  debugFrameMarker;
-
-//private:
-	ulong**  GC_framePointerToWalkStack;
-
-	bool   *JIT_globalLookupCacheHasPointersToFrom;
-	oop_t **JIT_globalLookupCache;
-	char  **JIT_codeCache;
-
-	bool   *GC_anyNativizedCompiledMethodInFromSpace;
-	bool   *GC_anyCompiledMethodInFromSpace;
-	ulong  *GC_spacesDelta;
-};
 
 }
 

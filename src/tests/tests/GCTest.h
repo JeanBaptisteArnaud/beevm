@@ -17,6 +17,8 @@ class GCTest
 protected:
 	oop_t* global(const std::string &name);
 
+	Memory *memoryForTesting();
+
 // helpers for originally smalltalk methods (may be polymorphic)
 
 	bool isSameArray(oop_t *object, oop_t *anotherObject);

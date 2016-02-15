@@ -13,33 +13,44 @@
 
 namespace Bee {
 
-class GenerationalGC: public GarbageCollector {
+class GenerationalGC: public GarbageCollector
+{
 
 public:
 	GenerationalGC();
 	~GenerationalGC();
-	void collect();
-	oop_t* moveToOldOrTo(oop_t* object);
+
+	void initialize();
 	void initLocals();
 	void initNonLocals();
-	void addRoot(oop_t *object);
-	void followRoots();
-	bool arenaIncludes(oop_t *object);
-	oop_t* copyTo(oop_t *object, GCSpace &to);
+
+	void collect();
+
+	void setUpLocals();
+	void setUpNonLocals();
+	void doCollect();
+
 
 	void purgeRoots();
+	void followRoots();
+
+	void addRoot(oop_t *object);
+	bool arenaIncludes(oop_t *object);
+	oop_t* copyTo(oop_t *object, GCSpace &to);
+	oop_t* moveToOldOrTo(oop_t* object);
+
 
 protected:
 	bool hasToPurge(oop_t *object);
 	ulong* codeCacheReferenceAtOffset(ulong offset);
 	void moveToOldAll(ReferencedVMArray &objects);
-	void followRememberSet();
+	void followRememberedSet();
 	void purgeLiteralsReference();
-	void purgeRememberSet();
+	void purgeRememberedSet();
 	bool checkReachablePropertyOf(oop_t *ephemeron);
 	void followCodeCacheReferences();
 	void moveClassCheckReferences();
-	void cleanRememberSet();
+	void cleanRememberedSet();
 	void addInterrupt();
 	void fixReferencesFromNativeMethods();
 	void flipSpaces();

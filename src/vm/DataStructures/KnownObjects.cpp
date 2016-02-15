@@ -14,91 +14,31 @@
 using namespace Bee;
 using namespace std;
 
-oop_t*  KnownObjects::nil;
-oop_t*  KnownObjects::stTrue;
-oop_t*  KnownObjects::stFalse;
+#define HOSTVM_NIL    (oop_t*)0x10026060
+#define HOSTVM_TRUE   (oop_t*)0x10026070
+#define HOSTVM_FALSE  (oop_t*)0x10026080
 
+oop_t  *KnownObjects::nil;
+oop_t  *KnownObjects::stTrue;
+oop_t  *KnownObjects::stFalse;
+oop_t  *KnownObjects::emptyArray;
+Memory *KnownObjects::currentMemory;
 
-// for now we have vmhost ones
-HostVMVariables::HostVMVariables()
+void Bee::initializeKnownObjects(oop_t *aNil, oop_t *aTrue, oop_t *aFalse, oop_t *emptyArray, Memory *aMemory)
 {
-	debugFrameMarker = (oop_t**) 0x1001B633;
-
-	JIT_globalLookupCacheHasPointersToFrom = (bool*) 0x1003EC48;
-	JIT_globalLookupCache = (oop_t**) 0x1002EC20;
-	JIT_codeCache         = (char **) 0x1002E820;
-
-
-	GC_framePointerToWalkStack = (ulong**) 0x100407C4;
-	GC_anyNativizedCompiledMethodInFromSpace = (bool*) 0x10041714;
-	GC_anyCompiledMethodInFromSpace  = (bool*) 0x10041710;
-	GC_spacesDelta = (ulong*)0x1004175C;
+	KnownObjects::nil     = aNil;
+	KnownObjects::stTrue  = aTrue;
+	KnownObjects::stFalse = aFalse;
+	KnownObjects::emptyArray = emptyArray;
+	KnownObjects::currentMemory = aMemory;
 }
 
-bool HostVMVariables::globalCacheHasPointersToFrom()
+void Bee::initializeKnownObjectsOnHostVM(Memory *aMemory)
 {
-	return *JIT_globalLookupCacheHasPointersToFrom;
-}
-
-void   HostVMVariables::globalCacheHasPointersToFrom(bool value)
-{
-	*JIT_globalLookupCacheHasPointersToFrom = value;
-}
-
-oop_t* HostVMVariables::globalLookupCacheAt(ulong index)
-{
-	return JIT_globalLookupCache[index];
-}
-
-void HostVMVariables::globalLookupCacheAtPut(ulong index, oop_t *value)
-{
-	JIT_globalLookupCache[index] = value;
+	cout << "FIXME: find a way to get an empty array" << endl;
+	initializeKnownObjects(HOSTVM_NIL, HOSTVM_TRUE, HOSTVM_FALSE, HOSTVM_NIL, aMemory);
 }
 
 
-bool HostVMVariables::anyCompiledMethodInFromSpace()
-{
-	return *GC_anyCompiledMethodInFromSpace;
-}
-
-void HostVMVariables::anyCompiledMethodInFromSpace(bool value)
-{
-	*GC_anyCompiledMethodInFromSpace = value;
-}
-
-bool HostVMVariables::anyNativizedCompiledMethodInFromSpace()
-{
-	return *GC_anyNativizedCompiledMethodInFromSpace;
-}
-
-void HostVMVariables::anyNativizedCompiledMethodInFromSpace(bool value)
-{
-	*GC_anyNativizedCompiledMethodInFromSpace = value;
-}
-
-ulong HostVMVariables::spacesDelta()
-{
-	return *GC_spacesDelta;
-}
-
-void HostVMVariables::spacesDelta(ulong delta)
-{
-	*GC_spacesDelta = delta;
-}
-
-ulong* HostVMVariables::framePointerToStartWalkingTheStack()
-{
-	return *GC_framePointerToWalkStack;
-}
-
-void HostVMVariables::framePointerToStartWalkingTheStack(ulong *value)
-{
-	*GC_framePointerToWalkStack = value;
-}
-
-char* HostVMVariables::codeCache()
-{
-	return *JIT_codeCache;
-}
 
 

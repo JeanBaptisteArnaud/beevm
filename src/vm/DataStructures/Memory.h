@@ -8,43 +8,56 @@
 #ifndef MEMORY_H_
 #define MEMORY_H_
 
-#include "../GarbageCollector/GarbageCollector.h"
 #include "GCSpace.h"
 #include "VMArray.h"
 #include <vector>
 
-namespace Bee {
+namespace Bee
+{
 
-class Memory {
+class GenerationalGC;
 
-	static Memory * singleton;
-protected:
-
-
-	//Collector
-
+// a smalltalk object
+class Memory
+{
 public:
-	GarbageCollector * collector;
-	GCSpace * currentSpace;
-	std::vector<GCSpace * > spaces;
-	std::vector<GCSpace * > collectedSpaces;
-	GCSpace * nextSpace;
-	static Memory * current();
 	Memory();
-	GCSpace * growIfNeeded(ulong size);
-	GCSpace dynamicNew(ulong size);
-	ulong * obtainFreeSpaceAndAllocate(ulong size);
-	ulong * VM();
-	GCSpaceInfo allocateWithoutFinalization(ulong);
+
 	void initializeCollector();
-	void setGC(GarbageCollector * collector);
 	void startUp();
 	void createPinnedSpace();
 	void releaseEverything();
-	GCSpace * acquireMoreSpace();
-	void createNextSpace();
-	void addSpace(GCSpace *);
-	void addCollectedSpace(GCSpace *);
+
+//protected:
+// up to date
+	void scavengeFromSpace();
+	void growIfTime();
+	void commitMoreSpace();
+
+
+// for testing only
+//	void addSpace(GCSpace *aSpace);
+//	void addCollectedSpace(GCSpace *aSpace);
+
+
+	static const ulong instVarCount = 8;
+
+public: // for testing
+
+	GCSpace **spaces;
+	GCSpace **collectedSpaces;
+	GenerationalGC *flipper;
+	GCSpace *pinnedSpace;
+	GCSpace *fromSpace;
+	GCSpace *toSpace;
+	GCSpace *oldSpace;
+
+	oop_t *rememberedSet;
+	oop_t *literalsReferences;
+	oop_t *codeCacheObjectReferences;
+	oop_t *nativizedMethods;
+	oop_t *rescuedEphemerons;
+	oop_t *residueObject;
 };
 
 }

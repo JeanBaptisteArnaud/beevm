@@ -23,6 +23,16 @@ oop_t* Bee::smiConst(int number)
 	return (oop_t*)((number << 1) | 1);
 }
 
+oop_t* Bee::pointerConst(ulong number)
+{
+	return (oop_t*)(number | 1);
+}
+
+oop_t* Bee::asObject(void *smallPointer)
+{
+	return (oop_t*) ((ulong)smallPointer & ~1);
+}
+
 // size calculation
 
 ulong oop_t::_basicSize()
@@ -130,17 +140,17 @@ void oop_t::unsetExtFlags(unsigned char flag)
 
 void oop_t::_beExtended()
 {
-	this->setFlags(basic_header_t::ObjectFlag_isExtended);
+	this->setFlags(basic_header_t::Flag_isExtended);
 }
 
 bool oop_t::_hasWeaks()
 {
-	return this->testFlags(basic_header_t::ObjectFlag_isEphemeron);
+	return this->testFlags(basic_header_t::Flag_isEphemeron);
 }
 
 void oop_t::_haveNoWeaks()
 {
-	this->unsetFlags(basic_header_t::ObjectFlag_isEphemeron);
+	this->unsetFlags(basic_header_t::Flag_isEphemeron);
 }
 
 bool oop_t::_isActiveEphemeron()
@@ -150,56 +160,63 @@ bool oop_t::_isActiveEphemeron()
 
 bool oop_t::_isEphemeron()
 {
-	return this->testFlags   (basic_header_t::ObjectFlag_isExtended) &&
-	       this->testExtFlags(basic_header_t::ObjectFlag_isEphemeron);
+	return this->testFlags   (basic_header_t::Flag_isExtended) &&
+	       this->testExtFlags(basic_header_t::Flag_isEphemeron);
 }
 
 void oop_t::_beSecondGeneration()
 {
-	this->setFlags(basic_header_t::ObjectFlag_generation);
+	this->setFlags(basic_header_t::Flag_generation);
 }
 
 bool oop_t::_isSecondGeneration()
 {
-	return this->testFlags(basic_header_t::ObjectFlag_generation);
+	return this->testFlags(basic_header_t::Flag_generation);
 }
 
 bool oop_t::_isBytes()
 {
-	return this->testFlags(basic_header_t::ObjectFlag_isBytes);
+	return this->testFlags(basic_header_t::Flag_isBytes);
 }
 
 bool oop_t::_isExtended()
 {
-	return this->testFlags(basic_header_t::ObjectFlag_isExtended);
+	return this->testFlags(basic_header_t::Flag_isExtended);
 }
 
 bool oop_t::_isZeroTerminated()
 {
-	return this->testFlags(basic_header_t::ObjectFlag_zeroTermOrNamed);
+	return this->testFlags(basic_header_t::Flag_zeroTermOrNamed);
 }
 
 bool oop_t::_isInRememberedSet()
 {
-	return this->testFlags(basic_header_t::ObjectFlag_isInRememberSet);
+	return this->testFlags(basic_header_t::Flag_isInRememberSet);
 }
 
 void oop_t::_beNotInRememberedSet()
 {
-	this->unsetFlags(basic_header_t::ObjectFlag_isInRememberSet);
+	this->unsetFlags(basic_header_t::Flag_isInRememberSet);
 }
 
 void oop_t::_beInRememberedSet()
 {
-	this->setFlags(basic_header_t::ObjectFlag_isInRememberSet);
+	this->setFlags(basic_header_t::Flag_isInRememberSet);
 }
 
+
+void oop_t::_beFullUnseenInSpace()
+{
+	this->setFlags(basic_header_t::Flag_unseenInSpace);
+	if (this->_isExtended())
+		this->setExtFlags(basic_header_t::Flag_unseenInSpace);
+}
 
 
 // proxiing method
 bool oop_t::_isProxy()
 {
-	return !this->testFlags(basic_header_t::ObjectFlag_reserved1);
+	return !this->testFlags(basic_header_t::Flag_unseenInSpace);
 }
 
 void oop_t::_setProxee(oop_t *value)

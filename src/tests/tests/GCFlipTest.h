@@ -8,15 +8,20 @@
 namespace Bee
 {
 
+class Memory;
 class GenerationalGC;
+class GCSpace;
 
 class GCFlipTest : public GCTest
 {
 public:
+	GCFlipTest();
+	~GCFlipTest();
+
 	void testGCCollect();
 	void testCopyToFlip();
 	void testCopyToOld();
-	void testCopyToOldBee();
+	void testCopyToOldBug();
 	void testEphemeron();
 	void testEphemeronOnce();
 	void testFollowObjectAndCheckGraph();
@@ -29,7 +34,11 @@ public:
 	void setUp();
 	void tearDown();
 
-	GenerationalGC *flipper;
+	GenerationalGC* flipper();
+	GCSpace* fromSpace();
+	GCSpace* toSpace();
+	GCSpace* oldSpace();
+	Memory *memory;
 };
 
 }

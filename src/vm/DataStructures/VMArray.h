@@ -23,6 +23,7 @@ public:
 	void addAll(oop_t *array);
 
 	void emptyWith(oop_t *);
+	void emptyReserving(ulong size);
 
 	void grow();
 	void grow(ulong);

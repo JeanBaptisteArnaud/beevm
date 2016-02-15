@@ -33,14 +33,14 @@ typedef struct basic_header_t
 	oop_t* slots() { return (oop_t*)((ulong)this + 8); }
 
 // flags bits
-	static const uchar ObjectFlag_reserved1 = 1;
-	static const uchar ObjectFlag_generation = 2;
-	static const uchar ObjectFlag_isEphemeron = 4;
-	static const uchar ObjectFlag_isInRememberSet = 8;
-	static const uchar ObjectFlag_isBytes = 0x10;
-	static const uchar ObjectFlag_zeroTermOrNamed = 0x20;
-	static const uchar ObjectFlag_notIndexed = 0x40;
-	static const uchar ObjectFlag_isExtended = 0x80;
+	static const uchar Flag_unseenInSpace = 1;
+	static const uchar Flag_generation = 2;
+	static const uchar Flag_isEphemeron = 4;
+	static const uchar Flag_isInRememberSet = 8;
+	static const uchar Flag_isBytes = 0x10;
+	static const uchar Flag_zeroTermOrNamed = 0x20;
+	static const uchar Flag_notIndexed = 0x40;
+	static const uchar Flag_isExtended = 0x80;
 
 	static const uchar ObjectFlagMaxValue = 0xFF;
 
@@ -80,19 +80,21 @@ typedef struct extended_header_t
 
 
 oop_t* smiConst(int number);
+oop_t* pointerConst(ulong number);
+oop_t* asObject(void *smallPointer);
 
 struct oop_t
 {
 public:
 
-	bool isSmallInteger() { return ((ulong)this & 1) == 0; }
+	bool isSmallInteger() { return ((ulong)this & 1) == 1; }
 
 	// small integers
 	oop_t* smiPlusNative(int b) { return (oop_t*)(((ulong)this & SMI_CLEAR_FLAG) + (ulong)smiConst(b)); }
 	
 	long   _asNative()  { return (long)this >> 1; }
 	void*  _asObject()  { return (void*)((ulong)this & ~1); }
-	oop_t* _asPointer() { return isSmallInteger() ? (oop_t*)_asNative() : (oop_t*)_asObject(); }
+	oop_t* _asPointer() { return isSmallInteger() ? (oop_t*)_asNative() : pointerConst((ulong)this); }
 
 
 	basic_header_t*    basic_header()   { return (basic_header_t*)((ulong)this-8); }
@@ -125,6 +127,7 @@ public:
 	void _beSecondGeneration();
 	void _beExtended();
 	void _haveNoWeaks();
+	void _beFullUnseenInSpace();
 
 	bool testFlags    (unsigned char flag);
 	bool testExtFlags (unsigned char flag);

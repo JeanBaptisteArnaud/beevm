@@ -24,32 +24,32 @@ public:
 	void reference(const std::string &name, slot_t *slot);
 
 	// creation
-	oop_t* mockBasicObject(const std::string &classname, uchar size, ushort hash, uchar flags, Bee::GCSpace &space);
-	oop_t* mockBasicObject(const std::string &classname, uchar size, ushort hash, uchar flags);
+	oop_t* newBasicObject(const std::string &classname, uchar size, ushort hash, uchar flags, Bee::GCSpace &space);
+	oop_t* newBasicObject(const std::string &classname, uchar size, ushort hash, uchar flags);
 	
-	oop_t* mockExtendedObject(const std::string &classname, ulong size, ushort hash, uchar flags, Bee::GCSpace &space);
-	oop_t* mockExtendedObject(const std::string &classname, ulong size, ushort hash, uchar flags);
+	oop_t* newExtendedObject(const std::string &classname, ulong size, ushort hash, uchar flags, Bee::GCSpace &space);
+	oop_t* newExtendedObject(const std::string &classname, ulong size, ushort hash, uchar flags);
 
-	void mockNil();
-	void mockTrue();
-	void mockFalse();
-
+	oop_t*  mockNil();
+	oop_t*  mockTrue();
+	oop_t*  mockFalse();
+	Memory* mockMemory();
+	GCSpace* mockGCSpace(ulong size);
 
 	// helpers for tests
-	oop_t* mockArray(ulong slots);
-	oop_t* mockWeakArray();
-	bool   checkValueMockArray1024(oop_t*  localArray);
-	void   mockVMValue();
+	oop_t* newObject();
+	oop_t* newArray(ulong slots);
+	oop_t* newArray(ulong slots, GCSpace *space);
+	oop_t* newWeakArray();
+
+
 	void   freeSimpleObject (oop_t *object);
 	void   freeComplexObject(oop_t *object);
-	oop_t* mockEphemeronFrom(oop_t *key, oop_t *value);
-	oop_t* mockObjectFrom();
-	bool   checkMockArray2(oop_t *object);
+	oop_t* newEphemeron(oop_t *key, oop_t *value);
 
-	HostVMVariables vm;
+	bool   checknewArray2(oop_t *object);
 
 	Bee::GCSpace defaultSpace;
-
 	std::vector<std::pair<slot_t*,std::string> > references;
 	std::map<std::string, oop_t*> definitions;
 };
