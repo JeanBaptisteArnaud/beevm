@@ -124,7 +124,7 @@ void GenerationalGC::holdReferenceTo(oop_t* object)
 	if (!object->_isInRememberedSet())
 	{
 		object->_beInRememberedSet();
-		rememberedSet.add(object);
+		this->addRoot(object);
 	}
 }
 
@@ -150,7 +150,7 @@ oop_t* GenerationalGC::moveToToSpace(oop_t *object)
 
 void GenerationalGC::someEphemeronsRescued()
 {
-	//this->holdReferenceTo(rescuedEphemerons.contents);
+	this->holdReferenceTo(rescuedEphemerons.contents);
 }
 
 void GenerationalGC::purgeLiteralsReference()
@@ -173,7 +173,7 @@ void GenerationalGC::purgeLiteralsReference()
 
 void GenerationalGC::fixReferencesOrSetTombstone(oop_t * weakContainer)
 {
-	for (ulong index = 0; index < weakContainer->_size(); index++)
+	for (ulong index = 0; index < weakContainer->_size(); index++) // was index = 1
 	{
 		oop_t *instance = weakContainer->slot(index);
 		if (this->arenaIncludes(instance))
@@ -373,19 +373,18 @@ void GenerationalGC::followCountStartingAt(slot_t *root, int size, long start)
 	slot_t *objects = root;
 	long index = start - 1;
 	long limit = index + size;
-	bool first = true;
-	while (first | !(stack.isEmpty()))
+	
+	do
 	{
-		first = false;
 		while (index < limit)
 		{
 			index = index + 1;
-			oop_t *object = objects[index];
+			oop_t *object = objects[index-1]; // was objects[index]
 			if (this->arenaIncludes(object))
 			{
 				if (object->_isProxy())
 				{
-					objects[index] = object->_getProxee();
+					objects[index-1] = object->_getProxee();  // was objects[index]
 				}
 				else
 				{
@@ -395,24 +394,29 @@ void GenerationalGC::followCountStartingAt(slot_t *root, int size, long start)
 						stack.push(smiConst(index));
 						stack.push(smiConst(limit));
 					}
-					this->rememberIfWeak(object);
-					// in the original I think it is a bug self rememberIfWeak: moved. and move before
+					// FIXME: this line was not in smalltalk:
+					//this->rememberIfWeak(object); // in the original I think it is a bug self rememberIfWeak: moved. and move before
+					
 					oop_t *moved = this->moveToOldOrTo(object);
-					objects[index] = moved;
+					objects[index-1] = moved; // was objects[index]
 					this->rememberIfWeak(moved);
-					index = - 2; // smalltalk power array base 1
+					index = - 1;
 					limit = index + moved->_strongPointersSize();
 					objects = (oop_t**)moved;
 				}
 			}
 		}
+
 		if (!stack.isEmpty())
 		{
 			limit = stack.pop()->_asNative();
 			index = stack.pop()->_asNative();
 			objects = (oop_t **) stack.pop();
 		}
-	}
+		else
+			break;
+	} while(true);
+
 }
 
 void GenerationalGC::addInterrupt()

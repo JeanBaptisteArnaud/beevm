@@ -125,11 +125,14 @@ void GCFlipTest::testCopyToOldBug()
 
 void GCFlipTest::testEphemeron()
 {
+	GCSpace default = mockedObjects.setDefaultSpace(fromSpace());
 	oop_t *key = mockedObjects.newObject();
 	oop_t *value = mockedObjects.newObject();
 	oop_t *ephemeron = mockedObjects.newEphemeron(key, value);
+	mockedObjects.setDefaultSpace(&default);
+	
 	oop_t *tombstone = mockedObjects.newObject();
-	oop_t *root = mockedObjects.newArray(1024);
+	oop_t *root = mockedObjects.newArray(2);
 	root->slot(0) = ephemeron;
 	root->slot(1) = key;
 
@@ -146,17 +149,21 @@ void GCFlipTest::testEphemeron()
 	key       = root->slot(1);
 
 	ASSERTM("To space do not include ephemeron", toSpace()->includes(ephemeron));
-//	ASSERTM("Key is not in to space" ,(toSpace()->includes(key)));
-//	ASSERTM("key change" , ephemeron[1] == (ulong) key);
-//	ASSERTM("value not set" ,(toSpace()->includes((unsigned long *) ephemeron[2])));
+	ASSERTM("Key is not in to space" , toSpace()->includes(key));
+	ASSERTM("key change" , ephemeron->slot(0) == key );
+	ASSERTM("value not set" , toSpace()->includes(ephemeron->slot(1)) );
 }
 
 void GCFlipTest::testEphemeronOnce()
 {
+	GCSpace default = mockedObjects.setDefaultSpace(fromSpace());
 	oop_t *key = mockedObjects.newObject();
 	oop_t *ephemeron = mockedObjects.newEphemeron(key, smiConst(2));
 	oop_t *tombstone = mockedObjects.newObject();
-	oop_t *root = mockedObjects.newArray(1024);
+	mockedObjects.setDefaultSpace(&default);
+
+
+	oop_t *root = mockedObjects.newArray(2);
 	root->slot(0) = ephemeron;
 	root->slot(1) = ephemeron;
 
@@ -172,41 +179,49 @@ void GCFlipTest::testEphemeronOnce()
 
 	ephemeron = flipper()->rescuedEphemerons.pop();
 	ASSERTM("rescued ephemeron is not empty", flipper()->rescuedEphemerons.isEmpty());
-	ASSERTM("??", ephemeron->slot(1) == smiConst(2));
-	//	ASSERTM("Ephemeron is not in to space" ,(toSpace()->includes(ephemeron)));
-	//	ASSERTM("Key is not in to space" ,(toSpace()->includes(key)));
+	ASSERTM("ephemeron value is wrong", ephemeron->slot(1) == smiConst(2));
+	ASSERTM("ephemeron is not in to space", toSpace()->includes(ephemeron));
+	ASSERTM("key is not in to space", toSpace()->includes(ephemeron->slot(0)));
+}
+
+// only works when padding = 2^k
+ulong padTo(ulong number, ulong padding)
+{
+	return (number + padding - 1) & ~(padding-1);
 }
 
 void GCFlipTest::testFollowObject()
 {
 	oop_t *array = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	oop_t *string = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	fromSpace()->shallowCopy(mockedObjects.newArray(1024));
-	oop_t *byteArray = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	oop_t *root = fromSpace()->shallowCopy(mockedObjects.newArray(3));
+	oop_t *string = fromSpace()->shallowCopy(mockedObjects.newString("a string"));
+	fromSpace()->shallowCopy(mockedObjects.newString("leaked"));
+	oop_t *byteArray = fromSpace()->shallowCopy(mockedObjects.newByteArray(3));
 
-	long flipSize = toSpace()->getNextFree() - toSpace()->getBase();
-	long currentSize = fromSpace()->getNextFree() - fromSpace()->getBase();
+	long toUsed = toSpace()->used();
+	long fromUsed = fromSpace()->used();
 
-	ASSERTM("ToSpace not empty 0", flipSize == 0);
-	ASSERTM("ToSpace not correctly allocated ", currentSize == (1024 + 32));
-
+	ulong headerBytes = 8;
+	ASSERTM("ToSpace not empty 0", toUsed == 0);
+	ASSERTM("ToSpace not correctly allocated ", fromUsed == (3*4 + padTo(9,4) + padTo(7,4) + padTo(3,4) + headerBytes * 4));
 
 	array->slot(0) = smiConst(1);
 	array->slot(1) = string;
 	array->slot(2) = byteArray;
+
+	oop_t *root = mockedObjects.newArray(1);
 	root->slot(0) = array;
+
 	//string = byteArray = array = nil;
 	flipper()->addRoot(root);
 	flipper()->followRoots();
 
-	flipSize = toSpace()->getNextFree() - toSpace()->getBase();
-	currentSize = fromSpace()->getNextFree() - fromSpace()->getBase();
+	toUsed = toSpace()->used();
+	fromUsed = fromSpace()->used();
 
-	ASSERTM("flipSize is not empty", flipSize);
-	ASSERTM("flipSize >= current size", flipSize < currentSize);
+	ASSERTM("toUsed is not empty", toUsed);
+	ASSERTM("toUsed >= current size", toUsed < fromUsed);
 	// check the number
-	ASSERTM("calculation of pointer", (currentSize - flipSize) == (1035));
+	ASSERTM("calculation of pointer", (fromUsed - toUsed) == (headerBytes + padTo(7,4)) );
 }
 
 void GCFlipTest::testGCReferencesAfterCollect()
@@ -236,11 +251,11 @@ void GCFlipTest::testTombstone()
 	oop_t *weakArray = fromSpace()->shallowCopy(mockedObjects.newWeakArray());
 	oop_t *toGarbage = fromSpace()->shallowCopy(mockedObjects.newArray(3));
 
-	weakArray->setSlot(0, toGarbage);
-	weakArray->setSlot(1, toGarbage);
+	weakArray->slot(0) = toGarbage;
+	weakArray->slot(1) = toGarbage;
 
 	oop_t *root = mockedObjects.newArray(3);
-	root->setSlot(0, weakArray);
+	root->slot(0) = weakArray;
 	ASSERTM("from space include", flipper()->arenaIncludes(toGarbage));
 	oop_t *tombstone = smiConst(42);
 	flipper()->addRoot(root);
@@ -256,43 +271,46 @@ void GCFlipTest::testTombstone()
 
 void GCFlipTest::testFollowObjectAndCheckGraph()
 {
-	oop_t *string = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	fromSpace()->shallowCopy(mockedObjects.newArray(1024));
-	oop_t *byteArray = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	oop_t *root = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	long flipSize = toSpace()->getNextFree() - toSpace()->getBase();
-	long currentSize = fromSpace()->getNextFree()
-			- fromSpace()->getBase();
+	oop_t *array = fromSpace()->shallowCopy(mockedObjects.newArray(3));
+	oop_t *string = fromSpace()->shallowCopy(mockedObjects.newString("a String"));
+	fromSpace()->shallowCopy(mockedObjects.newString("leaked"));
+	oop_t *byteArray = fromSpace()->shallowCopy(mockedObjects.newByteArray(3));
 
-	ASSERTM("ToSpace not empty 0", flipSize == 0);
-	ASSERTM("ToSpace not correctly allocated ", currentSize == (1024 + 32));
+	long toUsed = toSpace()->used();
+	long fromUsed = fromSpace()->used();
 
-	root->slot(0) = smiConst(1);
-	root->slot(1) = string;
-	root->slot(2) = byteArray;
+	ulong headerBytes = 8;
+
+	ASSERTM("ToSpace not empty 0", toUsed == 0);
+	ASSERTM("ToSpace not correctly allocated ", fromUsed == (3*4 + padTo(9,4) + padTo(7,4) + padTo(3,4) + headerBytes * 4));
+
+	array->slot(0) = smiConst(1);
+	array->slot(1) = string;
+	array->slot(2) = byteArray;
+
+	oop_t *root = mockedObjects.newArray(1);
+	root->slot(0) = array;
 	//string = byteArray = array = nil;
+
 	flipper()->addRoot(root);
 	flipper()->followRoots();
 
-	flipSize = toSpace()->getNextFree() - toSpace()->getBase();
-	currentSize = fromSpace()->getNextFree() - fromSpace()->getBase();
+	toUsed = toSpace()->used();
+	fromUsed = fromSpace()->used();
 
-//	self
-//		assert: toSize < fromSize;
 //		assert: fromSize - toSize = (8 + ('leaked' size roundTo: 4)) _asPointer;
 //		assert: root first first = 1;
 //		assert: root first second = 'a String';
 //		assert: root first third = #[1 2 3]
 
-	ASSERTM("flipSize is not empty", flipSize);
-	ASSERTM("flipSize >= current size", flipSize < currentSize);
+	ASSERTM("toUsed is not empty", toUsed);
+	ASSERTM("toUsed >= current size", toUsed < fromUsed);
+	ASSERTM("from/to bytes difference is wrong", (fromUsed - toUsed) == headerBytes + padTo(7,4));
+	ASSERTM("root 1 change", root->slot(0)->slot(0) == smiConst(1));
+	ASSERTM("root 2 newArray 2 change", root->slot(0)->slot(1)->equalsStr("a String") );
 
-	// check the number
-//	ASSERTM("calculation of pointer", (currentSize - flipSize) == (1035));
-//	ASSERTM("array ", (currentSize - flipSize) == (1035));
-	ASSERTM("root 1 change", root->slot(0) == smiConst(1));
-	ASSERTM("root 2 newArray 2 change", mockedObjects.checknewArray2(root->slot(1)));
-	ASSERTM("root 3 newArray 3 change", mockedObjects.checknewArray2(root->slot(2)));
+	byteArray = mockedObjects.newByteArray(3);
+	ASSERTM("root 3 newArray 3 change", root->slot(0)->slot(2)->equalsByteArray(byteArray));
 
 }
 
@@ -300,42 +318,46 @@ void GCFlipTest::testFollowObjectAndCheckGraph()
 
 void GCFlipTest::testFollowObjectCheckGraphAndOop()
 {
-	// no need it
-	oop_t *string = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	fromSpace()->shallowCopy(mockedObjects.newArray(1024));
-	oop_t *byteArray = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	oop_t *root = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	long flipSize = toSpace()->getNextFree() - toSpace()->getBase();
-	long currentSize = fromSpace()->getNextFree()
-			- fromSpace()->getBase();
+	oop_t *array = fromSpace()->shallowCopy(mockedObjects.newArray(3));
+	oop_t *string = fromSpace()->shallowCopy(mockedObjects.newString("a String"));
+	fromSpace()->shallowCopy(mockedObjects.newString("leaked"));
+	oop_t *byteArray = fromSpace()->shallowCopy(mockedObjects.newByteArray(3));
 
-	ASSERTM("ToSpace not empty 0", flipSize == 0);
-	ASSERTM("ToSpace not correctly allocated ", currentSize == (1024 + 32));
+	long toUsed = toSpace()->used();
+	long fromUsed = fromSpace()->used();
 
-	root->slot(0) = smiConst(1);
-	root->slot(1) = string;
-	root->slot(2) = byteArray;
+	ulong headerBytes = 8;
+
+	ASSERTM("ToSpace not empty 0", toUsed == 0);
+	ASSERTM("ToSpace not correctly allocated ", fromUsed == (3*4 + padTo(9,4) + padTo(7,4) + padTo(3,4) + headerBytes * 4));
+
+	array->slot(0) = smiConst(1);
+	array->slot(1) = string;
+	array->slot(2) = byteArray;
+
+	oop_t *root = mockedObjects.newArray(1);
+	root->slot(0) = array;
 	//string = byteArray = array = nil;
+
 	flipper()->addRoot(root);
 	flipper()->followRoots();
 
-	flipSize    = toSpace()->getNextFree()   - toSpace()->getBase();
-	currentSize = fromSpace()->getNextFree() - fromSpace()->getBase();
-//	self
-//		assert: toSize < fromSize;
-//		assert: fromSize - toSize = (8 + ('leaked' size roundTo: 4)) _asPointer;
-//		assert: root first first = 1;
-//		assert: root first second = 'a String';
-//		assert: root first third = #[1 2 3]
-	ASSERTM("flipSize is not empty", flipSize);
-	ASSERTM("flipSize >= current size", flipSize < currentSize);
-	// check the number
-//	ASSERTM("calculation of pointer", (currentSize - flipSize) == (1035));
-//	ASSERTM("array ", (currentSize - flipSize) == (1035));
-	ASSERTM("root 1 change", root->slot(0) == smiConst(1));
-	ASSERTM("root 2 newArray 2 change", mockedObjects.checknewArray2(root->slot(1)));
-	ASSERTM("root 3 newArray 3 change", mockedObjects.checknewArray2(root->slot(2)));
+	toUsed = toSpace()->used();
+	fromUsed = fromSpace()->used();
 
+
+	ASSERTM("toUsed is not empty", toUsed);
+	ASSERTM("toUsed >= current size", toUsed < fromUsed);
+	ASSERTM("from/to bytes difference is wrong", (fromUsed - toUsed) == headerBytes + padTo(7,4));
+	ASSERTM("root 1 change", root->slot(0)->slot(0) == smiConst(1));
+	ASSERTM("root 2 newArray 2 change", root->slot(0)->slot(1)->equalsStr("a String") );
+
+	ASSERTM("flipper didn't save the string", toSpace()->includes(root->slot(0)->slot(1)));
+
+	byteArray = mockedObjects.newByteArray(3);
+	ASSERTM("root 3 newArray 3 change", root->slot(0)->slot(2)->equalsByteArray(byteArray));
+
+	ASSERTM("flipper didn't save the byte array", toSpace()->includes(root->slot(0)->slot(2)));
 }
 
 

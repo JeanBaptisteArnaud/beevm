@@ -18,6 +18,9 @@ public:
 	MockedObjects();
 	void initializeKnownObjects();
 
+	ulong* stackPtr();
+	void addStackVariable(oop_t **value);
+
 	// globals
 	oop_t* get(const std::string &name);
 	void define   (const std::string &name, oop_t *value);
@@ -40,18 +43,25 @@ public:
 	oop_t* newObject();
 	oop_t* newArray(ulong slots);
 	oop_t* newArray(ulong slots, GCSpace *space);
+	oop_t* newByteArray(ulong slots);
+	oop_t* newString(const char *value);
 	oop_t* newWeakArray();
+	oop_t* newEphemeron(oop_t *key, oop_t *value);
 
+	GCSpace setDefaultSpace(GCSpace *newSpace);
 
 	void   freeSimpleObject (oop_t *object);
 	void   freeComplexObject(oop_t *object);
-	oop_t* newEphemeron(oop_t *key, oop_t *value);
 
 	bool   checknewArray2(oop_t *object);
 
 	Bee::GCSpace defaultSpace;
 	std::vector<std::pair<slot_t*,std::string> > references;
 	std::map<std::string, oop_t*> definitions;
+
+	std::vector<ulong> stack;
+	int stackVars;
+
 };
 
 }

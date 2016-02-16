@@ -44,10 +44,10 @@ void GCSpaceTest::testAllocate()
 	ulong *address = localSpace.allocateIfPossible(1024);
 	address = localSpace.allocateIfPossible(1024);
 	ASSERTM("nextFree simple",
-			(ulong)localSpace.getNextFree() == (ulong)localSpace.getBase() + 1024 + 1024);
+			(ulong)localSpace.getNextFree() == (ulong)localSpace.getBase() + (ulong)pointerConst(1024 + 1024));
 	address = localSpace.allocateIfPossible(1024 * 38);
 	ASSERTM("nextFree limit",
-			(ulong)localSpace.getNextFree() == (ulong)localSpace.getBase() + (1024 * 40));
+			(ulong)localSpace.getNextFree() == (ulong)localSpace.getBase() + (ulong)pointerConst(1024 * 40));
 	address = localSpace.allocateIfPossible(1024 * 30);
 }
 

@@ -7,11 +7,11 @@
 using namespace std;
 using namespace Bee;
 
-
 MockedObjects::MockedObjects()
 {
 	GCSpaceInfo info = GCSpaceInfo::newSized(4*1024*1024);
 	defaultSpace.loadFrom(info);
+	stackVars = 0;
 }
 
 void MockedObjects::initializeKnownObjects()
@@ -23,6 +23,25 @@ void MockedObjects::initializeKnownObjects()
 	Memory *memory  = mockMemory();
 
 	Bee::initializeKnownObjects(nil, stTrue, stFalse, array, memory);
+
+	// create a fake stack with place for 1022 slots
+	stack.reserve(1024);
+	for (int i = 0; i < 1024; i++)
+		stack.push_back((ulong)KnownObjects::nil);
+
+	stack[0] = (ulong)&stack[1023];
+	stack[1023] = 0;
+}
+
+void MockedObjects::addStackVariable(oop_t **value)
+{
+	stack[stackVars+1] = (ulong)value;
+	stackVars++;
+}
+
+ulong* MockedObjects::stackPtr()
+{
+	return &stack[0];
 }
 
 // mock vars to replace HostVM pointers
@@ -165,6 +184,40 @@ oop_t* MockedObjects::newArray(ulong slots)
 	return this->newArray(slots, &this->defaultSpace);
 }
 
+oop_t* MockedObjects::newByteArray(ulong size)
+{
+	oop_t *array;
+	uchar flags = basic_header_t::Flag_isBytes | basic_header_t::Flag_unseenInSpace;
+
+	if (size > 255)
+		array = this->newExtendedObject("ByteArray", size, 0, basic_header_t::Flag_isExtended | flags, defaultSpace);
+	else
+		array = this->newBasicObject("ByteArray", (uchar)size, 0, flags, defaultSpace);
+
+	for (ulong index = 0; index <= size; index++)
+		array->slot(index) = smiConst(index);
+	
+	return array;
+}
+
+
+oop_t* MockedObjects::newString(const char *value)
+{
+	oop_t *result;
+	ulong size = strlen(value) + 1;
+
+	uchar flags = basic_header_t::Flag_isBytes | basic_header_t::Flag_zeroTermOrNamed | basic_header_t::Flag_unseenInSpace;
+
+	if (size > 255)
+		result = this->newExtendedObject("String", size, 0, basic_header_t::Flag_isExtended | flags, defaultSpace);
+	else
+		result = this->newBasicObject("Array", (uchar)size, 0, flags, defaultSpace);
+
+	strcpy_s((char*)result, size, value);
+
+	return result;
+}
+
 oop_t* MockedObjects::newWeakArray()
 {
 
@@ -177,7 +230,12 @@ oop_t* MockedObjects::newWeakArray()
 	return array;
 }
 
-
+GCSpace MockedObjects::setDefaultSpace(GCSpace *newSpace)
+{
+	GCSpace previous = defaultSpace;
+	defaultSpace.loadFrom(*newSpace);
+	return previous;
+}
 
 Memory* MockedObjects::mockMemory()
 {
@@ -204,23 +262,6 @@ GCSpace* MockedObjects::mockGCSpace(ulong size)
 }
 
 
-
-bool MockedObjects::checknewArray2(oop_t *object)
-{
-	ulong sizeA = object->_size();
-	if (sizeA != 5)
-		return false;
-
-	if (object->behavior() != this->get("Array behavior"))
-		return false;
-
-	for (ulong index = 0; index < sizeA; index++) {
-		if (object->slot(index) != KnownObjects::nil)
-			return false;
-	}
-
-	return true;
-}
 
 void freeSimpleObject(oop_t *object)
 {

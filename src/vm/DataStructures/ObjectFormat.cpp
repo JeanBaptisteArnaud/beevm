@@ -30,7 +30,12 @@ oop_t* Bee::pointerConst(ulong number)
 
 oop_t* Bee::asObject(void *smallPointer)
 {
-	return (oop_t*) ((ulong)smallPointer & ~1);
+	return (oop_t*)asUObject(smallPointer);
+}
+
+ulong Bee::asUObject(void *smallPointer)
+{
+	return (ulong)smallPointer & ~1;
 }
 
 // size calculation
@@ -99,7 +104,7 @@ ulong oop_t::_headerSizeInBytes()
 
 ulong oop_t::_strongPointersSize()
 {
-	if (this->_isBytes() | this->_hasWeaks())
+	if (this->_isBytes() || this->_hasWeaks())
 		return 1;
 	else
 		return (1 + this->_size());
@@ -248,4 +253,25 @@ ulong Bee::rotateRight(ulong n, unsigned int c)
 void _halt()
 {
 	perror("_halt encountered");
+}
+
+// should work with symbols (check needed)
+bool oop_t::equalsStr(const char *aString)
+{
+	return strncmp((char*)this, aString, this->_size()) == 0;
+}
+
+
+bool oop_t::equalsByteArray(oop_t *other)
+{
+	if (this->_size() != other->_size())
+		return false;
+
+	for (ulong i = 0; i < this->_size(); i++)
+	{
+		if (this->byte(i) != other->byte(i))
+			return false;
+	}
+
+	return true;
 }

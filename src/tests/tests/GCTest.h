@@ -26,7 +26,6 @@ protected:
 
 protected:
 	MockedObjects mockedObjects;
-
 };
 
 }

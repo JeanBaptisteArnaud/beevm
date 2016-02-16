@@ -51,7 +51,7 @@ protected:
 	void makeRescuedEphemeronsNonWeak();
 	void forgetNativeObjects();
 	void saveSpaces();
-	void followFrameCountStartingAt(slot_t *frame, ulong count , ulong start);
+	void followFrameCountStartingAt(slot_t *frame, ulong size , ulong startIndex);
 	//void followCountStartingAt(ulong * root,ulong  count ,ulong  start);
 
 	bool followEphemeronsCollectingUnknowns();

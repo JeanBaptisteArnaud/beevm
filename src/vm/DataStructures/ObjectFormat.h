@@ -82,6 +82,7 @@ typedef struct extended_header_t
 oop_t* smiConst(int number);
 oop_t* pointerConst(ulong number);
 oop_t* asObject(void *smallPointer);
+ulong  asUObject(void *smallPointer);
 
 struct oop_t
 {
@@ -142,7 +143,7 @@ public:
 	oop_t* behavior() { return this->basic_header()->behavior; }
 	oop_t* setBehavior(oop_t *behavior) { return this->basic_header()->behavior = behavior; }
 	slot_t& slot(long index) { ulong *pos = (ulong*)this + index; return *((slot_t*)pos); }
-	void setSlot(long index, oop_t *value) { ((ulong*)this)[index] = (ulong)value; }
+	uchar&  byte(long index) { uchar *pos = (uchar*)this + index; return *pos; }
 
 
 	//done
@@ -154,6 +155,10 @@ public:
 	bool _isProxy();
 	void _setProxee(oop_t *copy);
 	oop_t* _getProxee();
+
+	// for testing
+	bool equalsStr(const char *aString);
+	bool equalsByteArray(oop_t *other);
 
 };
 

@@ -146,7 +146,12 @@ void GCSpace::load()
 
 ulong GCSpace::reservedSize()
 {
-	return asObject(reservedLimit) - asObject(base);
+	return asUObject(reservedLimit) - asUObject(base);
+}
+
+ulong GCSpace::used()
+{
+	return asUObject(nextFree) - asUObject(base);
 }
 
 
@@ -313,10 +318,6 @@ void GCSpace::decommitSlack()
 		_decommit((ulong*)padded, (ulong*)delta);
 		this->setCommitedLimit((ulong*) padded);
 	}
-}
-ulong GCSpace::used()
-{
-	return asObject(nextFree)-asObject(base);
 }
 
 int GCSpace::percentageOfCommitedUsed()

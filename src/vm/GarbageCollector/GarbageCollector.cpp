@@ -62,10 +62,13 @@ void GarbageCollector::rescueEphemeron(oop_t *ephemeron)
 bool GarbageCollector::followEphemeronsCollectingUnknowns()
 {
 	bool rescan = false;
-	while (!ephemerons.isEmpty()) {
+	while (!ephemerons.isEmpty())
+	{
 		oop_t *ephemeron = ephemerons.pop();
-		if (!(ephemeron == KnownObjects::nil)) {
-			if (this->checkReachablePropertyOf(ephemeron)) {
+		if (ephemeron != KnownObjects::nil)
+		{
+			if (this->checkReachablePropertyOf(ephemeron))
+			{
 				this->followCountStartingAt((slot_t*)ephemeron, ephemeron->_extendedSize(), 1);
 				rescan = true;
 			} else {
@@ -86,8 +89,8 @@ void GarbageCollector::rescueEphemerons()
 			ephemerons = unknowns;
 			unknowns = aux;
 		} else {
-			for (long ephemeronIndex = 0; ephemeronIndex < ephemerons.size()->_asNative();	ephemeronIndex++)
-				this->rescueEphemeron(unknowns[ephemeronIndex]);
+			for (long index = 1; index <= unknowns.size()->_asNative(); index++)
+				this->rescueEphemeron(unknowns[index]);
 			rescued = true;
 		}
 		unknowns.reset();
@@ -99,7 +102,8 @@ void GarbageCollector::rescueEphemerons()
 
 void GarbageCollector::clearPolymorphicMethodCache()
 {
-	for (int index = 1; index <= 0x4000; index++) {
+	for (int index = 1; index <= 0x4000; index++)
+	{
 		vm.globalLookupCacheAtPut(index, KnownObjects::nil);
 	}
 }
@@ -107,39 +111,53 @@ void GarbageCollector::clearPolymorphicMethodCache()
 void GarbageCollector::followStack()
 {
 	ulong *frame = this->framePointerToStartWalkingTheStack();
-	ulong nextFrame = *frame;
-	while (nextFrame) {
-		ulong start;
-		ulong size = (ulong) nextFrame - (ulong) frame / 4;
-		if (frame[1] == (ulong)*vm.debugFrameMarker) {
-			this->followCountStartingAt((slot_t*)frame, 5, 3);
-			start = 9;
-		} else
-			start = 3;
-		this->followFrameCountStartingAt((slot_t*)frame, size, start);
-		frame = (ulong *) nextFrame;
-		nextFrame = frame[0];
-	}
+	ulong endMarker = 0;
+
+	do 
+	{
+		ulong nextFrame = *frame;
+		if (nextFrame == endMarker)
+		{
+			ulong start;
+			ulong size = ((ulong)nextFrame - (ulong)frame) / 4;
+			if (frame[0] == (ulong)*vm.debugFrameMarker) // was frame[1]
+			{
+				this->followCountStartingAt((slot_t*)frame, 5, 3);
+				start = 9;
+			} else
+				start = 3;
+
+			this->followFrameCountStartingAt((slot_t*)frame, size, start);
+			frame = (ulong *) nextFrame;
+		}
+		else
+			break;
+	} while(true);
+
 }
 
-void GarbageCollector::followFrameCountStartingAt(slot_t *frame, ulong count, ulong start)
+void GarbageCollector::followFrameCountStartingAt(slot_t *frame, ulong size, ulong startIndex)
 {
-	cerr << "Need to implement " << "followCountStartingAt" << endl;
-//	followFrame: frame count: size startingAt: startIndex
-//		| start index gapMarker callbackFrame |
-//		gapMarker := 2 _asPointer _asObject.
-//		start := index := startIndex.
-//		[index < size] whileTrue: [| object |
-//			object := frame _basicAt: index.
-//			object == gapMarker ifTrue: [
-//				callbackFrame := frame _basicAt: index + 1.
-//				self follow: frame count: index - start startingAt: start.
-//				self follow: callbackFrame count: 5 startingAt: 1.
-//				index := callbackFrame _asPointer - frame _asPointer // 4 _asPointer.
-//				start := (index := index + 7) + 1].
-//			index := index + 1].
-//		self follow: frame count: size - start + 1 startingAt: start
+	oop_t *gapMarker = (oop_t*)2;
+	ulong start = startIndex;
+	ulong index = startIndex;
+	
+	while (index < size)
+	{
+		oop_t* object = frame[index-1]; // was index
+		if (object == gapMarker)
+		{
+			oop_t *callbackFrame = frame[index]; // was index+1
+			this->followCountStartingAt(frame, index - start, start);
+			this->followCountStartingAt((slot_t*)callbackFrame, 5, 1);
+			index = ((ulong)callbackFrame - (ulong)frame) / 4;
+			index = index + 7;
+			start = index + 1;
+		}
+		index = index + 1;
+	}
 
+	this->followCountStartingAt(frame, size - start + 1, start);
 }
 
 void GarbageCollector::follow(oop_t *object)

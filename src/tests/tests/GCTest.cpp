@@ -34,12 +34,7 @@ Memory *GCTest::memoryForTesting()
 
 	memory->flipper->useOwnVMVariables();
 
-	ulong *stack = new ulong[4];
-	stack[3] = 0;
-	stack[2] = (ulong)KnownObjects::nil;
-	stack[1] = (ulong)KnownObjects::nil; // might want to put a compiledMethod
-	stack[0] = (ulong)&stack[3];
-	memory->flipper->vm.framePointerToStartWalkingTheStack(stack);
+	memory->flipper->vm.framePointerToStartWalkingTheStack(mockedObjects.stackPtr());
 	*memory->flipper->vm.JIT_globalLookupCache = (oop_t*)new ulong[0x4000];
 
 	memory->rememberedSet             = mockedObjects.newArray(0x200, memory->oldSpace);
