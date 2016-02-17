@@ -189,7 +189,7 @@ void ObjectFormatTest::testObjectFlagManipulation()
 	oop_t *ephemeron = mockedObjects.newEphemeron(object, object);
 	ASSERTM("Ephemeron", ephemeron->_isActiveEphemeron());
 
-	oop_t *weakArray = mockedObjects.newWeakArray();
+	oop_t *weakArray = mockedObjects.newWeakArray(1);
 	ASSERTM("should not be Ephemeron", !weakArray->_isEphemeron());
 	ASSERTM("but should weak", weakArray->_hasWeaks());
 

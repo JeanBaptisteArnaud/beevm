@@ -116,6 +116,18 @@ oop_t* MockedObjects::newExtendedObject(const string &classname, ulong size, ush
 	return newExtendedObject(classname, size, hash, flags, defaultSpace);
 }
 
+oop_t* MockedObjects::newObject(const string &classname, ulong size, ushort hash, uchar flags, GCSpace &space)
+{
+	oop_t *result;
+
+	if (size > 255)
+		result = this->newExtendedObject(classname, size, hash, basic_header_t::Flag_isExtended | flags, space);
+	else
+		result = this->newBasicObject(classname, (uchar)size, hash, flags, space);
+
+	return result;
+}
+
 oop_t* MockedObjects::mockNil()
 {
 	//nil_hdr <0, 3445h, Flag_unseenInSpace or Flag_zeroTermOrNamed or Flag_notIndexed, UndefinedObject_behavior>
@@ -164,14 +176,10 @@ oop_t* MockedObjects::newEphemeron(oop_t *key, oop_t *value)
 }
 
 
+
 oop_t* MockedObjects::newArray(ulong slots, GCSpace *space)
 {
-	oop_t *array;
-
-	if (slots > 255)
-		array = this->newExtendedObject("Array", slots, 0, basic_header_t::Flag_isExtended | basic_header_t::Flag_unseenInSpace, *space);
-	else
-		array = this->newBasicObject("Array", (uchar)slots, 0, 1, *space);
+	oop_t *array = this->newObject("Array", slots, 0, basic_header_t::Flag_unseenInSpace, *space);
 
 	for (ulong index = 0; index <= slots; index++)
 		array->slot(index) = smiConst(index);
@@ -186,13 +194,9 @@ oop_t* MockedObjects::newArray(ulong slots)
 
 oop_t* MockedObjects::newByteArray(ulong size)
 {
-	oop_t *array;
 	uchar flags = basic_header_t::Flag_isBytes | basic_header_t::Flag_unseenInSpace;
 
-	if (size > 255)
-		array = this->newExtendedObject("ByteArray", size, 0, basic_header_t::Flag_isExtended | flags, defaultSpace);
-	else
-		array = this->newBasicObject("ByteArray", (uchar)size, 0, flags, defaultSpace);
+	oop_t *array = this->newObject("ByteArray", size, 0, flags, defaultSpace);
 
 	for (ulong index = 0; index <= size; index++)
 		array->slot(index) = smiConst(index);
@@ -203,30 +207,26 @@ oop_t* MockedObjects::newByteArray(ulong size)
 
 oop_t* MockedObjects::newString(const char *value)
 {
-	oop_t *result;
-	ulong size = strlen(value) + 1;
-
+	ulong size  = strlen(value) + 1;
 	uchar flags = basic_header_t::Flag_isBytes | basic_header_t::Flag_zeroTermOrNamed | basic_header_t::Flag_unseenInSpace;
 
-	if (size > 255)
-		result = this->newExtendedObject("String", size, 0, basic_header_t::Flag_isExtended | flags, defaultSpace);
-	else
-		result = this->newBasicObject("Array", (uchar)size, 0, flags, defaultSpace);
+	oop_t *result = this->newObject("String", size, 0, flags, defaultSpace);
 
 	strcpy_s((char*)result, size, value);
 
 	return result;
 }
 
-oop_t* MockedObjects::newWeakArray()
+oop_t* MockedObjects::newWeakArray(ulong slots)
 {
+	oop_t *array = this->newObject("Array", slots, 0, basic_header_t::Flag_isEphemeron | basic_header_t::Flag_unseenInSpace, defaultSpace);
 
-	oop_t *array = this->newExtendedObject("Array", 1024, 0, 0x81);
+	// if extended we have to unset ephemeron/weak flag or it will be confused with an ephemeron
+	array->unsetExtFlags(basic_header_t::Flag_isEphemeron);
 
-	for (int index = 0; index <= 1024; index++)
-		array->slot(index) = smiConst(index);
+	for (ulong index = 0; index <= slots; index++)
+		array->slot(index) = KnownObjects::nil;
 
-	array->setFlags(basic_header_t::Flag_isEphemeron);
 	return array;
 }
 

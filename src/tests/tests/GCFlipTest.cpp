@@ -246,25 +246,26 @@ void GCFlipTest::testGCReferencesAfterCollect()
 
 void GCFlipTest::testTombstone()
 {
-	oop_t *weakArray = fromSpace()->shallowCopy(mockedObjects.newWeakArray());
-	oop_t *toGarbage = fromSpace()->shallowCopy(mockedObjects.newArray(3));
+	oop_t *weakArray = fromSpace()->shallowCopy(mockedObjects.newWeakArray(1));
+	oop_t *object = fromSpace()->shallowCopy(mockedObjects.newObject());
 
-	weakArray->slot(0) = toGarbage;
-	weakArray->slot(1) = toGarbage;
+	weakArray->slot(0) = object;
 
-	oop_t *root = mockedObjects.newArray(3);
+	oop_t *root = mockedObjects.newArray(1);
 	root->slot(0) = weakArray;
-	ASSERTM("from space include", flipper()->arenaIncludes(toGarbage));
+
+	ASSERTM("from space include", flipper()->arenaIncludes(object));
+	
 	oop_t *tombstone = smiConst(42);
 	flipper()->addRoot(root);
 	flipper()->tombstone(tombstone);
 	flipper()->followRoots();
 	flipper()->fixWeakContainers();
-	oop_t *weak = root->slot(0);
-	ASSERTM("weak is not in the to space", toSpace()->includes(weak));
-	ASSERTM("tombstone fail", weak->slot(1) == tombstone);
-	ASSERTM("tombstone fail", weak->slot(0) == tombstone);
 
+	oop_t *weak = root->slot(0);
+
+	ASSERTM("weak is not in the to space", toSpace()->includes(weak));
+	ASSERTM("tombstone fail", weak->slot(0) == tombstone);
 }
 
 void GCFlipTest::testFollowObjectAndCheckGraph()
@@ -487,8 +488,10 @@ void GCFlipTest::testRescueEphemeronRescuedInRoots()
 	ASSERTM("old space should include key", oldSpace()->includes(key));
 }
 
-void GCFlipTest::testRescueNoEphemeron()
+void GCFlipTest::testRescueNoEphemerons()
 {
+	flipper()->rescueEphemerons();
+	ASSERTM("rescued ephemeron is not empty", flipper()->rescuedEphemerons.isEmpty());
 }
 
 void GCFlipTest::testStackCallbackTP19064()
@@ -509,10 +512,54 @@ void GCFlipTest::testStackFollowObjectNestedBlock()
 
 void GCFlipTest::testWeakContainer()
 {
+	oop_t *weakArray = fromSpace()->shallowCopy(mockedObjects.newWeakArray(1));
+	oop_t *object = fromSpace()->shallowCopy(mockedObjects.newObject());
+
+	weakArray->slot(0) = object;
+
+	oop_t *root = mockedObjects.newArray(2);
+	root->slot(0) = weakArray;
+	root->slot(1) = object;
+	
+	oop_t *tombstone = mockedObjects.newObject();
+	flipper()->addRoot(root);
+	flipper()->tombstone(tombstone);
+	flipper()->followRoots();
+	flipper()->fixWeakContainers();
+
+	oop_t *weak = root->slot(0);
+	object = root->slot(1);
+
+	ASSERTM("weak is not in the to space", toSpace()->includes(weak));
+	ASSERTM("object is not in the to space", toSpace()->includes(object));
+	ASSERTM("weak reference shouldn't have been tombstoned", weak->slot(0) != tombstone);
+	ASSERTM("weak reference shouldn't have changed", weak->slot(0) == object);
 }
 
 void GCFlipTest::testWeakContainerExtended()
 {
+	oop_t *weakArray = fromSpace()->shallowCopy(mockedObjects.newWeakArray(1024));
+	oop_t *object = fromSpace()->shallowCopy(mockedObjects.newObject());
+
+	weakArray->slot(0) = object;
+
+	oop_t *root = mockedObjects.newArray(2);
+	root->slot(0) = weakArray;
+	root->slot(1) = object;
+	
+	oop_t *tombstone = mockedObjects.newObject();
+	flipper()->addRoot(root);
+	flipper()->tombstone(tombstone);
+	flipper()->followRoots();
+	flipper()->fixWeakContainers();
+
+	oop_t *weak = root->slot(0);
+	object = root->slot(1);
+
+	ASSERTM("weak is not in the to space", toSpace()->includes(weak));
+	ASSERTM("object is not in the to space", toSpace()->includes(object));
+	ASSERTM("weak reference shouldn't have been tombstoned", weak->slot(0) != tombstone);
+	ASSERTM("weak reference shouldn't have changed", weak->slot(0) == object);
 }
 
 
@@ -536,7 +583,7 @@ cute::suite make_suite_GCFlipTest()
 
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testRescuedEphemeron));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testRescueEphemeronRescuedInRoots));
-	s.push_back(CUTE_SMEMFUN(GCFlipTest, testRescueNoEphemeron));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testRescueNoEphemerons));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackCallbackTP19064));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectAndCheckGraph));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectCallbackHole));

@@ -33,6 +33,8 @@ public:
 	oop_t* newExtendedObject(const std::string &classname, ulong size, ushort hash, uchar flags, Bee::GCSpace &space);
 	oop_t* newExtendedObject(const std::string &classname, ulong size, ushort hash, uchar flags);
 
+	oop_t* newObject(const std::string &classname, ulong size, ushort hash, uchar flags, GCSpace &space);
+
 	oop_t*  mockNil();
 	oop_t*  mockTrue();
 	oop_t*  mockFalse();
@@ -45,7 +47,7 @@ public:
 	oop_t* newArray(ulong slots, GCSpace *space);
 	oop_t* newByteArray(ulong slots);
 	oop_t* newString(const char *value);
-	oop_t* newWeakArray();
+	oop_t* newWeakArray(ulong slots);
 	oop_t* newEphemeron(oop_t *key, oop_t *value);
 
 	GCSpace setDefaultSpace(GCSpace *newSpace);

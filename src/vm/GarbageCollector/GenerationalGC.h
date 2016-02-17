@@ -1,7 +1,7 @@
 /*
  * GenerationalGC.h
  *
- *  Created on: 18 d�c. 2015
+ *  Created on: 18 dic. 2015
  *      Author: Arnaud Jean-Baptiste
  */
 

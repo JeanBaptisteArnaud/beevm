@@ -43,7 +43,7 @@ public:
 	void testRescuedEphemeron();
 	void testRescuedEphemeronNoRescuedByValue();
 	void testRescueEphemeronRescuedInRoots();
-	void testRescueNoEphemeron();
+	void testRescueNoEphemerons();
 
 	void testStackCallbackTP19064();
 	void testStackFollowObjectAndCheckGraph();
