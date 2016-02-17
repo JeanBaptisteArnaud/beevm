@@ -17,7 +17,12 @@ class GCSpaceInfo
 {
 public:
 	GCSpaceInfo();
-	GCSpaceInfo(ulong *address, ulong size);
+	GCSpaceInfo(ulong address, ulong size);
+
+	static GCSpaceInfo newSized(ulong size);
+	static GCSpaceInfo currentTo();
+	static GCSpaceInfo currentFrom();
+	static GCSpaceInfo old();
 
 	unsigned short shortAt(ulong);
 	ulong * at(ulong);
@@ -39,13 +44,9 @@ public:
 	void freeMock();
 
 
-	static GCSpaceInfo newSized(ulong size);
-	static GCSpaceInfo currentTo();
-	static GCSpaceInfo currentFrom();
-	static GCSpaceInfo old();
 
 //protected:
-	unsigned char *contents;
+	uchar *contents;
 	ulong sizeInBytes;
 
 };

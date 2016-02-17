@@ -37,7 +37,7 @@ public:
 
 	void fixWeakContainers();
 
-protected:
+//protected:
 	void addWeakContainer (oop_t *object);
 	void loadSpaces();
 	void initLocals();

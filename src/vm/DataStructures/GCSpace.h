@@ -67,6 +67,7 @@ public:
 	int percentageOfCommitedUsed();
 
 	bool includes(oop_t *object);
+	bool isReferredBy(oop_t *object);
 
 	
 	ulong* _commit  (ulong limit, ulong delta);

@@ -23,7 +23,7 @@ ulong* VM()
 	if (!address)
 		osError();
 
-	GCSpaceInfo info = GCSpaceInfo(address, size);
+	GCSpaceInfo info = GCSpaceInfo((ulong)address, size);
 	
 	GCSpace *space   = new GCSpace();
 	space->loadFrom(info);

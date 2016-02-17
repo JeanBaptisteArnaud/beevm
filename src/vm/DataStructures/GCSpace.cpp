@@ -91,6 +91,21 @@ bool GCSpace::includes(oop_t *object)
 			&& (ulong) object < (ulong) this->commitedLimit);
 }
 
+bool GCSpace::isReferredBy(oop_t *object)
+{
+	if (object->isSmallInteger())
+		return false;
+
+	ulong size = object->_pointersSize();
+	for (long i = -1; i < (long)size - 1; i++)
+	{
+		oop_t *slot = object->slot(i);
+		if (!slot->isSmallInteger() && this->includes(slot))
+			return true;
+	}
+	return false;
+}
+
 void GCSpace::setBase(ulong *localBase)
 {
 	base = localBase;

@@ -36,7 +36,7 @@ typedef struct basic_header_t
 	static const uchar Flag_unseenInSpace = 1;
 	static const uchar Flag_generation = 2;
 	static const uchar Flag_isEphemeron = 4;
-	static const uchar Flag_isInRememberSet = 8;
+	static const uchar Flag_isInRememberedSet = 8;
 	static const uchar Flag_isBytes = 0x10;
 	static const uchar Flag_zeroTermOrNamed = 0x20;
 	static const uchar Flag_notIndexed = 0x40;
@@ -111,7 +111,8 @@ public:
 	ulong _sizeInBytes();
 	ulong _headerSizeInBytes();
 
-	ulong  _strongPointersSize();
+	ulong _pointersSize();
+	ulong _strongPointersSize();
 
 	// flags
 	bool _isBytes();

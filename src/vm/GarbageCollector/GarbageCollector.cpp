@@ -195,7 +195,7 @@ void GarbageCollector::tombstone(oop_t *object)
 void GarbageCollector::forgetNativeObjects()
 {
 	cerr << "Need to implement " << "forgetNativeObjects" << endl;
-//	rememberSet forget.
+//	rememberedSet forget.
 //	literalsReferences forget.
 //	rescuedEphemerons forget.
 //	classCheckReferences forget.

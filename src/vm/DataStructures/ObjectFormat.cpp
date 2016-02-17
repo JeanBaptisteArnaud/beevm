@@ -102,12 +102,20 @@ ulong oop_t::_headerSizeInBytes()
 	}
 }
 
+ulong oop_t::_pointersSize()
+{
+	if (this->_isBytes())
+		return 1;
+	else
+		return 1 + this->_size();
+}
+
 ulong oop_t::_strongPointersSize()
 {
 	if (this->_isBytes() || this->_hasWeaks())
 		return 1;
 	else
-		return (1 + this->_size());
+		return 1 + this->_size();
 }
 
 
@@ -196,17 +204,17 @@ bool oop_t::_isZeroTerminated()
 
 bool oop_t::_isInRememberedSet()
 {
-	return this->testFlags(basic_header_t::Flag_isInRememberSet);
+	return this->testFlags(basic_header_t::Flag_isInRememberedSet);
 }
 
 void oop_t::_beNotInRememberedSet()
 {
-	this->unsetFlags(basic_header_t::Flag_isInRememberSet);
+	this->unsetFlags(basic_header_t::Flag_isInRememberedSet);
 }
 
 void oop_t::_beInRememberedSet()
 {
-	this->setFlags(basic_header_t::Flag_isInRememberSet);
+	this->setFlags(basic_header_t::Flag_isInRememberedSet);
 }
 
 

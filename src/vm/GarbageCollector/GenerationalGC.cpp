@@ -90,7 +90,7 @@ void GenerationalGC::setUpNonLocals()
 void GenerationalGC::doCollect()
 {
 	
-	this->purgeLiteralsReference();
+	this->purgeLiteralsReferences();
 	this->purgeRememberedSet();
 	this->followCodeCacheReferences();
 	this->followRoots();
@@ -115,8 +115,7 @@ void GenerationalGC::addRoot(oop_t *object)
 
 bool GenerationalGC::hasToPurge(oop_t *object)
 {
-	cerr << "hasToPurge stub" << endl;
-	return false;
+	return 	this->arenaIncludes(object) || !fromSpace.isReferredBy(object);
 }
 
 void GenerationalGC::holdReferenceTo(oop_t* object)
@@ -153,24 +152,6 @@ void GenerationalGC::someEphemeronsRescued()
 	this->holdReferenceTo(rescuedEphemerons.contents);
 }
 
-void GenerationalGC::purgeLiteralsReference()
-{
-	long kept = 0;
-	ulong offset;
-	oop_t *literal;
-	for (long index = 1; index < literalsReferences.size()->_asNative(); index = index + 2)
-	{
-		literal = literalsReferences[index];
-		if (this->arenaIncludes(literal))
-		{
-			kept = kept + 2;
-			offset = (ulong) literalsReferences[index + 1];
-			literalsReferences[kept - 1] = literal;
-			literalsReferences[kept] = (oop_t*) offset;
-		}
-	}
-}
-
 void GenerationalGC::fixReferencesOrSetTombstone(oop_t * weakContainer)
 {
 	for (ulong index = 0; index < weakContainer->_size(); index++) // was index = 1
@@ -188,6 +169,26 @@ void GenerationalGC::fixReferencesOrSetTombstone(oop_t * weakContainer)
 	}
 }
 
+void GenerationalGC::purgeLiteralsReferences()
+{
+	long kept = 0;
+	ulong offset;
+	oop_t *literal;
+	for (long index = 1; index <= literalsReferences.size()->_asNative(); index = index + 2)
+	{
+		literal = literalsReferences[index];
+		if (this->arenaIncludes(literal))
+		{
+			kept = kept + 2;
+			offset = (ulong) literalsReferences[index + 1];
+			literalsReferences[kept - 1] = literal;
+			literalsReferences[kept] = (oop_t*) offset;
+		}
+	}
+
+	literalsReferences.size(smiConst(kept));
+}
+
 void GenerationalGC::purgeRememberedSet()
 {
 	long kept = 0;
@@ -199,11 +200,18 @@ void GenerationalGC::purgeRememberedSet()
 		{
 			object->_beNotInRememberedSet();
 		} else {
-			rememberedSet[kept + 1] = object;
+			kept++;
+			rememberedSet[kept] = object;
 		}
-
-		rememberedSet.size(smiConst(kept));
 	}
+
+	rememberedSet.size(smiConst(kept));
+}
+
+void GenerationalGC::purgeRoots()
+{
+	this->purgeLiteralsReferences();
+	this->purgeRememberedSet();
 }
 
 void GenerationalGC::followRoots()
@@ -232,7 +240,7 @@ ulong* GenerationalGC::codeCacheReferenceAtOffset(ulong offset)
 void GenerationalGC::moveClassCheckReferences()
 {
 	oop_t *moved;
-	for (long index = 1; index < classCheckReferences.size()->_asNative(); index++)
+	for (long index = 1; index <= classCheckReferences.size()->_asNative(); index++)
 	{
 		ulong offset = (ulong) classCheckReferences[index];
 		ulong *reference = codeCacheReferenceAtOffset(offset);
@@ -291,14 +299,6 @@ bool GenerationalGC::checkReachablePropertyOf(oop_t *ephemeron)
 	return ephemeron->slot(0)->_isProxy() || !arenaIncludes(ephemeron->slot(0));
 }
 
-
-void GenerationalGC::purgeRoots()
-{
-	this->purgeLiteralsReference();
-	this->purgeRememberedSet();
-
-}
-
 void GenerationalGC::followCodeCacheReferences()
 {
 	if (vm.globalCacheHasPointersToFrom())
@@ -340,7 +340,7 @@ void GenerationalGC::updateSpacesDelta()
 
 void GenerationalGC::fixReferencesFromNativeMethods()
 {
-	for (long index = 0; index < literalsReferences.size()->_asNative(); index = index + 2)
+	for (long index = 1; index <= literalsReferences.size()->_asNative(); index = index + 2)
 	{
 		ulong literal = (ulong) literalsReferences[index];
 		ulong offset = (ulong) literalsReferences[index + 1];
@@ -353,7 +353,7 @@ void GenerationalGC::cleanRememberedSet()
 {
 	int kept = 0;
 	oop_t* object = 0;
-	for (long index = 0; index < rememberedSet.size()->_asNative(); index++)
+	for (long index = 1; index <= rememberedSet.size()->_asNative(); index++)
 	{
 		object = rememberedSet[index];
 		rememberedSet[index] = KnownObjects::nil;

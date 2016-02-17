@@ -78,7 +78,7 @@ void GCFlipTest::testCopyToFlip()
 	ASSERTM("size is different", copy->_size() == array->_size());
 	ASSERTM("first element is different", array->slot(0) == copy->slot(0));
 	ASSERTM("array are different", isSameArray(array, copy));
-	ASSERTM("oop is not in toSpace", toSpace()->includes(copy));
+	ASSERTM("copy is not in toSpace", toSpace()->includes(copy));
 	ASSERTM("remenbered set do not include copy", !(flipper()->rememberedSet.includes(copy)));
 }
 
@@ -97,7 +97,7 @@ void GCFlipTest::testCopyToOld()
 	ASSERTM("size is different", copy->_size() == array->_size());
 	ASSERTM("First Element is different", array->slot(0) == copy->slot(0));
 	ASSERTM("array are different", isSameArray(array, copy));
-	ASSERTM("oopy is not in toSpace", oldSpace()->includes(copy));
+	ASSERTM("copy is not in toSpace", oldSpace()->includes(copy));
 	ASSERTM("remmenber set do not include copy", !flipper()->rememberedSet.includes(copy));
 }
 
@@ -118,7 +118,7 @@ void GCFlipTest::testCopyToOldBug()
 	ASSERTM("size is different", copy->_size() == array->_size());
 	ASSERTM("First Element is different", array->slot(0) == copy->slot(0));
 	ASSERTM("array are different", isSameArray(array, copy));
-	ASSERTM("oopy is not in toSpace", oldSpace()->includes(copy));
+	ASSERTM("copy is not in toSpace", oldSpace()->includes(copy));
 	ASSERTM("remmenber set do not include copy", !(flipper()->rememberedSet.includes(copy)));
 
 }
@@ -150,7 +150,7 @@ void GCFlipTest::testEphemeron()
 
 	ASSERTM("To space do not include ephemeron", toSpace()->includes(ephemeron));
 	ASSERTM("Key is not in to space" , toSpace()->includes(key));
-	ASSERTM("key change" , ephemeron->slot(0) == key );
+	ASSERTM("key changed" , ephemeron->slot(0) == key );
 	ASSERTM("value not set" , toSpace()->includes(ephemeron->slot(1)) );
 }
 
@@ -167,8 +167,8 @@ void GCFlipTest::testEphemeronOnce()
 	root->slot(0) = ephemeron;
 	root->slot(1) = ephemeron;
 
-	ASSERTM("key change", ephemeron->slot(0) == key);
-	ASSERTM("value change", ephemeron->slot(1) == smiConst(2));
+	ASSERTM("key changed", ephemeron->slot(0) == key);
+	ASSERTM("value changed", ephemeron->slot(1) == smiConst(2));
 
 	flipper()->addRoot(root);
 	flipper()->tombstone(tombstone);
@@ -220,8 +220,7 @@ void GCFlipTest::testFollowObject()
 
 	ASSERTM("toUsed is not empty", toUsed);
 	ASSERTM("toUsed >= current size", toUsed < fromUsed);
-	// check the number
-	ASSERTM("calculation of pointer", (fromUsed - toUsed) == (headerBytes + padTo(7,4)) );
+	ASSERTM("from/to bytes difference is wrong", (fromUsed - toUsed) == (headerBytes + padTo(7,4)) );
 }
 
 void GCFlipTest::testGCReferencesAfterCollect()
@@ -247,7 +246,6 @@ void GCFlipTest::testGCReferencesAfterCollect()
 
 void GCFlipTest::testTombstone()
 {
-
 	oop_t *weakArray = fromSpace()->shallowCopy(mockedObjects.newWeakArray());
 	oop_t *toGarbage = fromSpace()->shallowCopy(mockedObjects.newArray(3));
 
@@ -297,11 +295,6 @@ void GCFlipTest::testFollowObjectAndCheckGraph()
 
 	toUsed = toSpace()->used();
 	fromUsed = fromSpace()->used();
-
-//		assert: fromSize - toSize = (8 + ('leaked' size roundTo: 4)) _asPointer;
-//		assert: root first first = 1;
-//		assert: root first second = 'a String';
-//		assert: root first third = #[1 2 3]
 
 	ASSERTM("toUsed is not empty", toUsed);
 	ASSERTM("toUsed >= current size", toUsed < fromUsed);
@@ -360,19 +353,166 @@ void GCFlipTest::testFollowObjectCheckGraphAndOop()
 	ASSERTM("flipper didn't save the byte array", toSpace()->includes(root->slot(0)->slot(2)));
 }
 
+void GCFlipTest::testPurgeEmptyRoots()
+{
+	flipper()->purgeRoots();
+	ASSERTM("literals should be empty", flipper()->literalsReferences.isEmpty());
+	ASSERTM("rememberedSet should be empty", flipper()->rememberedSet.isEmpty());
+}
 
 void GCFlipTest::testPurgeLiteralsWithNewObject()
 {
-	oop_t *array = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	ReferencedVMArray * rememberedSet = &(flipper()->rememberedSet);
-	//rememberedSet->add(Object); //??
-	ReferencedVMArray * literals = &(flipper()->literalsReferences);
-	literals->add(array);
-	literals->add(smiConst(2));
-	flipper()->purgeRoots();
-	ASSERTM("literals size ", literals->size()->_asNative() == 2);
-	ASSERTM("rememberedSet isEmpty", rememberedSet->isEmpty());
 
+	ReferencedVMArray *rememberedSet = &flipper()->rememberedSet;
+	ReferencedVMArray *literalsReferences = &flipper()->literalsReferences;
+
+	oop_t *anObject = fromSpace()->shallowCopy(mockedObjects.newObject());
+	rememberedSet->add(anObject);
+	literalsReferences->add(anObject);
+	literalsReferences->add(smiConst(2));
+	flipper()->purgeRoots();
+	ASSERTM("literals size", literalsReferences->size()->_asNative() == 2);
+	ASSERTM("rememberedSet should be empty", rememberedSet->isEmpty());
+}
+
+void GCFlipTest::testPurgeLiteralsWithOldObject()
+{
+	ReferencedVMArray *rememberedSet = &flipper()->rememberedSet;
+	ReferencedVMArray *literalsReferences = &flipper()->literalsReferences;
+
+	oop_t* anOldObject = mockedObjects.newObject();
+	rememberedSet->add(anOldObject);
+	literalsReferences->add(anOldObject);
+	literalsReferences->add(smiConst(2));
+	flipper()->purgeRoots();
+
+	ASSERTM("literals should be empty", literalsReferences->isEmpty());
+	ASSERTM("rememberedSet should be empty", rememberedSet->isEmpty());
+}
+
+void GCFlipTest::testRescuedEphemeron()
+{
+	oop_t *key = fromSpace()->shallowCopy(mockedObjects.newObject());
+	oop_t *ephemeron = fromSpace()->shallowCopy(mockedObjects.newEphemeron(key, smiConst(2)));
+	
+	oop_t *root = mockedObjects.newArray(1);
+	root->slot(0) = ephemeron;
+
+	oop_t *tombstone = mockedObjects.newObject();
+
+	flipper()->addRoot(root);
+	flipper()->tombstone(tombstone);
+	flipper()->followRoots();
+	flipper()->rescueEphemerons();
+
+	ASSERTM("rescued ephemeron is empty", !flipper()->rescuedEphemerons.isEmpty());
+
+	ephemeron = flipper()->rescuedEphemerons.pop();
+	key       = ephemeron->slot(0);
+	oop_t *value = ephemeron->slot(1);
+
+	ASSERTM("value is wrong" , value == smiConst(2) );
+	ASSERTM("to space does not include ephemeron", toSpace()->includes(ephemeron));
+	ASSERTM("to space does not include key" , toSpace()->includes(key));
+}
+
+void GCFlipTest::testRescuedEphemeronNoRescuedByValue()
+{
+	oop_t *key   = fromSpace()->shallowCopy(mockedObjects.newObject());
+	oop_t *value = fromSpace()->shallowCopy(mockedObjects.newObject());
+	oop_t *ephemeron = fromSpace()->shallowCopy(mockedObjects.newEphemeron(key, smiConst(2)));
+	
+	oop_t *root = mockedObjects.newArray(2);
+	root->slot(0) = ephemeron;
+	root->slot(1) = key;
+
+	oop_t *tombstone = mockedObjects.newObject();
+
+	flipper()->addRoot(root);
+	flipper()->tombstone(tombstone);
+	flipper()->followRoots();
+	flipper()->rescueEphemerons();
+
+	ASSERTM("rescued ephemeron is not empty", flipper()->rescuedEphemerons.isEmpty());
+
+	ephemeron = root->slot(0);
+	key       = ephemeron->slot(0);
+	value     = ephemeron->slot(1);
+
+	ASSERTM("to space does not include ephemeron", toSpace()->includes(ephemeron));
+	ASSERTM("to space does not include key" , toSpace()->includes(key));
+	ASSERTM("to space does not include value" , toSpace()->includes(value));
+}
+
+
+void GCFlipTest::testRescueEphemeronRescuedInRoots()
+{
+	oop_t *key   = fromSpace()->shallowCopy(mockedObjects.newObject());
+	oop_t *value = fromSpace()->shallowCopy(mockedObjects.newObject());
+	oop_t *ephemeron = fromSpace()->shallowCopy(mockedObjects.newEphemeron(key, smiConst(2)));
+	
+	oop_t *root = mockedObjects.newArray(1);
+	root->slot(0) = ephemeron;
+
+	oop_t *clearRescuedEphemeronsArray = flipper()->localSpace.shallowCopy(flipper()->rescuedEphemerons.contents);
+
+	oop_t *tombstone = mockedObjects.newObject();
+
+	flipper()->addRoot(root);
+	flipper()->tombstone(tombstone);
+	flipper()->followRoots();
+	flipper()->rescueEphemerons();
+	flipper()->makeRescuedEphemeronsNonWeak();
+
+	ASSERTM("rescued ephemeron is empty", !flipper()->rescuedEphemerons.isEmpty());
+	
+	flipper()->flipSpaces();
+	flipper()->rescuedEphemerons.contents = clearRescuedEphemeronsArray;
+
+	flipper()->rememberedSet[1] = KnownObjects::nil;
+	flipper()->purgeRememberedSet();
+	flipper()->followRoots();
+	flipper()->rescueEphemerons();
+
+	ASSERTM("rescued ephemeron is not empty", flipper()->rescuedEphemerons.isEmpty());
+	ASSERTM("rememberedSet shouldn't be empty", !flipper()->rememberedSet.isEmpty());
+	ASSERTM("rememberedSet shouldn't be nil", flipper()->rememberedSet[1] != KnownObjects::nil);
+
+	ephemeron = flipper()->rememberedSet[1]->slot(1);
+	key   = ephemeron->slot(0);
+	value = ephemeron->slot(1);
+
+	ASSERTM("ephemeron value is wrong", value == smiConst(2));
+	ASSERTM("old space should include ephemeron",   oldSpace()->includes(ephemeron));
+	ASSERTM("old space should include key", oldSpace()->includes(key));
+}
+
+void GCFlipTest::testRescueNoEphemeron()
+{
+}
+
+void GCFlipTest::testStackCallbackTP19064()
+{
+}
+
+void GCFlipTest::testStackFollowObjectAndCheckGraph()
+{
+}
+
+void GCFlipTest::testStackFollowObjectCallbackHole()
+{
+}
+
+void GCFlipTest::testStackFollowObjectNestedBlock()
+{
+}
+
+void GCFlipTest::testWeakContainer()
+{
+}
+
+void GCFlipTest::testWeakContainerExtended()
+{
 }
 
 
@@ -385,18 +525,29 @@ cute::suite make_suite_GCFlipTest()
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testCopyToOld));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testCopyToOldBug));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testEphemeron));
-	s.push_back(CUTE_SMEMFUN(GCFlipTest, testFollowObject));
-	s.push_back(CUTE_SMEMFUN(GCFlipTest, testGCReferencesAfterCollect));
-	s.push_back(CUTE_SMEMFUN(GCFlipTest, testTombstone));
-
-	// ==> to make it work need to do VMArrayReferenced
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testEphemeronOnce));
-
-	// bug in the Follow not all array is copied
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testFollowObject));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testFollowObjectAndCheckGraph));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testFollowObjectCheckGraphAndOop));
-	s.push_back(CUTE_SMEMFUN(GCFlipTest, testPurgeLiteralsWithNewObject));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testGCReferencesAfterCollect));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testPurgeEmptyRoots));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testPurgeLiteralsWithNewObject));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testPurgeLiteralsWithOldObject));
+
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testRescuedEphemeron));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testRescueEphemeronRescuedInRoots));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testRescueNoEphemeron));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackCallbackTP19064));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectAndCheckGraph));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectCallbackHole));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectNestedBlock));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testWeakContainer));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testWeakContainerExtended));
+
+	
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testTombstone));
+
+	
 
 	//s.push_back(CUTE(softLimitTests));
 	//s.push_back(CUTE(reservedLimitTests));

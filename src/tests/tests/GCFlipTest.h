@@ -18,19 +18,6 @@ public:
 	GCFlipTest();
 	~GCFlipTest();
 
-	void testGCCollect();
-	void testCopyToFlip();
-	void testCopyToOld();
-	void testCopyToOldBug();
-	void testEphemeron();
-	void testEphemeronOnce();
-	void testFollowObjectAndCheckGraph();
-	void testFollowObjectCheckGraphAndOop();
-	void testPurgeLiteralsWithNewObject();
-	void testFollowObject();
-	void testGCReferencesAfterCollect();
-	void testTombstone();
-
 	void setUp();
 	void tearDown();
 
@@ -38,6 +25,35 @@ public:
 	GCSpace* fromSpace();
 	GCSpace* toSpace();
 	GCSpace* oldSpace();
+
+	void testGCCollect();
+	void testCopyToFlip();
+	void testCopyToOld();
+	void testCopyToOldBug();
+	void testEphemeron();
+	void testEphemeronOnce();
+	void testFollowObject();
+	void testFollowObjectAndCheckGraph();
+	void testFollowObjectCheckGraphAndOop();
+	void testGCReferencesAfterCollect();
+	void testPurgeEmptyRoots();
+	void testPurgeLiteralsWithNewObject();
+	void testPurgeLiteralsWithOldObject();
+
+	void testRescuedEphemeron();
+	void testRescuedEphemeronNoRescuedByValue();
+	void testRescueEphemeronRescuedInRoots();
+	void testRescueNoEphemeron();
+
+	void testStackCallbackTP19064();
+	void testStackFollowObjectAndCheckGraph();
+	void testStackFollowObjectCallbackHole();
+	void testStackFollowObjectNestedBlock();
+
+	void testTombstone();
+	void testWeakContainer();
+	void testWeakContainerExtended();
+
 	Memory *memory;
 };
 

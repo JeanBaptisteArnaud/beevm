@@ -40,12 +40,12 @@ public:
 	oop_t* moveToOldOrTo(oop_t* object);
 
 
-protected:
+//protected:
 	bool hasToPurge(oop_t *object);
 	ulong* codeCacheReferenceAtOffset(ulong offset);
 	void moveToOldAll(ReferencedVMArray &objects);
 	void followRememberedSet();
-	void purgeLiteralsReference();
+	void purgeLiteralsReferences();
 	void purgeRememberedSet();
 	bool checkReachablePropertyOf(oop_t *ephemeron);
 	void followCodeCacheReferences();
