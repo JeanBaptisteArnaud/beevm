@@ -19,6 +19,8 @@ VMVariables::VMVariables()
 
 }
 
+
+
 void VMVariablesProxy::initializeForHostVM()
 {
 	debugFrameMarker = (oop_t**) 0x1001B633;
@@ -32,7 +34,13 @@ void VMVariablesProxy::initializeForHostVM()
 	GC_anyNativizedCompiledMethodInFromSpace = (bool*) 0x10041714;
 	GC_anyCompiledMethodInFromSpace  = (bool*) 0x10041710;
 	GC_spacesDelta = (ulong*)0x1004175C;
+
+	// other unused variables (for now)
+	// currentTo   0x100416C8
+	// currentFrom 0x100416B0
+	// old         0x100406B0
 }
+
 
 void VMVariablesProxy::initializeFor(VMVariables *variables)
 {

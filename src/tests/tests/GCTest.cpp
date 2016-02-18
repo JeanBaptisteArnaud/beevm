@@ -20,14 +20,10 @@ oop_t* GCTest::global(const std::string &name)
 Memory *GCTest::memoryForTesting()
 {
 	Memory *memory = new Memory();
-	memory->fromSpace = new GCSpace;
-	memory->toSpace   = new GCSpace;
-	memory->oldSpace  = new GCSpace;
+	memory->fromSpace = GCSpace::dynamicNewP( 8 * 1024);
+	memory->toSpace   = GCSpace::dynamicNewP( 8 * 1024);
+	memory->oldSpace  = GCSpace::dynamicNewP(16 * 1024);
 	
-	memory->fromSpace->loadFrom(GCSpaceInfo::newSized( 8 * 1024));
-	memory->  toSpace->loadFrom(GCSpaceInfo::newSized( 8 * 1024));
-	memory-> oldSpace->loadFrom(GCSpaceInfo::newSized(16 * 1024));
-
 	memory->flipper->memory = memory;
 	memory->flipper->localSpace.loadFrom(GCSpaceInfo::newSized(32 * 1024));
 	memory->flipper->initialize();
@@ -56,6 +52,21 @@ Memory *GCTest::memoryForTesting()
 	return memory;
 }
 
+void GCTest::releaseMemoryForTesting(Memory *memory)
+{
+	memory->fromSpace->dynamicFree();
+	memory->toSpace  ->dynamicFree();
+	memory->oldSpace ->dynamicFree();
+
+	delete memory->fromSpace;
+	delete memory->toSpace;
+	delete memory->oldSpace;
+
+	memory->flipper->localSpace.dynamicFree();
+
+	delete *memory->flipper->vm.JIT_globalLookupCache;
+	delete memory;
+}
 
 bool GCTest::isArray(oop_t *object)
 {

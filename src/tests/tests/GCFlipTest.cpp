@@ -494,12 +494,63 @@ void GCFlipTest::testRescueNoEphemerons()
 	ASSERTM("rescued ephemeron is not empty", flipper()->rescuedEphemerons.isEmpty());
 }
 
+/**
+ * usual stack shape is shown next. Most fields are nil in these mocked tests.
+ *
+ * rightmost? local
+ * ...
+ * leftmost? local
+ * current env
+ * prev env (nil)
+ * cm (nil)
+ * receiver (nil)
+ * prev framepointer
+ * return address
+ **/
+
 void GCFlipTest::testStackCallbackTP19064()
 {
+	
 }
 
 void GCFlipTest::testStackFollowObjectAndCheckGraph()
 {
+	oop_t *inEnvironmentContext = mockedObjects.newArray(1);
+	
+	oop_t *arrayInStack = fromSpace()->shallowCopy(mockedObjects.newArray(3));
+	
+	arrayInStack->slot(1) = fromSpace()->shallowCopy(mockedObjects.newString("a String"));
+	
+	fromSpace()->shallowCopy(mockedObjects.newString("leaked"));
+	
+	arrayInStack->slot(2) = fromSpace()->shallowCopy(mockedObjects.newByteArray(3));
+	arrayInStack->slot(0) = smiConst(1);
+
+	// This was done in smalltalk to make inEnvironment be put in an environment context. In C that is done manually.
+	// inEnvironmentContext->slot(0) = arrayInStack;
+
+	mockedObjects.stackAddTemporary(arrayInStack);
+	mockedObjects.stackEnvironment() = mockedObjects.newArray(1);
+	mockedObjects.stackEnvironment()->slot(0) = inEnvironmentContext;
+
+	inEnvironmentContext->slot(0) = KnownObjects::nil;
+
+	flipper()->followStack();
+
+	oop_t *movedInStack = mockedObjects.stackTemporary(0);;
+
+	ulong toUsed = toSpace()->used();
+	ulong fromUsed = fromSpace()->used();
+
+	ASSERTM("toUsed >= current size", toUsed < fromUsed);
+
+	ulong headerBytes = 8;
+	ASSERTM("from/to bytes difference is wrong", (fromUsed - toUsed) == headerBytes + padTo(7,4) );
+	ASSERTM("integer was modified", movedInStack->slot(0) == smiConst(1));
+	ASSERTM("string was modified", movedInStack->slot(1)->equalsStr("a String") );
+
+	oop_t *byteArray = mockedObjects.newByteArray(3);
+	ASSERTM("byte array was modified", movedInStack->slot(2)->equalsByteArray(byteArray));
 }
 
 void GCFlipTest::testStackFollowObjectCallbackHole()
@@ -586,10 +637,10 @@ cute::suite make_suite_GCFlipTest()
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testRescueNoEphemerons));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackCallbackTP19064));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectAndCheckGraph));
-	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectCallbackHole));
-	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectNestedBlock));
-	s.push_back(CUTE_SMEMFUN(GCFlipTest, testWeakContainer));
-	s.push_back(CUTE_SMEMFUN(GCFlipTest, testWeakContainerExtended));
+	//s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectCallbackHole));
+	//s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectNestedBlock));
+	//s.push_back(CUTE_SMEMFUN(GCFlipTest, testWeakContainer));
+	//s.push_back(CUTE_SMEMFUN(GCFlipTest, testWeakContainerExtended));
 
 	
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testTombstone));

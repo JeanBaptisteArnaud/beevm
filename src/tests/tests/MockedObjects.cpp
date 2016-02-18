@@ -7,11 +7,18 @@
 using namespace std;
 using namespace Bee;
 
+#define STACK_SIZE 16
+#define STACK_LAST (STACK_SIZE - 1)
+
 MockedObjects::MockedObjects()
 {
-	GCSpaceInfo info = GCSpaceInfo::newSized(4*1024*1024);
-	defaultSpace.loadFrom(info);
-	stackVars = 0;
+	defaultSpace.loadFrom(GCSpaceInfo::newSized(4*1024*1024));
+	stackTempIndex = STACK_LAST - 5; // -0: end of stack. -1: self. -2: cm. -3: prev env. -4: env. -5: first temp
+}
+
+MockedObjects::~MockedObjects()
+{
+	defaultSpace.dynamicFree();
 }
 
 void MockedObjects::initializeKnownObjects()
@@ -24,20 +31,31 @@ void MockedObjects::initializeKnownObjects()
 
 	Bee::initializeKnownObjects(nil, stTrue, stFalse, array, memory);
 
-	// create a fake stack with place for 1022 slots
-	stack.reserve(1024);
-	for (int i = 0; i < 1024; i++)
+	// create a fake stack with place for all slots
+	stack.reserve(STACK_SIZE);
+	for (int i = 0; i < STACK_SIZE; i++)
 		stack.push_back((ulong)KnownObjects::nil);
 
-	stack[0] = (ulong)&stack[1023];
-	stack[1023] = 0;
+	stack[0] = (ulong)&stack[STACK_LAST];
+	stack[STACK_LAST] = 0;
 }
 
-void MockedObjects::addStackVariable(oop_t **value)
+void MockedObjects::stackAddTemporary(oop_t *value)
 {
-	stack[stackVars+1] = (ulong)value;
-	stackVars++;
+	stack[stackTempIndex] = (ulong)value;
+	stackTempIndex--;
 }
+
+slot_t& MockedObjects::stackTemporary(ulong index)
+{
+	return *(slot_t*)&stack[STACK_LAST - 5 - index];
+}
+
+slot_t& MockedObjects::stackEnvironment()
+{
+	return *(slot_t*)&stack[STACK_LAST - 4];
+}
+
 
 ulong* MockedObjects::stackPtr()
 {
@@ -164,10 +182,10 @@ oop_t* MockedObjects::newObject()
 
 oop_t* MockedObjects::newEphemeron(oop_t *key, oop_t *value)
 {
-//	flags: Flag_unseenInSpace or Flag_isEphemeron or Flag_zeroTermOrNamed or 
-//	Flag_notIndexed or Flag_isExtended
+	uchar flags = basic_header_t::Flag_isEphemeron | basic_header_t::Flag_zeroTermOrNamed |
+				basic_header_t::Flag_notIndexed | basic_header_t::Flag_isExtended | basic_header_t::Flag_unseenInSpace;
 
-	oop_t *ephemeron = this->newExtendedObject("Ephemeron", 3, 0, 0xE5);
+	oop_t *ephemeron = this->newExtendedObject("Ephemeron", 3, 0, flags);
 
 	ephemeron->slot(0) = key;
 	ephemeron->slot(1) = value;

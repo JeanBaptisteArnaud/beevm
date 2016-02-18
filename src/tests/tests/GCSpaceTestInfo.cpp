@@ -15,12 +15,15 @@ GCSpaceInfo mockSpaceForTest()
 	return GCSpaceInfo::newSized(100);
 }
 
-void atTests() {
+void atTests()
+{
 	GCSpaceInfo mock = mockSpaceForTest();
 	ASSERTM("size", mock.sizeInBytes == 24);
-	for (unsigned long value = 0; value < smallPointerMaxValue; value++) {
+	for (unsigned long value = 0; value < smallPointerMaxValue; value++)
+	{
 		mock.atPut(0, (unsigned long *) value);
-		if (mock.at(0) != (unsigned long *) value) {
+		if (mock.at(0) != (unsigned long *) value)
+		{
 			ostringstream ostr;
 			ostr << "v:";
 			ostr << value;
@@ -31,13 +34,14 @@ void atTests() {
 
 		//ASSERTM("at", mock.at(0) == value);
 	}
-	mock.freeMock();
 }
 
-void base_3Tests() {
+void base_3Tests()
+{
 	GCSpaceInfo mock = mockSpaceForTest();
 	ASSERTM("size", mock.sizeInBytes == 24);
-	for (unsigned long value = 0; value < smallPointerMaxValue; value++) {
+	for (unsigned long value = 0; value < smallPointerMaxValue; value++)
+	{
 		mock.setBase_3((unsigned long *) value);
 		ostringstream ostr;
 		ostr << "commitedLimit v:";
@@ -46,13 +50,14 @@ void base_3Tests() {
 		ostr << mock.getBase_3();
 		ASSERTM(ostr.str(), (ulong)mock.getBase_3() == value);
 	}
-	mock.freeMock();
 }
 
-void commitedLimitTests() {
+void commitedLimitTests()
+{
 	GCSpaceInfo mock = mockSpaceForTest();
 	ASSERTM("size", mock.sizeInBytes == 24);
-	for (unsigned long value = 0; value < smallPointerMaxValue; value++) {
+	for (unsigned long value = 0; value < smallPointerMaxValue; value++)
+	{
 		mock.setCommitedLimit((unsigned long *)value);
 		ostringstream ostr;
 		ostr << "commitedLimit v:";
@@ -61,13 +66,14 @@ void commitedLimitTests() {
 		ostr << mock.getCommitedLimit();
 		ASSERTM(ostr.str(), (ulong)mock.getCommitedLimit() == value);
 	}
-	mock.freeMock();
 }
 
-void nextFreeTests() {
+void nextFreeTests()
+{
 	GCSpaceInfo mock = mockSpaceForTest();
 	ASSERTM("size", mock.sizeInBytes == 24);
-	for (unsigned long value = 0; value < smallPointerMaxValue; value++) {
+	for (unsigned long value = 0; value < smallPointerMaxValue; value++)
+	{
 		mock.setNextFree((unsigned long *)value);
 		ostringstream ostr;
 		ostr << "nextFree v:";
@@ -76,13 +82,14 @@ void nextFreeTests() {
 		ostr << mock.getNextFree();
 		ASSERTM(ostr.str(), (ulong)mock.getNextFree() == value);
 	}
-	mock.freeMock();
 }
 
-void reservedLimitTests() {
+void reservedLimitTests()
+{
 	GCSpaceInfo mock = mockSpaceForTest();
 	ASSERTM("size", mock.sizeInBytes == 24);
-	for (unsigned long value = 0; value < smallPointerMaxValue; value++) {
+	for (unsigned long value = 0; value < smallPointerMaxValue; value++)
+	{
 		mock.setReservedLimit((unsigned long *)value);
 		ostringstream ostr;
 		ostr << "reservedLimit v:";
@@ -91,13 +98,14 @@ void reservedLimitTests() {
 		ostr << mock.getReservedLimit();
 		ASSERTM(ostr.str(), (ulong)mock.getReservedLimit() == value);
 	}
-	mock.freeMock();
 }
 
-void softLimitTests() {
+void softLimitTests()
+{
 	GCSpaceInfo mock = mockSpaceForTest();
 	ASSERTM("size", mock.sizeInBytes == 24);
-	for (unsigned long value = 0; value < smallPointerMaxValue; value++) {
+	for (unsigned long value = 0; value < smallPointerMaxValue; value++)
+	{
 		mock.setSoftLimit((unsigned long *)value);
 		ostringstream ostr;
 		ostr << "softLimit v:";
@@ -106,13 +114,14 @@ void softLimitTests() {
 		ostr << mock.getSoftLimit();
 		ASSERTM(ostr.str(), (ulong)mock.getSoftLimit() == value);
 	}
-	mock.freeMock();
 }
 
-void baseTests() {
+void baseTests()
+{
 	GCSpaceInfo mock = mockSpaceForTest();
 	ASSERTM("size", mock.sizeInBytes == 24);
-	for (unsigned long value = 0; value < smallPointerMaxValue; value++) {
+	for (unsigned long value = 0; value < smallPointerMaxValue; value++)
+	{
 		mock.setBase((unsigned long *)value);
 		ostringstream ostr;
 		ostr << "base v:";
@@ -121,10 +130,10 @@ void baseTests() {
 		ostr << mock.getBase();
 		ASSERTM(ostr.str(), (ulong)mock.getBase() == value);
 	}
-	mock.freeMock();
 }
 
-cute::suite make_suite_GCSpaceInfoTest() {
+cute::suite make_suite_GCSpaceInfoTest()
+{
 	cute::suite s;
 	//Long time so just test it one by one
 	//s.push_back(CUTE(atTests));

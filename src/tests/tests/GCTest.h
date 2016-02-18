@@ -18,6 +18,7 @@ protected:
 	oop_t* global(const std::string &name);
 
 	Memory *memoryForTesting();
+	void releaseMemoryForTesting(Memory *memory);
 
 // helpers for originally smalltalk methods (may be polymorphic)
 

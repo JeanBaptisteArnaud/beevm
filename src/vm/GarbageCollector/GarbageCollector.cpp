@@ -116,7 +116,7 @@ void GarbageCollector::followStack()
 	do 
 	{
 		ulong nextFrame = *frame;
-		if (nextFrame == endMarker)
+		if (nextFrame != endMarker)
 		{
 			ulong start;
 			ulong size = ((ulong)nextFrame - (ulong)frame) / 4;

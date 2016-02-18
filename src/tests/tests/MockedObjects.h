@@ -16,10 +16,13 @@ class MockedObjects
 {
 public:
 	MockedObjects();
+	~MockedObjects();
 	void initializeKnownObjects();
 
 	ulong* stackPtr();
-	void addStackVariable(oop_t **value);
+	void stackAddTemporary(oop_t *value);
+	slot_t& stackTemporary(ulong index);
+	slot_t& stackEnvironment();
 
 	// globals
 	oop_t* get(const std::string &name);
@@ -62,7 +65,7 @@ public:
 	std::map<std::string, oop_t*> definitions;
 
 	std::vector<ulong> stack;
-	int stackVars;
+	int stackTempIndex;
 
 };
 

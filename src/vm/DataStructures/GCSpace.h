@@ -19,7 +19,10 @@ class GCSpace
 public:
 	GCSpace();
 
-	static GCSpace dynamicNew(ulong size);
+	static GCSpace  dynamicNew(ulong size);
+	static GCSpace* dynamicNewP(ulong size);
+
+	void dynamicFree();
 
 	// accessor
 	void debug();

@@ -30,6 +30,19 @@ GCSpace GCSpace::dynamicNew(ulong size)
 	return result;
 }
 
+GCSpace* GCSpace::dynamicNewP(ulong size)
+{
+	GCSpace *result = new GCSpace;
+	result->loadFrom(GCSpaceInfo::newSized(size));
+
+	return result;
+}
+
+void GCSpace::dynamicFree()
+{
+	this->_free(base, (ulong*)((ulong)reservedLimit - (ulong)base));
+}
+
 
 ulong* GCSpace::getBase()
 {

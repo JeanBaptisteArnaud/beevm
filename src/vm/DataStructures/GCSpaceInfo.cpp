@@ -15,11 +15,15 @@ using namespace Bee;
 GCSpaceInfo::GCSpaceInfo()
 {
 	contents = (unsigned char *) malloc(INFO_SIZE);
+	ownsContents = true;
 }
+
 
 GCSpaceInfo::GCSpaceInfo(ulong address, ulong size)
 {
 	this->contents = (unsigned char *) malloc(INFO_SIZE);
+	ownsContents = true;
+
 	this->sizeInBytes = INFO_SIZE;
 	ulong *base = (ulong*)address;
 	ulong *limit = (ulong*)(address+size);
@@ -28,6 +32,12 @@ GCSpaceInfo::GCSpaceInfo(ulong address, ulong size)
 	this->setCommitedLimit(limit);
 	this->setSoftLimit(limit);
 	this->setReservedLimit(limit);
+}
+
+GCSpaceInfo::~GCSpaceInfo()
+{
+	if (ownsContents)
+		free(contents);
 }
 
 GCSpaceInfo GCSpaceInfo::newSized(ulong size)
@@ -109,34 +119,11 @@ void GCSpaceInfo::setSoftLimit(ulong* value)
 void GCSpaceInfo::setContents(ulong *value)
 {
 	contents = (unsigned char *) value;
-}
+	
+	if (ownsContents)
+		free(contents);
 
-void GCSpaceInfo::freeMock()
-{
-	free(contents);
-
-}
-
-
-GCSpaceInfo GCSpaceInfo::currentTo()
-{
-	GCSpaceInfo returnValue = GCSpaceInfo();
-	returnValue.setContents((ulong *) 0x100416C8);
-	return returnValue;
-}
-
-GCSpaceInfo GCSpaceInfo::currentFrom()
-{
-	GCSpaceInfo returnValue = GCSpaceInfo();
-	returnValue.setContents((ulong *) 0x100416B0);
-	return returnValue;
-}
-
-GCSpaceInfo GCSpaceInfo::old()
-{
-	GCSpaceInfo returnValue = GCSpaceInfo();
-	returnValue.setContents((ulong *) 0x100406B0);
-	return returnValue;
+	ownsContents = false;
 }
 
 
