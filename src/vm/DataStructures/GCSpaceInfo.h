@@ -22,6 +22,10 @@ public:
 	GCSpaceInfo(ulong address, ulong size);
 
 	static GCSpaceInfo newSized(ulong size);
+	static GCSpaceInfo withContents(uchar *contents);
+
+	void setContents(uchar *contents);
+
 
 	unsigned short shortAt(ulong);
 	ulong * at(ulong);
@@ -33,7 +37,6 @@ public:
 	void setBase_3(ulong * );
 	ulong * getCommitedLimit();
 	void setCommitedLimit(ulong * );
-	void setContents(ulong *);
 	ulong * getNextFree();
 	void setNextFree(ulong *);
 	ulong * getReservedLimit();

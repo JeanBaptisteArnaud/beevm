@@ -28,26 +28,10 @@ public:
 	void debug();
 	ulong reservedSize();
 	ulong used();
-	ulong* getBase();
-	ulong* getNextFree();
-	ulong* getCommitedLimit();
-	ulong* getReservedLimit();
-	ulong* getRegionBase();
-	ulong* getSoftLimit();
-//	void setInfo(GCSpaceInfo gcspaceinfo); // think we don't need for now/anymore
-	void setBase(ulong * localBase);
-	void setNextFree(ulong * localNextFree);
-	void setCommitedLimit(ulong * localCommitedLimit);
-	void setReservedLimit(ulong * localReservedLimit);
-	void setSoftLimit(ulong * localSoftLimit);
-	void setRegionBase(ulong  * localRegionBase);
 	
-	void setInfo(GCSpaceInfo *info); // deprecated
-
-	void load();
-	void save();
 	void loadFrom(GCSpace &from);
 	void loadFrom(GCSpaceInfo &info);
+	void saveTo(GCSpaceInfo &info);
 	void reset();
 
 
@@ -77,17 +61,24 @@ public:
 	void   _decommit(ulong *limit, ulong *delta);
 	void   _free    (ulong *limit, ulong *delta);
 
+	ulong* getBase();
+	ulong* getNextFree();
+	ulong* getCommitedLimit();
+	ulong* getReservedLimit();
+	ulong* getRegionBase();
+	ulong* getSoftLimit();
+	void setBase(ulong * localBase);
+	void setNextFree(ulong * localNextFree);
+	void setCommitedLimit(ulong * localCommitedLimit);
+	void setReservedLimit(ulong * localReservedLimit);
+	void setSoftLimit(ulong * localSoftLimit);
+	void setRegionBase(ulong  * localRegionBase);
 
-//	GCSpace dynamicNew(ulong size);
 
 	static const ulong instVarCount = 8;
 
 
 protected:
-
-	ulong asObject(ulong *smallPointer);
-
-	GCSpaceInfo *info;
 	ulong *base;
 	ulong *nextFree;
 	ulong *commitedLimit;

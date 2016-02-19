@@ -11,6 +11,7 @@
 #include <windows.h>
 
 #include "Memory.h"
+#include "VMVariables.h"
 #include "../GarbageCollector/GenerationalGC.h"
 
 using namespace Bee;
@@ -23,7 +24,7 @@ Memory::Memory()
 
 void Memory::growIfTime()
 {
-	if (fromSpace->percentageOfCommitedUsed() > 90 )
+	if (fromSpace->percentageOfCommitedUsed() > 90)
 		this->commitMoreSpace();
 }
 
@@ -36,6 +37,25 @@ void Memory::commitMoreSpace()
 void Memory::scavengeFromSpace()
 {
 	flipper->collect();
+}
+
+void Memory::useHostVMVariables()
+{
+	flipper->useHostVMVariables();
+}
+
+void Memory::updateFromHostVM()
+{
+	fromSpace->loadFrom(VMVariablesProxy::hostVMFromSpace());
+	  toSpace->loadFrom(VMVariablesProxy::hostVMToSpace());
+	 oldSpace->loadFrom(VMVariablesProxy::hostVMOldSpace());
+}
+
+void Memory::updateToHostVM()
+{
+	fromSpace->saveTo(VMVariablesProxy::hostVMFromSpace());
+	  toSpace->saveTo(VMVariablesProxy::hostVMToSpace());
+	 oldSpace->saveTo(VMVariablesProxy::hostVMOldSpace());
 }
 
 // next methods still need checking

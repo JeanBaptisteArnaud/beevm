@@ -1,6 +1,7 @@
 
 #include "VMVariables.h"
 #include "ObjectFormat.h"
+#include "GCSpaceInfo.h"
 
 using namespace Bee;
 
@@ -35,10 +36,6 @@ void VMVariablesProxy::initializeForHostVM()
 	GC_anyCompiledMethodInFromSpace  = (bool*) 0x10041710;
 	GC_spacesDelta = (ulong*)0x1004175C;
 
-	// other unused variables (for now)
-	// currentTo   0x100416C8
-	// currentFrom 0x100416B0
-	// old         0x100406B0
 }
 
 
@@ -56,6 +53,46 @@ void VMVariablesProxy::initializeFor(VMVariables *variables)
 	GC_spacesDelta = &variables->GC_spacesDelta;
 }
 
+
+oop_t** VMVariablesProxy::hostVMRememberedSet()
+{
+	return (oop_t**)0x1004070C;
+}
+
+oop_t** VMVariablesProxy::hostVMLiteralsReferences()
+{
+	return (oop_t**)0x10040720;
+}
+
+oop_t** VMVariablesProxy::hostVMNativizedMethods()
+{
+	return (oop_t**)0x10040730;
+}
+
+oop_t** VMVariablesProxy::hostVMCodeCacheObjectReferences()
+{
+	return (oop_t**)0x100406CC;
+}
+
+oop_t** VMVariablesProxy::hostVMRescuedEphemerons()
+{
+	return (oop_t**)0x100407A8;
+}
+
+GCSpaceInfo VMVariablesProxy::hostVMFromSpace()
+{
+	return GCSpaceInfo::withContents((uchar*)0x100416B0);
+}
+
+GCSpaceInfo VMVariablesProxy::hostVMToSpace()
+{
+	return GCSpaceInfo::withContents((uchar*)0x100416C8);
+}
+
+GCSpaceInfo VMVariablesProxy::hostVMOldSpace()
+{
+	return GCSpaceInfo::withContents((uchar*)0x100406B0);
+}
 
 bool VMVariablesProxy::globalCacheHasPointersToFrom()
 {

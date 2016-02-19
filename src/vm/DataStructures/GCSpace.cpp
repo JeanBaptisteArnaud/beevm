@@ -43,37 +43,6 @@ void GCSpace::dynamicFree()
 	this->_free(base, (ulong*)((ulong)reservedLimit - (ulong)base));
 }
 
-
-ulong* GCSpace::getBase()
-{
-	return base;
-}
-
-ulong* GCSpace::getNextFree()
-{
-	return nextFree;
-}
-
-ulong* GCSpace::getCommitedLimit()
-{
-	return commitedLimit;
-}
-
-ulong* GCSpace::getReservedLimit()
-{
-	return reservedLimit;
-}
-
-ulong* GCSpace::getSoftLimit()
-{
-	return softLimit;
-}
-
-ulong* GCSpace::getRegionBase()
-{
-	return regionBase;
-}
-
 void GCSpace::loadFrom(GCSpace &space)
 {
 	this->setSoftLimit(space.getSoftLimit());
@@ -119,57 +88,11 @@ bool GCSpace::isReferredBy(oop_t *object)
 	return false;
 }
 
-void GCSpace::setBase(ulong *localBase)
-{
-	base = localBase;
-}
-
-void GCSpace::setRegionBase(ulong *localRegionBase)
-{
-	regionBase = localRegionBase;
-}
-
-void GCSpace::setNextFree(ulong *localNextFree)
-{
-	nextFree = localNextFree;
-}
-
-void GCSpace::setCommitedLimit(ulong *localCommitedLimit)
-{
-	commitedLimit = localCommitedLimit;
-}
-
-void GCSpace::setReservedLimit(ulong *localReservedLimit)
-{
-	reservedLimit = localReservedLimit;
-}
-
-void GCSpace::setSoftLimit(ulong *localSoftLimit)
-{
-	softLimit = localSoftLimit;
-}
 
 void GCSpace::release()
 {
 	_decommit(base, (ulong *) 0 );
 	_free(base, (ulong *) 0 );
-}
-
-void GCSpace::setInfo(GCSpaceInfo *localInfo)
-{
-	info = localInfo;
-}
-
-void GCSpace::load()
-{
-	regionBase = (ulong *) info->getBase();
-	base = regionBase;
-	base_3 = (ulong *) info->getBase_3();
-	commitedLimit = (ulong *) info->getCommitedLimit();
-	nextFree = (ulong *) info->getNextFree();
-
-	reservedLimit = (ulong *) info->getReservedLimit();
-	softLimit = (ulong *) info->getSoftLimit();
 }
 
 ulong GCSpace::reservedSize()
@@ -183,31 +106,14 @@ ulong GCSpace::used()
 }
 
 
-void GCSpace::save()
+void GCSpace::saveTo(GCSpaceInfo &info)
 {
-	info->setBase(base);
-	info->setBase_3(base_3);
-	info->setCommitedLimit(commitedLimit);
-	info->setNextFree(nextFree);
-	info->setReservedLimit(reservedLimit);
-	info->setSoftLimit(softLimit);
-}
-
-void GCSpace::debug()
-{
-	cerr << "regionBase:" << regionBase << endl;
-	cerr << "Base:" << base << endl;
-	cerr << "Base_3:" << base_3 << endl;
-	cerr << "commitedLimit:" << commitedLimit << endl;
-	cerr << "nextFree:" << nextFree << endl;
-	cerr << "reservedLimit:" << reservedLimit << endl;
-	cerr << "softLimit:" << softLimit << endl;
-}
-
-
-ulong GCSpace::asObject(ulong *smallPointer)
-{
-	return (ulong)((oop_t*)smallPointer)->_asObject();
+	info.setBase(base);
+	info.setBase_3(base_3);
+	info.setCommitedLimit(commitedLimit);
+	info.setNextFree(nextFree);
+	info.setReservedLimit(reservedLimit);
+	info.setSoftLimit(softLimit);
 }
 
 
@@ -219,9 +125,9 @@ void GCSpace::dispenseReservedSpace()
 ulong* GCSpace::allocateIfPossible(ulong size)
 {
 // lockedAllocate probably do not need the mutex
-	ulong answer = asObject(this->getNextFree());
+	ulong answer = asUObject(this->getNextFree());
 	ulong next = answer + size;
-	if (next > asObject(softLimit))
+	if (next > asUObject(softLimit))
 		return 0;
 	
 	this->setNextFree((ulong *)pointerConst(next));
@@ -232,9 +138,9 @@ ulong* GCSpace::allocateIfPossible(ulong size)
 ulong* GCSpace::allocateUnsafe(ulong size)
 {
 // lockedAllocate probably do not need the mutex
-	ulong answer = asObject(this->getNextFree());
+	ulong answer = asUObject(this->getNextFree());
 	ulong next = answer + size;
-	if (next > asObject(commitedLimit))
+	if (next > asUObject(commitedLimit))
 		this->commitMoreMemory();
 	this->setNextFree((ulong*)pointerConst(next));
 	return (ulong*)answer;
@@ -297,10 +203,10 @@ void GCSpace::commitMoreMemory()
 		error("out of reserved space");
 
 	ulong padding = 0x8000;
-	ulong newLimit = (asObject(nextFree) + padding) & -0x1000;
+	ulong newLimit = (asUObject(nextFree) + padding) & -0x1000;
 
-	ulong limit = this->commitSized(newLimit - asObject(regionBase));
-	if (limit != (asObject(regionBase) & -0x1000))
+	ulong limit = this->commitSized(newLimit - asUObject(regionBase));
+	if (limit != (asUObject(regionBase) & -0x1000))
 		error("commiting more memory failed");
 	
 	commitedLimit = (ulong*)pointerConst(newLimit);
@@ -323,17 +229,16 @@ void GCSpace::commitMoreMemoryIfNeeded()
 
 ulong GCSpace::commitSized(ulong total)
 {
-	return (ulong)_commit(asObject(regionBase), total);
+	return (ulong)_commit(asUObject(regionBase), total);
 }
 
 ulong GCSpace::commitDelta(ulong delta)
 {
-	return (ulong)_commit(asObject(commitedLimit), delta);
+	return (ulong)_commit(asUObject(commitedLimit), delta);
 }
 
 void GCSpace::decommitSlack()
 {
-// -0x1000 === (long) 0xFFFFFC18
 	ulong limit  = (long)this->getNextFree();
 	ulong padded =  (limit + 0xFFF) && 0xFFFFF000;
 	long delta = (long)this->getCommitedLimit() - padded;
@@ -350,7 +255,7 @@ void GCSpace::decommitSlack()
 
 int GCSpace::percentageOfCommitedUsed()
 {
-	return (int)(double(used()) * 100 / asObject(commitedLimit));
+	return (int)(double(used()) * 100 / asUObject(commitedLimit));
 }
 
 
@@ -368,4 +273,68 @@ void GCSpace::_free(ulong * limit, ulong *delta)
 {
 	VirtualFree((void *) limit, (ulong) delta, MEM_RELEASE);
 }
+
+
+ulong* GCSpace::getBase()
+{
+	return base;
+}
+
+ulong* GCSpace::getNextFree()
+{
+	return nextFree;
+}
+
+ulong* GCSpace::getCommitedLimit()
+{
+	return commitedLimit;
+}
+
+ulong* GCSpace::getReservedLimit()
+{
+	return reservedLimit;
+}
+
+ulong* GCSpace::getSoftLimit()
+{
+	return softLimit;
+}
+
+ulong* GCSpace::getRegionBase()
+{
+	return regionBase;
+}
+
+
+
+void GCSpace::setBase(ulong *localBase)
+{
+	base = localBase;
+}
+
+void GCSpace::setRegionBase(ulong *localRegionBase)
+{
+	regionBase = localRegionBase;
+}
+
+void GCSpace::setNextFree(ulong *localNextFree)
+{
+	nextFree = localNextFree;
+}
+
+void GCSpace::setCommitedLimit(ulong *localCommitedLimit)
+{
+	commitedLimit = localCommitedLimit;
+}
+
+void GCSpace::setReservedLimit(ulong *localReservedLimit)
+{
+	reservedLimit = localReservedLimit;
+}
+
+void GCSpace::setSoftLimit(ulong *localSoftLimit)
+{
+	softLimit = localSoftLimit;
+}
+
 

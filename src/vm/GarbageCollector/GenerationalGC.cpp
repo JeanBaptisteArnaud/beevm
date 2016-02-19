@@ -60,14 +60,7 @@ void GenerationalGC::initNonLocals()
 	nativizedMethods.setSpace(&oldSpace);
 	classCheckReferences.setSpace(&oldSpace);
 	rescuedEphemerons.setSpace(&oldSpace);
-
-	rememberedSet       .setReferer(&memory->rememberedSet);
-	literalsReferences  .setReferer(&memory->literalsReferences);
-	nativizedMethods    .setReferer(&memory->nativizedMethods);
-	classCheckReferences.setReferer(&memory->codeCacheObjectReferences);
-	rescuedEphemerons   .setReferer(&memory->rescuedEphemerons);
 }
-
 
 void GenerationalGC::setUpLocals()
 {
@@ -89,7 +82,6 @@ void GenerationalGC::setUpNonLocals()
 
 void GenerationalGC::doCollect()
 {
-	
 	this->purgeLiteralsReferences();
 	this->purgeRememberedSet();
 	this->followCodeCacheReferences();

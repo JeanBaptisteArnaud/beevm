@@ -33,11 +33,24 @@ GarbageCollector::GarbageCollector()
 void GarbageCollector::useOwnVMVariables()
 {
 	vm.initializeFor(new VMVariables());
+
+	rememberedSet       .setReferer(&memory->rememberedSet);
+	literalsReferences  .setReferer(&memory->literalsReferences);
+	nativizedMethods    .setReferer(&memory->nativizedMethods);
+	classCheckReferences.setReferer(&memory->codeCacheObjectReferences);
+	rescuedEphemerons   .setReferer(&memory->rescuedEphemerons);
 }
 
 void GarbageCollector::useHostVMVariables()
 {
 	vm.initializeForHostVM();
+
+	rememberedSet       .setReferer(vm.hostVMRememberedSet());
+	literalsReferences  .setReferer(vm.hostVMLiteralsReferences());
+	nativizedMethods    .setReferer(vm.hostVMNativizedMethods());
+	classCheckReferences.setReferer(vm.hostVMCodeCacheObjectReferences());
+	rescuedEphemerons   .setReferer(vm.hostVMRescuedEphemerons());
+
 }
 
 void GarbageCollector::updateFromMemory()

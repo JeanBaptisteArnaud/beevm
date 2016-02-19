@@ -28,17 +28,15 @@ public:
 	void createPinnedSpace();
 	void releaseEverything();
 
+	// to interface with host vm
+	void useHostVMVariables();
+	void updateFromHostVM();
+	void updateToHostVM();
+
 //protected:
-// up to date
 	void scavengeFromSpace();
 	void growIfTime();
 	void commitMoreSpace();
-
-
-// for testing only
-//	void addSpace(GCSpace *aSpace);
-//	void addCollectedSpace(GCSpace *aSpace);
-
 
 	static const ulong instVarCount = 8;
 

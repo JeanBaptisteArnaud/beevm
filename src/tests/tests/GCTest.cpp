@@ -23,15 +23,6 @@ Memory *GCTest::memoryForTesting()
 	memory->fromSpace = GCSpace::dynamicNewP( 8 * 1024);
 	memory->toSpace   = GCSpace::dynamicNewP( 8 * 1024);
 	memory->oldSpace  = GCSpace::dynamicNewP(16 * 1024);
-	
-	memory->flipper->memory = memory;
-	memory->flipper->localSpace.loadFrom(GCSpaceInfo::newSized(32 * 1024));
-	memory->flipper->initialize();
-
-	memory->flipper->useOwnVMVariables();
-
-	memory->flipper->vm.framePointerToStartWalkingTheStack(mockedObjects.stackPtr());
-	*memory->flipper->vm.JIT_globalLookupCache = (oop_t*)new ulong[0x4000];
 
 	memory->rememberedSet             = mockedObjects.newArray(0x200, memory->oldSpace);
 	memory->literalsReferences        = mockedObjects.newArray(0x200, memory->oldSpace);
@@ -46,6 +37,16 @@ Memory *GCTest::memoryForTesting()
 	memory->rescuedEphemerons        ->slot(0) = smiConst(2); // size = 0
 
 	memory->residueObject = mockedObjects.newObject();
+
+	memory->flipper->memory = memory;
+	memory->flipper->localSpace.loadFrom(GCSpaceInfo::newSized(32 * 1024));
+	memory->flipper->initialize();
+
+	memory->flipper->useOwnVMVariables();
+
+	memory->flipper->vm.framePointerToStartWalkingTheStack(mockedObjects.stackPtr());
+	*memory->flipper->vm.JIT_globalLookupCache = (oop_t*)new ulong[0x4000];
+
 
 	memory->flipper->updateFromMemory();
 

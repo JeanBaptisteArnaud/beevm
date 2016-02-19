@@ -40,6 +40,13 @@ GCSpaceInfo::~GCSpaceInfo()
 		free(contents);
 }
 
+GCSpaceInfo GCSpaceInfo::withContents(uchar *contents)
+{
+	GCSpaceInfo result;
+	result.setContents(contents);
+	return result;
+}
+
 GCSpaceInfo GCSpaceInfo::newSized(ulong size)
 {
 	ulong align = size + 0xFFF;
@@ -47,6 +54,19 @@ GCSpaceInfo GCSpaceInfo::newSized(ulong size)
 	ulong final = (address + 0xFFF) & ~0xFFF;
 	return GCSpaceInfo (final, size);
 }
+
+void GCSpaceInfo::setContents(uchar *value)
+{
+	contents = value;
+	
+	if (ownsContents)
+		free(contents);
+
+	ownsContents = false;
+}
+
+
+
 
 ulong * GCSpaceInfo::at(ulong offset)
 {
@@ -59,6 +79,7 @@ void GCSpaceInfo::atPut(ulong offset, ulong *value)
 	ulong* position = (ulong *)&contents[offset];
 	*position = (ulong)value & ~1;
 }
+
 
 ulong* GCSpaceInfo::getBase()
 {
@@ -116,15 +137,6 @@ void GCSpaceInfo::setSoftLimit(ulong* value)
 	this->atPut(0, value);
 }
 
-void GCSpaceInfo::setContents(ulong *value)
-{
-	contents = (unsigned char *) value;
-	
-	if (ownsContents)
-		free(contents);
-
-	ownsContents = false;
-}
 
 
 

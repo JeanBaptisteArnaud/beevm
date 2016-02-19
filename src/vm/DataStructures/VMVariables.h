@@ -6,6 +6,8 @@
 namespace Bee
 {
 
+class GCSpaceInfo;
+
 class VMVariables
 {
 public:
@@ -48,6 +50,16 @@ public:
 	oop_t* globalLookupCacheAt(ulong index);
 	void globalLookupCacheAtPut(ulong index, oop_t *value);
 
+	// some host vm addresses
+	oop_t** hostVMRememberedSet();
+	oop_t** hostVMLiteralsReferences();
+	oop_t** hostVMNativizedMethods();
+	oop_t** hostVMCodeCacheObjectReferences();
+	oop_t** hostVMRescuedEphemerons();
+
+	static GCSpaceInfo hostVMFromSpace();
+	static GCSpaceInfo hostVMToSpace();
+	static GCSpaceInfo hostVMOldSpace();
 
 	oop_t**  debugFrameMarker;
 
