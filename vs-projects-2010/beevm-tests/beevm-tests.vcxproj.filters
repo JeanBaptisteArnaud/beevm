@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="DataStructures">
+      <UniqueIdentifier>{3eea71fd-30b9-4947-83ac-553ed6709bbf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GarbageCollector">
+      <UniqueIdentifier>{dc2adae5-b0cd-47d5-9384-ebe1a8a35c6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{3f3cbc1d-acd8-4865-b596-f5528673f893}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\vm\GarbageCollector\GarbageCollector.cpp">
+      <Filter>GarbageCollector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\GCSpace.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\GCSpaceInfo.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\Memory.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\ReferencedVMArray.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\VMArray.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tests\tests\GCSpaceTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tests\tests\GCSpaceTestInfo.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tests\tests\GCTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tests\tests\MemoryTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tests\tests\VMArrayTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\GarbageCollector\GenerationalGC.cpp">
+      <Filter>GarbageCollector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\Bee.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tests\main.cpp" />
+    <ClCompile Include="..\..\src\vm\DataStructures\KnownObjects.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\ObjectFormat.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tests\tests\GCFlipTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tests\tests\MockedObjects.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tests\tests\ObjectFormatTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\VMVariables.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\GarbageCollector\MarkAndCompactGC.cpp">
+      <Filter>GarbageCollector</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\vm\DataStructures\VMArray.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\Memory.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\ReferencedVMArray.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\GarbageCollector\GenerationalGC.h">
+      <Filter>GarbageCollector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\GCSpaceInfo.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\GCSpace.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\GarbageCollector\GarbageCollector.h">
+      <Filter>GarbageCollector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\Bee.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\tests\tests\GCTest.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\tests\tests\GCSpaceTest.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\KnownObjects.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\tests\tests\MockedObjects.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\ObjectFormat.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\tests\tests\GCFlipTest.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\tests\tests\ObjectFormatTest.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\tests\tests\VMArrayTest.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\VMVariables.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\GarbageCollector\MarkAndCompactGC.h">
+      <Filter>GarbageCollector</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
