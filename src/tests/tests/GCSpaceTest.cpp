@@ -96,6 +96,8 @@ void GCSpaceTest::testExtendedGrowingTo()
 	ASSERTM("size of copy is wrong", copy->_size() == 2048);
 	ASSERTM("copy is not consistent (first element diverge)", array->slot(0) == copy->slot(0));
 	ASSERTM("copy is not consistent (last element diverge)",  array->slot(1023) == copy->slot(1023));
+	for (int i = 1024; i < 2048; i++)
+		ASSERTM("copy is not nilled right",  copy->slot(i) == KnownObjects::nil);
 
 	ASSERTM("value not correctly copied", checkValuenewArray1024(copy));
 //	ASSERTM("The moon is red",

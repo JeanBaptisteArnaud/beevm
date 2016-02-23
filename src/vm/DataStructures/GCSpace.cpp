@@ -189,7 +189,7 @@ oop_t* GCSpace::shallowCopyGrowingTo(oop_t *array, ulong newSize)
 	
 	copy->slot(-4) = array->slot(-2);
 	
-	for (ulong index = (array->_size() + 1); index <= newSize; index++)
+	for (ulong index = array->_size(); index < newSize; index++)
 	{
 		copy->slot(index) = KnownObjects::nil;
 	}
