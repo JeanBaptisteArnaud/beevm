@@ -28,6 +28,9 @@ public:
 
 	GenerationalGC * flipper;
 	void testAllocate();
+	void testDoesNotIncludeSmallIntegers();
+	void testIncludesFirstObject();
+	void testIncludesLastObject();
 	void testGCSpace();
 	void testExtendedGrowingTo();
 	void testGrow();

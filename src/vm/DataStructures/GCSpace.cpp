@@ -65,12 +65,14 @@ void GCSpace::loadFrom(GCSpaceInfo &info)
 
 void GCSpace::reset()
 {
+	this->setNextFree(this->getBase());
 }
 
 bool GCSpace::includes(oop_t *object)
 {
-	return ((ulong) object > (ulong) this->base
-			&& (ulong) object < (ulong) this->commitedLimit);
+	return !object->isSmallInteger() &&
+	       asUObject(this->base) <= (ulong)object &&
+	       (ulong)object         <= asUObject(this->commitedLimit);
 }
 
 bool GCSpace::isReferredBy(oop_t *object)
@@ -119,7 +121,7 @@ void GCSpace::saveTo(GCSpaceInfo &info)
 
 void GCSpace::dispenseReservedSpace()
 {
-	this->nextFree = this->commitedLimit;
+	this->softLimit = this->commitedLimit;
 }
 
 ulong* GCSpace::allocateIfPossible(ulong size)
@@ -151,18 +153,18 @@ oop_t* GCSpace::objectFromBuffer(ulong *buffer, ulong headerSize)
 	return (oop_t*) ((ulong)buffer + headerSize);
 }
 
-oop_t* GCSpace::shallowCopy(oop_t *array)
+oop_t* GCSpace::shallowCopy(oop_t *object)
 {
-	ulong size = array->_sizeInBytes();
-	ulong headerSize = array->_headerSizeInBytes();
+	ulong size = object->_sizeInBytes();
+	ulong headerSize = object->_headerSizeInBytes();
 	ulong *allocation = this->allocateUnsafe(headerSize + size);
 	oop_t *copy = objectFromBuffer(allocation, headerSize);
 
 	long first = -(long)(headerSize/4);
-	long last  = array->_size();
+	long last  = size / 4;
 	for (int index = first; index < last; index++)
 	{
-		copy->slot(index) = array->slot(index);
+		copy->slot(index) = object->slot(index);
 	}
 
 	copy->_beNotInRememberedSet();
@@ -224,7 +226,7 @@ void GCSpace::commitMoreMemoryIfNeeded()
 	if (!localAddress)
 		osError();
 
-	commitedLimit = (ulong *) newLimit;
+	commitedLimit = (ulong *)pointerConst(newLimit);
 }
 
 ulong GCSpace::commitSized(ulong total)
@@ -337,4 +339,13 @@ void GCSpace::setSoftLimit(ulong *localSoftLimit)
 	softLimit = localSoftLimit;
 }
 
-
+void GCSpace::print(ostream &stream)
+{
+	stream << "Base: " << base << "\t";
+	stream << "nextFree:" << nextFree << "\t";
+	stream << "softLimit:" << softLimit << "\t";
+	stream << "commitedLimit:" << commitedLimit << "\t";
+	stream << "reservedLimit:" << reservedLimit;
+//	stream << "regionBase:" << regionBase << endl;
+//	stream << "Base_3:" << base_3 << endl;
+}

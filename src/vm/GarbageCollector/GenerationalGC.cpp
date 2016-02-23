@@ -23,9 +23,8 @@ GenerationalGC::GenerationalGC()
 
 void GenerationalGC::initialize()
 {
-	this->initLocals(); // need to be change
-	this->initNonLocals(); // need to be change
-
+	this->initLocals();
+	this->initNonLocals();
 }
 
 GenerationalGC::~GenerationalGC()
@@ -41,16 +40,23 @@ void GenerationalGC::collect()
 
 	this->doCollect();
 
+	this->updateToMemory();
+
 	//Thinks we do not need that:: this->addInterrupt();
 	//Thinks we do not need that:: this->saveSpaces();
 }
 
 void GenerationalGC::initLocals()
 {
-	stack.setSpace(&localSpace);
-	unknowns.setSpace(&localSpace);
-	ephemerons.setSpace(&localSpace);
-	weakContainers.setSpace(&localSpace);
+	//stack.setSpace(&localSpace);
+	//unknowns.setSpace(&localSpace);
+	//ephemerons.setSpace(&localSpace);
+	//weakContainers.setSpace(&localSpace);
+	stack.setSpace(&oldSpace);
+	unknowns.setSpace(&oldSpace);
+	ephemerons.setSpace(&oldSpace);
+	weakContainers.setSpace(&oldSpace);
+
 }
 
 void GenerationalGC::initNonLocals()
@@ -164,7 +170,7 @@ void GenerationalGC::fixReferencesOrSetTombstone(oop_t * weakContainer)
 void GenerationalGC::purgeLiteralsReferences()
 {
 	long kept = 0;
-	ulong offset;
+	oop_t *offset;
 	oop_t *literal;
 	for (long index = 1; index <= literalsReferences.size()->_asNative(); index = index + 2)
 	{
@@ -172,9 +178,9 @@ void GenerationalGC::purgeLiteralsReferences()
 		if (this->arenaIncludes(literal))
 		{
 			kept = kept + 2;
-			offset = (ulong) literalsReferences[index + 1];
+			offset = literalsReferences[index + 1];
 			literalsReferences[kept - 1] = literal;
-			literalsReferences[kept] = (oop_t*) offset;
+			literalsReferences[kept] = offset;
 		}
 	}
 
@@ -224,9 +230,9 @@ ulong * GenerationalGC::framePointerToStartWalkingTheStack()
 	return vm.framePointerToStartWalkingTheStack();
 }
 
-ulong* GenerationalGC::codeCacheReferenceAtOffset(ulong offset)
+oop_t** GenerationalGC::codeCacheReferenceAtOffset(ulong offset)
 {
-	return (ulong*) (vm.codeCache() + offset);
+	return (oop_t**) ((ulong)vm.codeCache() + offset);
 }
 
 void GenerationalGC::moveClassCheckReferences()
@@ -234,18 +240,18 @@ void GenerationalGC::moveClassCheckReferences()
 	oop_t *moved;
 	for (long index = 1; index <= classCheckReferences.size()->_asNative(); index++)
 	{
-		ulong offset = (ulong) classCheckReferences[index];
-		ulong *reference = codeCacheReferenceAtOffset(offset);
-		oop_t *object = (oop_t*) *reference;
+		ulong offset = classCheckReferences[index]->_asNative();
+		oop_t **reference = codeCacheReferenceAtOffset(offset);
+		oop_t *object = *reference;
 		if (this->arenaIncludes(object))
 		{
 			if (object->_isProxy())
-		{
+			{
 				moved = object->_getProxee();
 			} else {
 				moved = moveToOldSpace(object);
 			}
-			*reference = (ulong) moved;
+			*reference = moved;
 		}
 	}
 
@@ -334,9 +340,9 @@ void GenerationalGC::fixReferencesFromNativeMethods()
 {
 	for (long index = 1; index <= literalsReferences.size()->_asNative(); index = index + 2)
 	{
-		ulong literal = (ulong) literalsReferences[index];
-		ulong offset = (ulong) literalsReferences[index + 1];
-		ulong *reference = codeCacheReferenceAtOffset(offset);
+		oop_t *literal = literalsReferences[index];
+		ulong offset = literalsReferences[index + 1]->_asNative();
+		oop_t **reference = codeCacheReferenceAtOffset(offset);
 		*reference = literal;
 	}
 }

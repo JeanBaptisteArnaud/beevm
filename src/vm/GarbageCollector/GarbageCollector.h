@@ -20,7 +20,10 @@
 using namespace std;
 namespace Bee {
 
-class GarbageCollector {
+class Memory;
+
+class GarbageCollector
+{
 
 public:
 	GarbageCollector();
@@ -30,6 +33,7 @@ public:
 	void useHostVMVariables();
 
 	void updateFromMemory();
+	void updateToMemory();
 	void collect();
 	void tombstone(oop_t *object);
 	void rescueEphemerons();

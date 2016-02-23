@@ -51,6 +51,28 @@ void GCSpaceTest::testAllocate()
 	address = localSpace.allocateIfPossible(1024 * 30);
 }
 
+void GCSpaceTest::testDoesNotIncludeSmallIntegers()
+{
+	GCSpace localSpace = GCSpace::dynamicNew(1024);
+	oop_t *inside = (oop_t*)localSpace.getBase();
+	ASSERTM("wrongly including small integer", !localSpace.includes(inside));
+
+}
+
+void GCSpaceTest::testIncludesFirstObject()
+{
+	GCSpace localSpace = GCSpace::dynamicNew(1024);
+	oop_t *inside = (oop_t*)localSpace.getBase();
+	ASSERTM("first object is not considered inside", localSpace.includes((oop_t*)inside->_asObject()));
+}
+
+void GCSpaceTest::testIncludesLastObject()
+{
+	// last object is considered inside, as its header is inside commited limit (think of an empty array)
+	GCSpace localSpace = GCSpace::dynamicNew(1024);
+	oop_t *inside = (oop_t*)localSpace.getCommitedLimit();
+	ASSERTM("last object is not considered inside", localSpace.includes((oop_t*)inside->_asObject()));
+}
 
 bool checkValuenewArray1024(oop_t *array)
 {
@@ -296,6 +318,9 @@ cute::suite make_suite_GCSpaceTest()
 	cute::suite s;
 
 	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testAllocate));
+	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testDoesNotIncludeSmallIntegers));
+	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testIncludesFirstObject));
+	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testIncludesLastObject));
 	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testGCSpace));
 	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testExtendedGrowingTo));
 //	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testGrow));

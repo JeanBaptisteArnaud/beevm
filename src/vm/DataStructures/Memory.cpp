@@ -49,6 +49,9 @@ void Memory::updateFromHostVM()
 	fromSpace->loadFrom(VMVariablesProxy::hostVMFromSpace());
 	  toSpace->loadFrom(VMVariablesProxy::hostVMToSpace());
 	 oldSpace->loadFrom(VMVariablesProxy::hostVMOldSpace());
+
+	 KnownObjects::emptyArray = emptyArray;
+	 flipper->tombstone(*VMVariablesProxy::hostVMTombstone());
 }
 
 void Memory::updateToHostVM()

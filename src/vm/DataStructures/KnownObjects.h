@@ -19,8 +19,6 @@
 namespace Bee
 {
 
-class Memory;
-
 class KnownObjects
 {
 public:
@@ -30,14 +28,10 @@ public:
 
 	static oop_t *emptyArray;
 
-	static oop_t *Array_behavior;
-	static Memory *currentMemory;
+	static void initialize(oop_t *aNil, oop_t *aTrue, oop_t *aFalse);
+	static void initializeFromHostVM();
 
 };
-
-void initializeKnownObjects(oop_t *aNil, oop_t *aTrue, oop_t *aFalse, oop_t *emptyArray, Memory *aMemory);
-void initializeKnownObjectsOnHostVM(Memory *aMemory);
-
 
 }
 

@@ -22,21 +22,17 @@ oop_t  *KnownObjects::nil;
 oop_t  *KnownObjects::stTrue;
 oop_t  *KnownObjects::stFalse;
 oop_t  *KnownObjects::emptyArray;
-Memory *KnownObjects::currentMemory;
 
-void Bee::initializeKnownObjects(oop_t *aNil, oop_t *aTrue, oop_t *aFalse, oop_t *emptyArray, Memory *aMemory)
+void KnownObjects::initialize(oop_t *aNil, oop_t *aTrue, oop_t *aFalse)
 {
 	KnownObjects::nil     = aNil;
 	KnownObjects::stTrue  = aTrue;
 	KnownObjects::stFalse = aFalse;
-	KnownObjects::emptyArray = emptyArray;
-	KnownObjects::currentMemory = aMemory;
 }
 
-void Bee::initializeKnownObjectsOnHostVM(Memory *aMemory)
+void KnownObjects::initializeFromHostVM()
 {
-	cout << "FIXME: find a way to get an empty array" << endl;
-	initializeKnownObjects(HOSTVM_NIL, HOSTVM_TRUE, HOSTVM_FALSE, HOSTVM_NIL, aMemory);
+	initialize(HOSTVM_NIL, HOSTVM_TRUE, HOSTVM_FALSE);
 }
 
 

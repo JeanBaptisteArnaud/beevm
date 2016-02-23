@@ -9,6 +9,11 @@ namespace Bee
 class VMArrayTest : public GCTest
 {
 public:
+	VMArrayTest();
+	~VMArrayTest();
+	void setUp();
+	void tearDown();
+
 	void testAdd();
 	void testAddAll();
 	void testDo();

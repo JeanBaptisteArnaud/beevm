@@ -22,6 +22,7 @@ typedef oop_t* slot_t;
 void getOsErrorMessage(ulong code, char buffer[], int buffer_length);
 void osError();
 void error(char *message);
+void debug(char *message);
 
 }
 

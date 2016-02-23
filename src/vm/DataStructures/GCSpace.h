@@ -8,6 +8,8 @@
 #ifndef GCSPACE_H_
 #define GCSPACE_H_
 
+#include <iostream>
+
 #include "Bee.h"
 #include "GCSpaceInfo.h"
 
@@ -74,18 +76,29 @@ public:
 	void setSoftLimit(ulong * localSoftLimit);
 	void setRegionBase(ulong  * localRegionBase);
 
+	void print(std::ostream &stream);
+
 
 	static const ulong instVarCount = 8;
 
 
 protected:
+	ulong *info;
 	ulong *base;
-	ulong *nextFree;
 	ulong *commitedLimit;
+	ulong *nextFree;
 	ulong *reservedLimit;
 	ulong *softLimit;
 	ulong *base_3;
 	ulong *regionBase;
+
+	//ulong *softLimit;
+	//ulong *base;
+	//ulong *nextFree;
+	//ulong *commitedLimit;
+	//ulong *base_3;
+	//ulong *reservedLimit;
+	//ulong *regionBase;
 
 };
 

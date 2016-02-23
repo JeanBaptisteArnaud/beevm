@@ -33,3 +33,8 @@ void Bee::error(char *message)
 	system("pause");
 	ExitProcess(-1);
 }
+
+void Bee::debug(char *message)
+{
+	OutputDebugString(message);
+}

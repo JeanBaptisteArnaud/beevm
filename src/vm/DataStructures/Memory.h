@@ -44,18 +44,23 @@ public: // for testing
 
 	GCSpace **spaces;
 	GCSpace **collectedSpaces;
-	GenerationalGC *flipper;
 	GCSpace *pinnedSpace;
 	GCSpace *fromSpace;
 	GCSpace *toSpace;
 	GCSpace *oldSpace;
+
+	oop_t *residueObject;
+	oop_t *statistics;
+
+	GenerationalGC *flipper;
+
+	oop_t *emptyArray;
 
 	oop_t *rememberedSet;
 	oop_t *literalsReferences;
 	oop_t *codeCacheObjectReferences;
 	oop_t *nativizedMethods;
 	oop_t *rescuedEphemerons;
-	oop_t *residueObject;
 };
 
 }

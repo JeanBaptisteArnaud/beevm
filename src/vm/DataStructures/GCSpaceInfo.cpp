@@ -57,11 +57,10 @@ GCSpaceInfo GCSpaceInfo::newSized(ulong size)
 
 void GCSpaceInfo::setContents(uchar *value)
 {
-	contents = value;
-	
 	if (ownsContents)
 		free(contents);
 
+	contents = value;
 	ownsContents = false;
 }
 
@@ -97,7 +96,7 @@ ulong* GCSpaceInfo::getCommitedLimit()
 
 ulong* GCSpaceInfo::getNextFree()
 {
-	return this->at(4);
+	return this->at(8);
 }
 
 ulong* GCSpaceInfo::getReservedLimit()

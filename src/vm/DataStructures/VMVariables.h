@@ -12,12 +12,13 @@ class VMVariables
 {
 public:
 	VMVariables();
+	~VMVariables();
 
 	oop_t *debugFrameMarker;
 
-	bool   JIT_globalLookupCacheHasPointersToFrom;
-	oop_t *JIT_globalLookupCache;
-	char  *JIT_codeCache;
+	bool    JIT_globalLookupCacheHasPointersToFrom;
+	oop_t* *JIT_globalLookupCache;
+	char   *JIT_codeCache;
 
 	bool   GC_anyNativizedCompiledMethodInFromSpace;
 	bool   GC_anyCompiledMethodInFromSpace;
@@ -51,6 +52,8 @@ public:
 	void globalLookupCacheAtPut(ulong index, oop_t *value);
 
 	// some host vm addresses
+	static oop_t**  hostVMTombstone();
+
 	oop_t** hostVMRememberedSet();
 	oop_t** hostVMLiteralsReferences();
 	oop_t** hostVMNativizedMethods();
@@ -67,7 +70,7 @@ public:
 	ulong**  GC_framePointerToWalkStack;
 
 	bool   *JIT_globalLookupCacheHasPointersToFrom;
-	oop_t **JIT_globalLookupCache;
+	oop_t **JIT_globalLookupCache; // a pointer to an array of oop_t*
 	char  **JIT_codeCache;
 
 	bool   *GC_anyNativizedCompiledMethodInFromSpace;

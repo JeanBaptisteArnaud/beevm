@@ -10,7 +10,9 @@ VMVariables::VMVariables()
 	debugFrameMarker = (oop_t*)0;
 
 	JIT_globalLookupCacheHasPointersToFrom = true;
-	JIT_globalLookupCache;
+	JIT_globalLookupCache = new oop_t*[4000];
+	
+	// FIXME: initialize it with address of a real code cache
 	JIT_codeCache;
 
 	GC_anyNativizedCompiledMethodInFromSpace = true;
@@ -20,7 +22,10 @@ VMVariables::VMVariables()
 
 }
 
-
+VMVariables::~VMVariables()
+{
+	delete JIT_globalLookupCache;
+}
 
 void VMVariablesProxy::initializeForHostVM()
 {
@@ -44,13 +49,18 @@ void VMVariablesProxy::initializeFor(VMVariables *variables)
 	debugFrameMarker = &variables->debugFrameMarker;
 
 	JIT_globalLookupCacheHasPointersToFrom = &variables->JIT_globalLookupCacheHasPointersToFrom;
-	JIT_globalLookupCache = &variables->JIT_globalLookupCache;
+	JIT_globalLookupCache = variables->JIT_globalLookupCache;
 	JIT_codeCache         = &variables->JIT_codeCache;
 
 	GC_framePointerToWalkStack = &variables->GC_framePointerToWalkStack;
 	GC_anyNativizedCompiledMethodInFromSpace = &variables->GC_anyNativizedCompiledMethodInFromSpace;
 	GC_anyCompiledMethodInFromSpace  = &variables->GC_anyCompiledMethodInFromSpace;
 	GC_spacesDelta = &variables->GC_spacesDelta;
+}
+
+oop_t** VMVariablesProxy::hostVMTombstone()
+{
+	return (oop_t**)0x1004079C;
 }
 
 
@@ -106,12 +116,12 @@ void   VMVariablesProxy::globalCacheHasPointersToFrom(bool value)
 
 oop_t* VMVariablesProxy::globalLookupCacheAt(ulong index)
 {
-	return (*JIT_globalLookupCache)->slot(index);
+	return JIT_globalLookupCache[index-1];
 }
 
 void VMVariablesProxy::globalLookupCacheAtPut(ulong index, oop_t *value)
 {
-	(*JIT_globalLookupCache)->slot(index) = value;
+	JIT_globalLookupCache[index-1] = value;
 }
 
 

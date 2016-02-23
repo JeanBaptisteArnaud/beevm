@@ -93,9 +93,7 @@ oop_t* VMArray::pop()
 
 void VMArray::push(oop_t *value)
 {
-	contents->slot(size()->smiPlusNative(1)->_asNative()) = value;
-	//contents[this->size()] = nil; Maybe reset to nil it is the point to have VM Array
-	this->size(this->size()->smiPlusNative(1));
+	this->add(value);
 }
 
 

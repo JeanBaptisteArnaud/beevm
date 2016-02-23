@@ -11,27 +11,24 @@ extern cute::suite make_suite_VMArrayTest();
 
 using namespace Bee;
 
-oop_t *allocateArrayedSlots(oop_t *behavior, ulong slotSize)
+
+VMArrayTest::VMArrayTest() 
 {
-	bool isExtended = slotSize > 255;
-	ulong headerBytes = isExtended ? 16 : 8;
-	void *buffer = (oop_t*)malloc(headerBytes + slotSize*4);
-	
-	if (isExtended)
-	{
-		extended_header_cast(buffer)->_size(slotSize);
-		extended_header_cast(buffer)->_behavior(behavior);
-		extended_header_cast(buffer)->_basicSize(4);
+	this->setUp();
+}
 
-		return extended_header_cast(buffer)->slots();
-	}
-	else
-	{
-		basic_header_cast(buffer)->_size(slotSize);
-		basic_header_cast(buffer)->_behavior(behavior);
+VMArrayTest::~VMArrayTest()
+{
+	this->tearDown();
+}
 
-		return basic_header_cast(buffer)->slots();
-	}
+void VMArrayTest::setUp()
+{
+	mockedObjects.initializeKnownObjects();
+}
+
+void VMArrayTest::tearDown()
+{
 }
 
 void VMArrayTest::testAdd()
@@ -139,22 +136,23 @@ void VMArrayTest::testDo()
 
 void VMArrayTest::testGrow()
 {
-//testGrow
-//	| space array |
-//	space := GCSpace dynamicNew: 1024 * 4 * 10.
-//	array := VMArray new on: space; yourself.
-//	self
-//		execute: [:vmArray | | size |
-//			vmArray emptyReserving: 100.
-//			size := vmArray contents size.
-//			self assert: size >= 100.
-//			99 timesRepeat: [vmArray push: 1].
-//			self assert: vmArray contents size = size.
-//			vmArray push: 1.
-//			self
-//				assert: vmArray contents size > 100;
-//				assert: vmArray contents size > size]
-//		proxying: array
+	VMArray array;
+	GCSpace space = GCSpace::dynamicNew(16*1024);
+	array.setSpace(&space);
+	array.emptyReserving(100);
+	ulong size = array.contents->_size();
+
+	ASSERTM("Size is wrong", array.contents->_size() >= 100);
+
+	for (ulong i = 0; i < 99; i++)
+		array.push(smiConst(1));
+
+	ASSERTM("Size is wrong", array.contents->_size() == size);
+
+	array.push(smiConst(1));
+
+	ASSERTM("Size is wrong", array.contents->_size() > 100);
+	ASSERTM("Size is wrong", array.contents->_size() > size);
 }
 
 void VMArrayTest::testPop()
@@ -230,7 +228,8 @@ void VMArrayTest::testUpdateReference()
 //			assert: array contents == referer first
 }
 
-cute::suite make_suite_VMArrayTest() {
+cute::suite make_suite_VMArrayTest()
+{
 	cute::suite s;
 
 	s.push_back(CUTE_SMEMFUN(VMArrayTest, testAdd));

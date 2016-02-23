@@ -29,7 +29,8 @@ void MockedObjects::initializeKnownObjects()
 	oop_t *array   = this->newArray(0);
 	Memory *memory  = mockMemory();
 
-	Bee::initializeKnownObjects(nil, stTrue, stFalse, array, memory);
+	KnownObjects::initialize(nil, stTrue, stFalse);
+	KnownObjects::emptyArray = array;
 
 	// create a fake stack with place for all slots
 	stack.reserve(STACK_SIZE);

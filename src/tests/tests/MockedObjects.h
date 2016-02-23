@@ -12,6 +12,8 @@
 namespace Bee
 {
 
+class Memory;
+
 class MockedObjects
 {
 public:

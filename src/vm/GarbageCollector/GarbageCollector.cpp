@@ -27,7 +27,6 @@ using namespace Bee;
 
 GarbageCollector::GarbageCollector()
 {
-	residueObject = 0;
 }
 
 void GarbageCollector::useOwnVMVariables()
@@ -58,6 +57,13 @@ void GarbageCollector::updateFromMemory()
 	fromSpace.loadFrom(*memory->fromSpace);
 	toSpace  .loadFrom(*memory->toSpace);
 	oldSpace .loadFrom(*memory->oldSpace);
+}
+
+void GarbageCollector::updateToMemory()
+{
+	memory->fromSpace->loadFrom(fromSpace);
+	memory->toSpace  ->loadFrom(toSpace);
+	memory->oldSpace ->loadFrom(oldSpace);
 }
 
 void GarbageCollector::collect()
@@ -200,6 +206,7 @@ void GarbageCollector::fixWeakContainers()
 	}
 	weakContainers.reset();
 }
+
 void GarbageCollector::tombstone(oop_t *object)
 {
 	this->residueObject = object;

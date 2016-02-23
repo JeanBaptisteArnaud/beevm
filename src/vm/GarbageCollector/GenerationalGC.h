@@ -42,7 +42,7 @@ public:
 
 //protected:
 	bool hasToPurge(oop_t *object);
-	ulong* codeCacheReferenceAtOffset(ulong offset);
+	oop_t** codeCacheReferenceAtOffset(ulong offset);
 	void moveToOldAll(ReferencedVMArray &objects);
 	void followRememberedSet();
 	void purgeLiteralsReferences();
