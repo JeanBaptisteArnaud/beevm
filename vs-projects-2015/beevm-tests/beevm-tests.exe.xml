@@ -1,0 +1,49 @@
+<testsuites>
+	<testsuite name="GCSpaceInfoTest" tests="0">
+	</testsuite>
+	<testsuite name="VMArrayTest" tests="8">
+		<testcase classname="VMArrayTest" name="Bee::VMArrayTest::testAdd"/>
+		<testcase classname="VMArrayTest" name="Bee::VMArrayTest::testAddAll"/>
+		<testcase classname="VMArrayTest" name="Bee::VMArrayTest::testDo"/>
+		<testcase classname="VMArrayTest" name="Bee::VMArrayTest::testGrow"/>
+		<testcase classname="VMArrayTest" name="Bee::VMArrayTest::testGrow2"/>
+		<testcase classname="VMArrayTest" name="Bee::VMArrayTest::testPop"/>
+		<testcase classname="VMArrayTest" name="Bee::VMArrayTest::testReset"/>
+		<testcase classname="VMArrayTest" name="Bee::VMArrayTest::testUpdateReference"/>
+	</testsuite>
+	<testsuite name="GCSpaceTest" tests="4">
+		<testcase classname="GCSpaceTest" name="Bee::GCSpaceTest::testAllocate">
+			<failure message="d:\cppenv\vs\beevm\src\tests\tests\gcspacetest.cpp:47 Bee::GCSpaceTest::testAllocate: nextFree simple">
+Bee::GCSpaceTest::testAllocate: nextFree simple
+			</failure>
+		</testcase>
+		<testcase classname="GCSpaceTest" name="Bee::GCSpaceTest::testGCSpace"/>
+		<testcase classname="GCSpaceTest" name="Bee::GCSpaceTest::testExtendedGrowingTo"/>
+		<testcase classname="GCSpaceTest" name="Bee::GCSpaceTest::testGrowingTo"/>
+	</testsuite>
+	<testsuite name="GCFlipTest" tests="23">
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testGCCollect"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testCopyToFlip"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testCopyToOld"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testCopyToOldBug"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testEphemeron"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testEphemeronOnce"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testFollowObject"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testFollowObjectAndCheckGraph"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testFollowObjectCheckGraphAndOop"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testGCReferencesAfterCollect"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testPurgeEmptyRoots"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testPurgeLiteralsWithNewObject"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testPurgeLiteralsWithOldObject"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testRescuedEphemeron"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testRescueEphemeronRescuedInRoots"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testRescueNoEphemerons"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testStackCallbackTP19064"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testStackFollowObjectAndCheckGraph"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testStackFollowObjectCallbackHole"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testStackFollowObjectNestedBlock"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testWeakContainer"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testWeakContainerExtended"/>
+		<testcase classname="GCFlipTest" name="Bee::GCFlipTest::testTombstone"/>
+	</testsuite>
+</testsuites>

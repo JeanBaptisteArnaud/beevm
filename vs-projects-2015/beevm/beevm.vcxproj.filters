@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="DataStructures">
+      <UniqueIdentifier>{9272573f-22cf-454b-af1e-0390f2343d60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GarbageCollector">
+      <UniqueIdentifier>{af8842f8-da1e-4dad-b05e-3e62d526cb2c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\vm\DataStructures\Bee.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\GCSpace.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\GCSpaceInfo.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\Memory.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\ReferencedVMArray.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\VMArray.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\GarbageCollector\GarbageCollector.cpp">
+      <Filter>GarbageCollector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\GarbageCollector\GenerationalGC.cpp">
+      <Filter>GarbageCollector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\ObjectFormat.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\KnownObjects.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\GarbageCollector\MarkAndCompactGC.cpp">
+      <Filter>GarbageCollector</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\dll\dll.cpp" />
+    <ClCompile Include="..\..\src\vm\DataStructures\VMVariables.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\vm\DataStructures\VMArray.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\ReferencedVMArray.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\Memory.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\GCSpaceInfo.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\GCSpace.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\GarbageCollector\GarbageCollector.h">
+      <Filter>GarbageCollector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\GarbageCollector\GenerationalGC.h">
+      <Filter>GarbageCollector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\Bee.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\ObjectFormat.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\KnownObjects.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\GarbageCollector\MarkAndCompactGC.h">
+      <Filter>GarbageCollector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\VMVariables.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

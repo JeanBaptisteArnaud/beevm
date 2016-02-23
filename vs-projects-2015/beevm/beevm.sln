@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "beevm", "beevm.vcxproj", "{05ABE768-DCFB-4616-8D67-00AB70AD4DD6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "beevm-tests", "..\beevm-tests\beevm-tests.vcxproj", "{976F1747-8BCD-4A5F-AB0E-EFE77E1B5BFB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{05ABE768-DCFB-4616-8D67-00AB70AD4DD6}.Debug|Win32.ActiveCfg = Debug|Win32
+		{05ABE768-DCFB-4616-8D67-00AB70AD4DD6}.Debug|Win32.Build.0 = Debug|Win32
+		{05ABE768-DCFB-4616-8D67-00AB70AD4DD6}.Release|Win32.ActiveCfg = Release|Win32
+		{05ABE768-DCFB-4616-8D67-00AB70AD4DD6}.Release|Win32.Build.0 = Release|Win32
+		{976F1747-8BCD-4A5F-AB0E-EFE77E1B5BFB}.Debug|Win32.ActiveCfg = Debug|Win32
+		{976F1747-8BCD-4A5F-AB0E-EFE77E1B5BFB}.Debug|Win32.Build.0 = Debug|Win32
+		{976F1747-8BCD-4A5F-AB0E-EFE77E1B5BFB}.Release|Win32.ActiveCfg = Release|Win32
+		{976F1747-8BCD-4A5F-AB0E-EFE77E1B5BFB}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
