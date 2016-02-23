@@ -51,8 +51,11 @@ public:
 	oop_t* globalLookupCacheAt(ulong index);
 	void globalLookupCacheAtPut(ulong index, oop_t *value);
 
-	// some host vm addresses
-	static oop_t**  hostVMTombstone();
+	// FIXME: migrate those variables to vmvariables, for now support only using host vm addresses
+	static oop_t** hostVMTombstone();
+	static oop_t** wellKnownRoots();
+	static oop_t** wellKnownRootsSize();
+	static oop_t** extraRoots();
 
 	oop_t** hostVMRememberedSet();
 	oop_t** hostVMLiteralsReferences();

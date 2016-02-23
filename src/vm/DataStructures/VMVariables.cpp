@@ -63,6 +63,20 @@ oop_t** VMVariablesProxy::hostVMTombstone()
 	return (oop_t**)0x1004079C;
 }
 
+oop_t** VMVariablesProxy::wellKnownRoots()
+{
+	return (oop_t**)0x100411E0;
+}
+oop_t** VMVariablesProxy::wellKnownRootsSize()
+{
+	return (oop_t**)0x10041694;
+}
+
+oop_t** VMVariablesProxy::extraRoots()
+{
+	return (oop_t**)0x10040798;
+}
+
 
 oop_t** VMVariablesProxy::hostVMRememberedSet()
 {
