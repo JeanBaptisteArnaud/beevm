@@ -67,10 +67,6 @@ public:
 	void holdReferenceTo(oop_t *object);
 };
 
-extern "C" {
-__declspec(dllexport) void collect(int val);
-}
-
 }
 
 #endif /* GARBAGECOLLECTOR_GENERATIONALGC_H_ */
