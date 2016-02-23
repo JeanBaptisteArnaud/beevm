@@ -59,14 +59,6 @@ void GenerationalGC::initLocals()
 
 }
 
-void GenerationalGC::initNonLocals()
-{
-	rememberedSet.setSpace(&oldSpace);
-	literalsReferences.setSpace(&oldSpace);
-	nativizedMethods.setSpace(&oldSpace);
-	classCheckReferences.setSpace(&oldSpace);
-	rescuedEphemerons.setSpace(&oldSpace);
-}
 
 void GenerationalGC::setUpLocals()
 {

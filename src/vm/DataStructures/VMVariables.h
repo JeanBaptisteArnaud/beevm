@@ -52,10 +52,20 @@ public:
 	void globalLookupCacheAtPut(ulong index, oop_t *value);
 
 	// FIXME: migrate those variables to vmvariables, for now support only using host vm addresses
+	static oop_t** hostVMWeakContainers();
+	static oop_t** hostVMEphemerons();
 	static oop_t** hostVMTombstone();
-	static oop_t** wellKnownRoots();
-	static oop_t** wellKnownRootsSize();
-	static oop_t** extraRoots();
+	static oop_t* hostVMFixedObjectsStart();
+	static oop_t* hostVMFixedObjectsEnd();
+
+	static oop_t* hostVMLibrariesArray();
+	static oop_t* hostVMLibrariesArrayEnd();
+	static oop_t* hostVMCharacterBase();
+	static oop_t* hostVMCharacterNextFree();
+
+	static oop_t** hostVMWellKnownRoots();
+	static ulong hostVMWellKnownRootsSize();
+	static oop_t** hostVMExtraRoots();
 
 	oop_t** hostVMRememberedSet();
 	oop_t** hostVMLiteralsReferences();

@@ -39,14 +39,26 @@ public:
 	void unseeSKernelMeta();
 	void unseeLibraryObjects();
 	void followWellKnownObjects();
-	void followStack();
 	void followExtraRoots();
 	void followRescuedEphemerons();
-
+	void prepareForCompact();
+	void allocateWeakContainersArray();
+	void allocateEphemeronsArray();
+	void forgetNativeObjects();
+	void followCountStartingAt(slot_t *frame, ulong size, ulong startIndex);
+	void setNewPositions(GCSpace * space);
+	void compact(GCSpace * space);
+	void librariesDo();
+	void initNonLocals();
+	bool arenaIncludes(oop_t *);
+	ulong librariesArraySize();
+	void fixReferencesOrSetTombstone(oop_t * weakContainer);
+	bool checkReachablePropertyOf(oop_t * ephemeron);
 
 	ReferencedVMArray tempArray;
 	GCSpace characters;
-	GCSpace skernelMeta;
+	GCSpace sKernelMeta;
+
 	//SLLInfo library;
 
 

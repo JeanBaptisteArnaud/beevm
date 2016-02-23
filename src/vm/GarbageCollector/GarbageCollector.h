@@ -45,6 +45,7 @@ public:
 	void addWeakContainer (oop_t *object);
 	void loadSpaces();
 	void initLocals();
+	void initNonLocals();
 	void clearPolymorphicMethodCache();
 	void follow(oop_t *object);
 	void follow(slot_t *slot, int count, ulong start);

@@ -22,7 +22,6 @@ public:
 
 	void initialize();
 	void initLocals();
-	void initNonLocals();
 
 	void collect();
 

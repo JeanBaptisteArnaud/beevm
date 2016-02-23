@@ -29,6 +29,17 @@ GarbageCollector::GarbageCollector()
 {
 }
 
+void GarbageCollector::initNonLocals()
+{
+	rememberedSet.setSpace(&oldSpace);
+	literalsReferences.setSpace(&oldSpace);
+	nativizedMethods.setSpace(&oldSpace);
+	classCheckReferences.setSpace(&oldSpace);
+	rescuedEphemerons.setSpace(&oldSpace);
+}
+
+
+
 void GarbageCollector::useOwnVMVariables()
 {
 	vm.initializeFor(new VMVariables());
@@ -243,4 +254,3 @@ void GarbageCollector::loadSpaces()
 //	oldSpace.load();
 //	toSpace.load();
 }
-;
