@@ -23,6 +23,7 @@ public:
 	void testVirtualBehavior();
 	void testProxying();
 	void testMulti();
+	void testNextObject();
 };
 
 }

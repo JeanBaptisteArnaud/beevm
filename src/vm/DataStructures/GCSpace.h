@@ -45,6 +45,7 @@ public:
 	oop_t* objectFromBuffer(ulong *buffer, ulong headerSize);
 	oop_t* shallowCopy(oop_t *object);
 	oop_t* shallowCopyGrowingTo(oop_t *array , ulong newSize);
+	oop_t* firstObject();
 
 	void commitMoreMemory();
 	void commitMoreMemoryIfNeeded();
@@ -52,10 +53,11 @@ public:
 	ulong commitDelta(ulong delta);
 	void decommitSlack();
 	void release();
-
+	
 	int percentageOfCommitedUsed();
 
 	bool includes(oop_t *object);
+	bool isBelowNextFree(oop_t * object);
 	bool isReferredBy(oop_t *object);
 
 	

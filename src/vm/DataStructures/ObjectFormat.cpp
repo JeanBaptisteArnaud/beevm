@@ -18,6 +18,12 @@ extended_header_t* Bee::extended_header_cast(void* buffer)
 	return (extended_header_t*)buffer;
 }
 
+oop_t * Bee::headerToObject(void * buffer)
+{
+	oop_t * object = ((oop_t *)((ulong)buffer + 8));
+	return object->_isExtended() ? (oop_t *)((ulong)buffer + 16) : object;
+}
+
 oop_t* Bee::smiConst(int number)
 {
 	return (oop_t*)((number << 1) | 1);
@@ -261,6 +267,12 @@ bool oop_t::_hasBeenSeenInLibrary()
 	return this->testFlags(basic_header_t::Flag_unseenInSpace);
 }
 
+oop_t * oop_t::nextObject()
+{
+	ulong completeSizeOfObject = this->_sizeInBytes();
+	ulong nextHeader = ((ulong) this + completeSizeOfObject);
+	return headerToObject((ulong *) nextHeader);
+}
 
 // proxiing method
 bool oop_t::_isProxy()

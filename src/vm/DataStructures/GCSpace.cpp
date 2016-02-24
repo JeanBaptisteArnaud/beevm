@@ -75,6 +75,12 @@ bool GCSpace::includes(oop_t *object)
 	       (ulong)object         <= asUObject(this->commitedLimit);
 }
 
+bool GCSpace::isBelowNextFree(oop_t *object)
+{
+	return  (ulong *) object <= this->getNextFree();
+}
+
+
 bool GCSpace::isReferredBy(oop_t *object)
 {
 	if (object->isSmallInteger())
@@ -196,6 +202,11 @@ oop_t* GCSpace::shallowCopyGrowingTo(oop_t *array, ulong newSize)
 
 	copy->_beNotInRememberedSet();
 	return copy;
+}
+
+oop_t * GCSpace::firstObject()
+{
+	return headerToObject(asObject(this->getBase()));
 }
 
 

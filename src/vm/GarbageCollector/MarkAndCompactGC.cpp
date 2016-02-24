@@ -72,12 +72,21 @@ void MarkAndCompactGC::unseeWellKnownObjects()
 
 void MarkAndCompactGC::unseeCharacters()
 {
-	// characters.objectsDo(object _beUnseenInLibrary);
+	oop_t * next = characters.firstObject();
+	while ((ulong *) next <= characters.getNextFree()) {
+		next->_beUnseenInLibrary();
+		next = next->nextObject();
+	}
 }
 
 void MarkAndCompactGC::unseeSKernelMeta()
 {
-	// sLernelMeta.objectsDo(object _beUnseenInLibrary);
+	oop_t * next = sKernelMeta.firstObject();
+	while ((ulong *)next <= sKernelMeta.getNextFree()) {
+		next->_beUnseenInLibrary();
+		next = next->nextObject();
+	}
+
 }
 void MarkAndCompactGC::unseeLibraryObjects()
 {

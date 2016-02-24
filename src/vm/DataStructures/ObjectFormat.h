@@ -31,6 +31,9 @@ typedef struct basic_header_t
 	void _behavior(oop_t *behavior)  { this->behavior = behavior; }
 
 	oop_t* slots() { return (oop_t*)((ulong)this + 8); }
+	basic_header_t* nextHeader();
+
+
 
 // flags bits
 	static const uchar Flag_unseenInSpace = 1;
@@ -156,7 +159,7 @@ public:
 	oop_t* setBehavior(oop_t *behavior) { return this->basic_header()->behavior = behavior; }
 	slot_t& slot(long index) { ulong *pos = (ulong*)this + index; return *((slot_t*)pos); }
 	uchar&  byte(long index) { uchar *pos = (uchar*)this + index; return *pos; }
-
+	oop_t* nextObject();
 
 	//done
 	ulong _basicAt(int index);
@@ -183,6 +186,7 @@ public:
 
 basic_header_t* basic_header_cast(void* buffer);
 extended_header_t* extended_header_cast(void* buffer);
+oop_t* headerToObject(void* buffer);
 
 // others
 

@@ -313,6 +313,34 @@ void GCSpaceTest::testSynchronousGCSpace()
 //		self deny: oldNextFree = space nextFree
 }
 
+void GCSpaceTest::testObjectsIteration()
+{
+	GCSpace localSpace = GCSpace::dynamicNew(4 * 10 * 1024);
+	mockedObjects.setDefaultSpace(&localSpace);
+	oop_t *array1 = mockedObjects.newArray(1);
+	oop_t *extended1 = mockedObjects.newArray(256);
+	oop_t *array2 = mockedObjects.newArray(5);
+	oop_t *array3 = mockedObjects.newArray(5);
+	oop_t *extended2 = mockedObjects.newArray(256);
+	oop_t *extended3 = mockedObjects.newArray(256);
+	
+	oop_t* next = localSpace.firstObject();
+	ASSERTM("first object is wrong", next == array1);
+	next = next->nextObject();
+	ASSERTM("next from first object to extended1", next == extended1);
+	next = next->nextObject();
+	ASSERTM("next from extended1 to array2", next == array2);
+	next = next->nextObject();
+	ASSERTM("next from array2 to array3", next == array3);
+	next = next->nextObject();
+	ASSERTM("next from array3 to extended3", next == extended2);
+	next = next->nextObject();
+	ASSERTM("next from extended2 to extended3", next == extended3);
+	next = next->nextObject();
+	ASSERTM("terminason rule", !localSpace.isBelowNextFree(next));
+
+}
+
 
 
 cute::suite make_suite_GCSpaceTest()
@@ -327,6 +355,8 @@ cute::suite make_suite_GCSpaceTest()
 	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testExtendedGrowingTo));
 //	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testGrow));
 	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testGrowingTo));
+
+	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testObjectsIteration));
 //	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testNewGCSpaceShallowCopy));
 //	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testShallowCopy));
 //	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testShallowCopyBytes));

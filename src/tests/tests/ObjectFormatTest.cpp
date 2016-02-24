@@ -79,6 +79,22 @@ void ObjectFormatTest::testBasicSize()
 
 }
 
+void ObjectFormatTest::testNextObject()
+{
+	oop_t *array1 = mockedObjects.newArray(1);
+	oop_t *extended1 = mockedObjects.newArray(256);
+	oop_t *extended2 = mockedObjects.newArray(256);
+	oop_t *array2 = mockedObjects.newArray(5);
+	oop_t *array3 = mockedObjects.newArray(4);
+
+	ASSERTM("nextObject basic to extended ", (array1->nextObject() == extended1));
+	ASSERTM("nextObject extended to extended", (extended1->nextObject() == extended2));
+	ASSERTM("nextObject extended to basic", (extended2->nextObject() == array2));
+	ASSERTM("nextObject basic to basic", (array2->nextObject() == array3));
+
+}
+
+
 void ObjectFormatTest::testBeExtended()
 {
 	oop_t *object = mockedObjects.newArray(1024);
@@ -242,14 +258,15 @@ void ObjectFormatTest::testMulti()
 cute::suite make_suite_VMMemoryTest()
 {
 	cute::suite s;
-//	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testHeaderOf));
-//	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testBasicSize));
-//  s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testBeExtended));
-//	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testRotateLeft));
-//	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testObjectFlagManipulation));
-//	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testVirtualBehavior));
-//	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testProxying));
-//	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testMulti));
+	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testNextObject));
+	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testHeaderOf));
+	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testBasicSize));
+	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testBeExtended));
+	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testRotateLeft));
+	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testObjectFlagManipulation));
+	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testVirtualBehavior));
+	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testProxying));
+	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testMulti));
 	return s;
 }
 
