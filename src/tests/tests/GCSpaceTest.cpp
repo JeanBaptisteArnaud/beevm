@@ -328,7 +328,7 @@ void GCSpaceTest::testObjectsIteration()
 	ASSERTM("first object is wrong", next == array1);
 	next = next->nextObject();
 	ASSERTM("next from first object to extended1", next == extended1);
-	next = next->nextObject();1
+	next = next->nextObject();
 	ASSERTM("next from extended1 to array2", next == array2);
 	next = next->nextObject();
 	ASSERTM("next from array2 to array3", next == array3);
