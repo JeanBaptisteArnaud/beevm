@@ -134,20 +134,24 @@ void MarkAndCompactGC::setNewPositionsAndCompact()
 }
 void MarkAndCompactGC::setNewPositions(GCSpace * space)
 {
-	//| reference headerBits |
-
-	//space.seenObjectsDo (:object :headerSize | | newPosition nextReference |
-	//newPosition : = auxSpace nextFree + headerSize.
-	//reference : = object _proxee.
-	//[
-	//	headerBits:= reference _basicAt : 1.
-	//			   reference _basicAt : 1 put : newPosition _asObject.
-	//nextReference : = headerBits _unrotate.
-	//nextReference _isSmallInteger]
-	//			 whileFalse : [reference:= nextReference].
-	//				 object _basicAt : -1 put : headerBits; _beSeenInSpace.
-	//				 auxSpace nextFree : newPosition + object _sizeInBytes _asPointer])
-
+	oop_t * next = space->firstObject();
+	while (space->isBelowNextFree(next)) {
+		if (next->_hasBeenSeenInSpace()) {
+			oop_t * newPosition =  asObject(auxSpace.getNextFree()) + next->_headerSizeInBytes();
+			oop_t * reference = next->_getProxee();
+			oop_t * headerBits;
+			do {
+				headerBits = reference->slot(0);
+				reference->slot(0) = newPosition;
+				oop_t * nextReference = (oop_t *)(headerBits->_unrotate());
+				if (nextReference->isSmallInteger()) break; else reference = nextReference;
+			} while (true);
+			next->slot(-2) = headerBits;
+			next->_beSeenInSpace();
+			auxSpace.setNextFree((ulong *) pointerConst((ulong) newPosition + next->_sizeInBytes()));
+		}
+		next = next->nextObject();
+	}
 }
 
 void MarkAndCompactGC::prepareForCompact()
@@ -158,11 +162,14 @@ void MarkAndCompactGC::prepareForCompact()
 
 void MarkAndCompactGC::compact(GCSpace * space)
 {
-	//space objectsDo : [:object |
-	//object _hasBeenSeenInSpace ifTrue : [| moved |
-	//moved:= auxSpace shallowCopy : object.
-	//moved _beUnseenInSpace]]
-
+	oop_t * next = space->firstObject();
+	while ((ulong *)next <= space->getNextFree()) {
+		if (next->_hasBeenSeenInSpace()) {
+			oop_t * copy = auxSpace.shallowCopy(next);
+			copy->_beUnseenInSpace();
+		}
+		next = next->nextObject();
+	}
 }
 
 void MarkAndCompactGC::updateOldSpace()

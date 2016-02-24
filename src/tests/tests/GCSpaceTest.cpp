@@ -324,11 +324,11 @@ void GCSpaceTest::testObjectsIteration()
 	oop_t *extended2 = mockedObjects.newArray(256);
 	oop_t *extended3 = mockedObjects.newArray(256);
 	
-	oop_t* next = localSpace.firstObject();
+	oop_t *next = localSpace.firstObject();
 	ASSERTM("first object is wrong", next == array1);
 	next = next->nextObject();
 	ASSERTM("next from first object to extended1", next == extended1);
-	next = next->nextObject();
+	next = next->nextObject();1
 	ASSERTM("next from extended1 to array2", next == array2);
 	next = next->nextObject();
 	ASSERTM("next from array2 to array3", next == array3);
