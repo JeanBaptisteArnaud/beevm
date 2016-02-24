@@ -16,6 +16,7 @@ namespace Bee
 {
 
 class GenerationalGC;
+class MarkAndCompactGC;
 
 // a smalltalk object
 class Memory
@@ -33,8 +34,10 @@ public:
 	void updateFromHostVM();
 	void updateToHostVM();
 
-//protected:
+	// main entries
 	void scavengeFromSpace();
+	void collectOldSpace();
+
 	void growIfTime();
 	void commitMoreSpace();
 
@@ -61,6 +64,8 @@ public: // for testing
 	oop_t *codeCacheObjectReferences;
 	oop_t *nativizedMethods;
 	oop_t *rescuedEphemerons;
+
+	MarkAndCompactGC *compactor;
 };
 
 }

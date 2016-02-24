@@ -29,12 +29,24 @@ public:
 	GarbageCollector();
 	virtual ~GarbageCollector() {};
 
-	void useOwnVMVariables();
-	void useHostVMVariables();
+	virtual void useOwnVMVariables();
+	virtual void useHostVMVariables();
 
-	void updateFromMemory();
-	void updateToMemory();
+	void initialize();
 	void collect();
+
+// protected
+
+	virtual void initLocals();
+	virtual void initNonLocals();
+
+	virtual void setUpLocals();
+	virtual void setUpNonLocals();
+	virtual void updateFromMemory();
+	virtual void updateToMemory();
+
+	virtual void doCollect() = 0;
+
 	void tombstone(oop_t *object);
 	void rescueEphemerons();
 	void rememberIfWeak (oop_t *object);
@@ -43,9 +55,8 @@ public:
 
 //protected:
 	void addWeakContainer (oop_t *object);
-	void loadSpaces();
-	void initLocals();
-	void initNonLocals();
+
+
 	void clearPolymorphicMethodCache();
 	void follow(oop_t *object);
 	void follow(slot_t *slot, int count, ulong start);
@@ -55,10 +66,7 @@ public:
 
 	void makeRescuedEphemeronsNonWeak();
 	void forgetNativeObjects();
-	void saveSpaces();
 	void followFrameCountStartingAt(slot_t *frame, ulong size , ulong startIndex);
-	//void followCountStartingAt(ulong * root,ulong  count ,ulong  start);
-
 	bool followEphemeronsCollectingUnknowns();
 	virtual void followCountStartingAt(slot_t *roots, int count, long start) = 0;
 	virtual ulong* framePointerToStartWalkingTheStack() = 0;

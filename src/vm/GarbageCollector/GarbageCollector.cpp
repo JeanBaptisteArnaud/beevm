@@ -29,6 +29,25 @@ GarbageCollector::GarbageCollector()
 {
 }
 
+void GarbageCollector::initialize()
+{
+	this->initLocals();
+	this->initNonLocals();
+}
+
+void GarbageCollector::initLocals()
+{
+	//stack.setSpace(&localSpace);
+	//unknowns.setSpace(&localSpace);
+	//ephemerons.setSpace(&localSpace);
+	//weakContainers.setSpace(&localSpace);
+	stack.setSpace(&oldSpace);
+	unknowns.setSpace(&oldSpace);
+	ephemerons.setSpace(&oldSpace);
+	weakContainers.setSpace(&oldSpace);
+
+}
+
 void GarbageCollector::initNonLocals()
 {
 	rememberedSet.setSpace(&oldSpace);
@@ -38,6 +57,36 @@ void GarbageCollector::initNonLocals()
 	rescuedEphemerons.setSpace(&oldSpace);
 }
 
+void GarbageCollector::collect()
+{
+	this->updateFromMemory();
+
+	this->setUpLocals();
+	this->setUpNonLocals();
+
+	this->doCollect();
+
+	this->updateToMemory();
+}
+
+
+void GarbageCollector::setUpLocals()
+{
+	localSpace.reset();
+	stack.emptyReserving(1024);
+	unknowns.emptyReserving(1025);
+	ephemerons.emptyReserving(1026);
+	weakContainers.emptyReserving(1027);
+}
+
+void GarbageCollector::setUpNonLocals()
+{
+	rememberedSet       .updateFromReferer();
+	literalsReferences  .updateFromReferer();
+	nativizedMethods    .updateFromReferer();
+	classCheckReferences.updateFromReferer();
+	rescuedEphemerons   .updateFromReferer();
+}
 
 
 void GarbageCollector::useOwnVMVariables()
@@ -77,10 +126,6 @@ void GarbageCollector::updateToMemory()
 	memory->oldSpace ->loadFrom(oldSpace);
 }
 
-void GarbageCollector::collect()
-{
-
-}
 
 void GarbageCollector::rescueEphemeron(oop_t *ephemeron)
 {
@@ -113,7 +158,8 @@ void GarbageCollector::rescueEphemerons()
 {
 	bool rescued = false;
 	VMArray aux;
-	while (!ephemerons.isEmpty()) {
+	while (!ephemerons.isEmpty())
+	{
 		if (this->followEphemeronsCollectingUnknowns()) {
 			aux = ephemerons;
 			ephemerons = unknowns;
@@ -234,23 +280,10 @@ void GarbageCollector::forgetNativeObjects()
 //	residueObject := globalFramePointerToWalkStack := nil
 }
 
-void GarbageCollector::saveSpaces()
-{
-//fromSpace save.
-//oldSpace save.
-//toSpace save
-}
 
 void GarbageCollector::makeRescuedEphemeronsNonWeak()
 {
 	for (long index = 1; index <= rescuedEphemerons.size()->_asNative(); index++) {
 		rescuedEphemerons[index]->_haveNoWeaks();
 	}
-}
-
-void GarbageCollector::loadSpaces()
-{
-//	fromSpace.load();
-//	oldSpace.load();
-//	toSpace.load();
 }

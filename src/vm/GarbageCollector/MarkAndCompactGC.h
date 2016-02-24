@@ -20,10 +20,11 @@ public:
 	MarkAndCompactGC();
 	~MarkAndCompactGC();
 
-	void collect();
+	virtual void useOwnVMVariables();
+	virtual void useHostVMVariables();
 
-	void addInterrupt();
-	void unmarkRememberSet();
+	void doCollect();
+	void unmarkRememberedSet();
 	void initAuxSpace(); 
 	void unseeWellKnownObjects(); 
 	void flushCodeCache();
@@ -34,7 +35,7 @@ public:
 	void allocateArrays();
 	void resetFrom();
 	void decommitSlack();
-	void disableRememberSet();
+	void disableRememberedSet();
 	void unseeCharacters();
 	void unseeSKernelMeta();
 	void unseeLibraryObjects();
@@ -54,6 +55,7 @@ public:
 	ulong librariesArraySize();
 	void fixReferencesOrSetTombstone(oop_t * weakContainer);
 	bool checkReachablePropertyOf(oop_t * ephemeron);
+	void addInterrupt();
 
 	ReferencedVMArray tempArray;
 	GCSpace characters;

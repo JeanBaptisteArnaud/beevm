@@ -21,61 +21,8 @@ GenerationalGC::GenerationalGC()
 {
 }
 
-void GenerationalGC::initialize()
-{
-	this->initLocals();
-	this->initNonLocals();
-}
-
 GenerationalGC::~GenerationalGC()
 {
-}
-
-void GenerationalGC::collect()
-{
-	this->updateFromMemory();
-
-	this->setUpLocals();
-	this->setUpNonLocals();
-
-	this->doCollect();
-
-	this->updateToMemory();
-
-	//Thinks we do not need that:: this->addInterrupt();
-	//Thinks we do not need that:: this->saveSpaces();
-}
-
-void GenerationalGC::initLocals()
-{
-	//stack.setSpace(&localSpace);
-	//unknowns.setSpace(&localSpace);
-	//ephemerons.setSpace(&localSpace);
-	//weakContainers.setSpace(&localSpace);
-	stack.setSpace(&oldSpace);
-	unknowns.setSpace(&oldSpace);
-	ephemerons.setSpace(&oldSpace);
-	weakContainers.setSpace(&oldSpace);
-
-}
-
-
-void GenerationalGC::setUpLocals()
-{
-	localSpace.reset();
-	stack.emptyReserving(1024);
-	unknowns.emptyReserving(1025);
-	ephemerons.emptyReserving(1026);
-	weakContainers.emptyReserving(1027);
-}
-
-void GenerationalGC::setUpNonLocals()
-{
-	rememberedSet       .updateFromReferer();
-	literalsReferences  .updateFromReferer();
-	nativizedMethods    .updateFromReferer();
-	classCheckReferences.updateFromReferer();
-	rescuedEphemerons   .updateFromReferer();
 }
 
 void GenerationalGC::doCollect()

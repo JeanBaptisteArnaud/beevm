@@ -37,7 +37,7 @@ void VMArray::emptyWith(oop_t * array)
 void VMArray::emptyReserving(ulong size)
 {
 	oop_t * array = space->shallowCopyGrowingTo(KnownObjects::emptyArray, size);
-	array->_beFullUnseenInSpace();
+	array->_beUnseenInSpaceFull();
 	this->emptyWith(array);
 }
 

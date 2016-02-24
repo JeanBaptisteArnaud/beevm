@@ -8,17 +8,24 @@
 
 using namespace Bee;
 
-void MarkAndCompactGC::addInterrupt()
+void MarkAndCompactGC::initNonLocals()
 {
-	//self interrupt: 7
+	GarbageCollector::initNonLocals();
+	tempArray.setSpace(&oldSpace);
+	
 }
 
-
-void MarkAndCompactGC::collect()
+void MarkAndCompactGC::useHostVMVariables()
 {
-	this->loadSpaces();
-	this->initLocals();
-	this->unmarkRememberSet();
+	GarbageCollector::useHostVMVariables();
+
+	sKernelMeta.setBase((ulong *) VMVariablesProxy::hostVMFixedObjectsStart()->_asPointer());
+	sKernelMeta.setNextFree((ulong *)VMVariablesProxy::hostVMFixedObjectsEnd()->_asPointer());
+}
+
+void MarkAndCompactGC::doCollect()
+{
+	this->unmarkRememberedSet();
 	this->initAuxSpace();
 	this->unseeWellKnownObjects();
 	this->flushCodeCache();
@@ -31,13 +38,12 @@ void MarkAndCompactGC::collect()
 	this->resetFrom();
 	this->decommitSlack();
 	this->addInterrupt();
-	this->saveSpaces();
 }
 
-void MarkAndCompactGC::unmarkRememberSet()
+void MarkAndCompactGC::unmarkRememberedSet()
 {
 	tempArray.contents = rememberedSet.contents;
-	this->disableRememberSet();
+	this->disableRememberedSet();
 	for (int i = 1; i < tempArray.size()->_asNative(); i++)
 	{
 		oop_t* object = tempArray[i];
@@ -113,7 +119,7 @@ void MarkAndCompactGC::setNewPositionsAndCompact()
 {
 	this->setNewPositions(&oldSpace);
 	this->setNewPositions(&fromSpace);
-	this->prepareForCompact;
+	this->prepareForCompact();
 	this->compact(&oldSpace);
 	this->compact(&fromSpace);
 }
@@ -162,13 +168,9 @@ void MarkAndCompactGC::updateNativeRescuedphemerons()
 
 void MarkAndCompactGC::allocateArrays()
 {
-	rememberedSet.setSpace(&oldSpace);
 	rememberedSet.emptyReserving(0x100);
-	literalsReferences.setSpace(&oldSpace);
 	literalsReferences.emptyReserving(0x200);
-	classCheckReferences.setSpace(&oldSpace);
 	classCheckReferences.emptyReserving(0x100);
-	nativizedMethods.setSpace(&oldSpace);
 	nativizedMethods.emptyReserving(0x100);
 	this->allocateWeakContainersArray();
 	this->allocateEphemeronsArray();
@@ -180,7 +182,6 @@ void MarkAndCompactGC::allocateWeakContainersArray()
 {
 	tempArray.referer = VMVariablesProxy::hostVMWeakContainers();
 	tempArray.loadMDAFrom(&nativizedMethods);
-	tempArray.setSpace(&oldSpace);
 	tempArray.emptyReserving(0x100);
 }
 
@@ -188,7 +189,6 @@ void MarkAndCompactGC::allocateEphemeronsArray()
 {
 	tempArray.referer = VMVariablesProxy::hostVMEphemerons();
 	tempArray.loadMDAFrom(&nativizedMethods);
-	tempArray.setSpace(&oldSpace);
 	tempArray.emptyReserving(0x100);
 }
 
@@ -208,9 +208,8 @@ void MarkAndCompactGC::decommitSlack()
 	oldSpace.decommitSlack();
 }
 
-void MarkAndCompactGC::disableRememberSet()
+void MarkAndCompactGC::disableRememberedSet()
 {
-	rememberedSet.setSpace(&localSpace);
 	rememberedSet.emptyReserving(0x100);
 }
 
@@ -258,7 +257,8 @@ void MarkAndCompactGC::followCountStartingAt(slot_t *frame, ulong size, ulong st
 	//						scanned : = stack pop]
 }
 
-void MarkAndCompactGC::librariesDo() {
+void MarkAndCompactGC::librariesDo()
+{
 	//: aBlock
 	//	| array size |
 	//	array : = self librariesArray.
@@ -267,57 +267,50 @@ void MarkAndCompactGC::librariesDo() {
 	//	library contents : (array _basicAt: i).
 	//	aBlock value : library].
 	//	library contents : nil
-
-
 }
 
-void MarkAndCompactGC::initNonLocals() {
-	GarbageCollector::initNonLocals();
-	tempArray.setSpace(&oldSpace);
-	sKernelMeta.setBase((ulong *) VMVariablesProxy::hostVMFixedObjectsStart()->_asPointer());
-	sKernelMeta.setNextFree((ulong *)VMVariablesProxy::hostVMFixedObjectsEnd()->_asPointer());
-}
-
-bool MarkAndCompactGC::arenaIncludes(oop_t * object) {
+bool MarkAndCompactGC::arenaIncludes(oop_t * object)
+{
 	return oldSpace.includes(object) || fromSpace.includes(object);
-
 }
 
-ulong MarkAndCompactGC::librariesArraySize() {
+ulong MarkAndCompactGC::librariesArraySize()
+{
 	return ((ulong)VMVariablesProxy::hostVMLibrariesArrayEnd() - (ulong)VMVariablesProxy::hostVMLibrariesArray()) / 4;
 }
 
+void MarkAndCompactGC::fixReferencesOrSetTombstone(oop_t * weakContainer)
+{
+	ulong size = this->arenaIncludes(weakContainer) ? 
+		weakContainer->_unthreadedSize() : weakContainer->_size();
+	
+		
+	for (ulong i = 0; i < size; i++)
+	{
+		oop_t *instance = weakContainer->slot(i);
+		bool seen = this->arenaIncludes(instance) ? 
+			instance->_hasBeenSeenInSpace() : instance->_hasBeenSeenInLibrary();
 
-void MarkAndCompactGC::fixReferencesOrSetTombstone(oop_t * weakContainer) {
-	/*| size |
-		size : = (self arenaIncludes : weakContainer)
-		ifTrue : [weakContainer _unthreadedSize]
-		ifFalse : [weakContainer _size].
-		1 to : size do : [:index | | instance seen |
-		instance : = weakContainer _basicAt : index.
-		seen : = (self arenaIncludes : instance)
-		ifTrue : [instance _hasBeenSeenInSpace]
-		ifFalse : [instance _hasBeenSeenInLibrary].
-		seen ifFalse : [weakContainer _basicAt : index put : residueObject]].
-		self follow : weakContainer count : size startingAt : 1*/
+		if (!seen)
+			weakContainer->slot(i) = residueObject;
+	}
+
+	this->followCountStartingAt((slot_t*)weakContainer, size,1);
 }
 
 
-bool MarkAndCompactGC::checkReachablePropertyOf(oop_t * ephemeron) {
-	return false;
-	/*	
-	| key |
-	key : = ephemeron _basicAt : 1.
-	key _isSmallInteger ifTrue : [^ true].
-	^ (self arenaIncludes : key)
-	ifTrue : [key _hasBeenSeenInSpace]
-	ifFalse : [key _hasBeenSeenInLibrary]*/
+bool MarkAndCompactGC::checkReachablePropertyOf(oop_t * ephemeron)
+{
+	
+	oop_t *key = ephemeron->slot(0);
+	if (key->isSmallInteger())
+		return true;
+
+	return this->arenaIncludes(key) ? key->_hasBeenSeenInSpace() : key->_hasBeenSeenInLibrary();
 }
 
-
-
-
-	
-
-	
+void MarkAndCompactGC::addInterrupt()
+{
+	//self interrupt: 7
+}
 

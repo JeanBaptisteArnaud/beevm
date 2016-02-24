@@ -217,12 +217,48 @@ void oop_t::_beInRememberedSet()
 	this->setFlags(basic_header_t::Flag_isInRememberedSet);
 }
 
+void oop_t::_beSeenInSpace()
+{
+	this->unsetFlags(basic_header_t::Flag_unseenInSpace);
+}
 
-void oop_t::_beFullUnseenInSpace()
+void oop_t::_beUnseenInSpace()
+{
+	this->setFlags(basic_header_t::Flag_unseenInSpace);
+}
+
+void oop_t::_beUnseenInSpaceFull()
 {
 	this->setFlags(basic_header_t::Flag_unseenInSpace);
 	if (this->_isExtended())
 		this->setExtFlags(basic_header_t::Flag_unseenInSpace);
+}
+
+void oop_t::_beSeenInSpaceFull()
+{
+	this->unsetFlags(basic_header_t::Flag_unseenInSpace);
+	if (this->_isExtended())
+		this->unsetExtFlags(basic_header_t::Flag_unseenInSpace);
+}
+
+void oop_t::_beUnseenInLibrary()
+{
+	this->_beSeenInSpaceFull();
+}
+
+void oop_t::_beSeenInLibrary()
+{
+	this->_beUnseenInSpaceFull();
+}
+
+bool oop_t::_hasBeenSeenInSpace()
+{
+	return !this->_hasBeenSeenInLibrary();
+}
+
+bool oop_t::_hasBeenSeenInLibrary()
+{
+	return this->testFlags(basic_header_t::Flag_unseenInSpace);
 }
 
 
@@ -234,12 +270,42 @@ bool oop_t::_isProxy()
 
 void oop_t::_setProxee(oop_t *value)
 {
-	this->slot(-2) = (oop_t*)rotateRight((ulong)value, 8);
+	this->slot(-2) = (oop_t*)value->_rotate();
 }
 
 oop_t* oop_t::_getProxee()
 {
-	return (oop_t*)rotateLeft((ulong)this->slot(-2), 8);
+	return (oop_t*)this->slot(-2)->_unrotate();
+}
+
+ulong oop_t::_rotate()
+{
+	return rotateRight((ulong)this, 8);
+}
+
+ulong oop_t::_unrotate()
+{
+	return rotateLeft((ulong)this, 8);
+}
+
+ulong oop_t::_unthreadedSize()
+{
+	debug("check that _unthreadedSize makes sense");
+	ulong extendedBits = 0x80 / 2;
+	oop_t *object = this->_getProxee();
+	oop_t *nextObject;
+	
+	do {
+		nextObject = (oop_t*)object->slot(0)->_unrotate();
+		if (nextObject->isSmallInteger())
+			break;
+		
+		object = nextObject;
+	}
+	while (true);
+
+	return (nextObject->_asNative() & extendedBits) == 0 ? 
+		(nextObject->_asNative() / 0x10000000) & 0xFF : this->_extendedSize();
 }
 
 // tool

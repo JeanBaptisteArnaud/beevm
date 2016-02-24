@@ -129,7 +129,18 @@ public:
 	void _beSecondGeneration();
 	void _beExtended();
 	void _haveNoWeaks();
-	void _beFullUnseenInSpace();
+	
+	void _beSeenInSpace();
+	void _beUnseenInSpace();
+	void _beSeenInSpaceFull();
+	void _beUnseenInSpaceFull();
+	
+	void _beUnseenInLibrary();
+	void _beSeenInLibrary();
+
+	bool _hasBeenSeenInSpace();
+	bool _hasBeenSeenInLibrary();
+
 
 	bool testFlags    (unsigned char flag);
 	bool testExtFlags (unsigned char flag);
@@ -152,10 +163,16 @@ public:
 	void  _basicAtPut(int index, unsigned long value);
 
 
-	// proxying method
+	// proxying objects
 	bool _isProxy();
 	void _setProxee(oop_t *copy);
 	oop_t* _getProxee();
+
+	// threading objects
+	ulong _unthreadedSize();
+
+	ulong _rotate();
+	ulong _unrotate();
 
 	// for testing
 	bool equalsStr(const char *aString);

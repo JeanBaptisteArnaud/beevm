@@ -13,6 +13,7 @@
 #include "Memory.h"
 #include "VMVariables.h"
 #include "../GarbageCollector/GenerationalGC.h"
+#include "../GarbageCollector/MarkAndCompactGC.h"
 
 using namespace Bee;
 using namespace std;
@@ -39,9 +40,16 @@ void Memory::scavengeFromSpace()
 	flipper->collect();
 }
 
+void Memory::collectOldSpace()
+{
+	compactor->collect();
+}
+
+
 void Memory::useHostVMVariables()
 {
 	flipper->useHostVMVariables();
+	compactor->useHostVMVariables();
 }
 
 void Memory::updateFromHostVM()

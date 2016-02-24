@@ -20,26 +20,17 @@ public:
 	GenerationalGC();
 	~GenerationalGC();
 
-	void initialize();
-	void initLocals();
 
-	void collect();
-
-	void setUpLocals();
-	void setUpNonLocals();
 	void doCollect();
-
+	
+//protected:
 
 	void purgeRoots();
 	void followRoots();
-
 	void addRoot(oop_t *object);
 	bool arenaIncludes(oop_t *object);
 	oop_t* copyTo(oop_t *object, GCSpace &to);
 	oop_t* moveToOldOrTo(oop_t* object);
-
-
-//protected:
 	bool hasToPurge(oop_t *object);
 	oop_t** codeCacheReferenceAtOffset(ulong offset);
 	void moveToOldAll(ReferencedVMArray &objects);
@@ -56,7 +47,6 @@ public:
 	void updateSpacesDelta();
 	oop_t* moveToOldSpace(oop_t* object);
 	oop_t* moveToToSpace(oop_t* object);
-
 	void spacesDelta(ulong delta);
 	ulong spacesDelta();
 	ulong* framePointerToStartWalkingTheStack();
