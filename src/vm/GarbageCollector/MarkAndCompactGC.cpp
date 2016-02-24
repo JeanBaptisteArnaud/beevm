@@ -5,6 +5,8 @@
 #include "../DataStructures/ObjectFormat.h"
 #include "../DataStructures/KnownObjects.h"
 #include "../DataStructures/Memory.h"
+#include "../DataStructures/SLLInfo.h"
+
 
 using namespace Bee;
 
@@ -12,14 +14,14 @@ void MarkAndCompactGC::initNonLocals()
 {
 	GarbageCollector::initNonLocals();
 	tempArray.setSpace(&oldSpace);
-	
+
 }
 
 void MarkAndCompactGC::useHostVMVariables()
 {
 	GarbageCollector::useHostVMVariables();
 
-	sKernelMeta.setBase((ulong *) VMVariablesProxy::hostVMFixedObjectsStart()->_asPointer());
+	sKernelMeta.setBase((ulong *)VMVariablesProxy::hostVMFixedObjectsStart()->_asPointer());
 	sKernelMeta.setNextFree((ulong *)VMVariablesProxy::hostVMFixedObjectsEnd()->_asPointer());
 }
 
@@ -73,7 +75,7 @@ void MarkAndCompactGC::unseeWellKnownObjects()
 void MarkAndCompactGC::unseeCharacters()
 {
 	oop_t * next = characters.firstObject();
-	while ((ulong *) next <= characters.getNextFree()) {
+	while ((ulong *)next <= characters.getNextFree()) {
 		next->_beUnseenInLibrary();
 		next = next->nextObject();
 	}
@@ -88,10 +90,7 @@ void MarkAndCompactGC::unseeSKernelMeta()
 	}
 
 }
-void MarkAndCompactGC::unseeLibraryObjects()
-{
-	// self librariesDo: [:sll | sll.objectsDo(object _beUnseenInLibrary)];
-}
+
 void MarkAndCompactGC::flushCodeCache()
 {
 	//this->_flushCodeCache();
@@ -137,7 +136,7 @@ void MarkAndCompactGC::setNewPositions(GCSpace * space)
 	oop_t * next = space->firstObject();
 	while (space->isBelowNextFree(next)) {
 		if (next->_hasBeenSeenInSpace()) {
-			oop_t * newPosition =  asObject(auxSpace.getNextFree()) + next->_headerSizeInBytes();
+			oop_t * newPosition = asObject(auxSpace.getNextFree()) + next->_headerSizeInBytes();
 			oop_t * reference = next->_getProxee();
 			oop_t * headerBits;
 			do {
@@ -148,7 +147,7 @@ void MarkAndCompactGC::setNewPositions(GCSpace * space)
 			} while (true);
 			next->slot(-2) = headerBits;
 			next->_beSeenInSpace();
-			auxSpace.setNextFree((ulong *) pointerConst((ulong) newPosition + next->_sizeInBytes()));
+			auxSpace.setNextFree((ulong *)pointerConst((ulong)newPosition + next->_sizeInBytes()));
 		}
 		next = next->nextObject();
 	}
@@ -273,16 +272,21 @@ void MarkAndCompactGC::followCountStartingAt(slot_t *frame, ulong size, ulong st
 	//						scanned : = stack pop]
 }
 
-void MarkAndCompactGC::librariesDo()
+void MarkAndCompactGC::unseeLibraryObjects()
 {
-	//: aBlock
-	//	| array size |
-	//	array : = self librariesArray.
-	//	size : = self librariesArraySize.
-	//	1 to : size do : [:i |
-	//	library contents : (array _basicAt: i).
-	//	aBlock value : library].
-	//	library contents : nil
+	SLLInfo  library;
+	oop_t * array = VMVariablesProxy::hostVMLibrariesArray();
+	ulong size = this->librariesArraySize();
+	for (int index = 0; index < size; index++)
+	{
+		library.contents = array->slot(index);
+		oop_t * next = library.firstObject();
+		while (library.isBelowNextFree(next)) {
+			next->_beUnseenInLibrary();
+		}
+		next = next->nextObject();
+	}
+	//library.contents = KnownObjects::nil;
 }
 
 bool MarkAndCompactGC::arenaIncludes(oop_t * object)
@@ -297,27 +301,27 @@ ulong MarkAndCompactGC::librariesArraySize()
 
 void MarkAndCompactGC::fixReferencesOrSetTombstone(oop_t * weakContainer)
 {
-	ulong size = this->arenaIncludes(weakContainer) ? 
+	ulong size = this->arenaIncludes(weakContainer) ?
 		weakContainer->_unthreadedSize() : weakContainer->_size();
-	
-		
+
+
 	for (ulong i = 0; i < size; i++)
 	{
 		oop_t *instance = weakContainer->slot(i);
-		bool seen = this->arenaIncludes(instance) ? 
+		bool seen = this->arenaIncludes(instance) ?
 			instance->_hasBeenSeenInSpace() : instance->_hasBeenSeenInLibrary();
 
 		if (!seen)
 			weakContainer->slot(i) = residueObject;
 	}
 
-	this->followCountStartingAt((slot_t*)weakContainer, size,1);
+	this->followCountStartingAt((slot_t*)weakContainer, size, 1);
 }
 
 
 bool MarkAndCompactGC::checkReachablePropertyOf(oop_t * ephemeron)
 {
-	
+
 	oop_t *key = ephemeron->slot(0);
 	if (key->isSmallInteger())
 		return true;

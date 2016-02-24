@@ -1,5 +1,5 @@
 #include "SLLInfo.h"
-
+#include "ObjectFormat.h"
 
 using namespace Bee;
 
@@ -17,10 +17,10 @@ ulong * SLLInfo::getBase() {
 }
 
 ulong * SLLInfo::getNextFree() {
-	return this->end();
+	return (ulong *) this->end();
 }
 
 oop_t * SLLInfo::end() {
-	return (ulong *) contents->slot(14)->_asPointer();
+	return contents->slot(14)->_asPointer();
 }
 

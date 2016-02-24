@@ -7,6 +7,10 @@ namespace Bee
 	class SLLInfo : public GCSpace
 	{
 	public:
+
+		oop_t * contents;
+
+
 		SLLInfo();
 		~SLLInfo();
 		ulong * getBase();
@@ -14,9 +18,5 @@ namespace Bee
 		oop_t * end();
 		ulong version();
 		ulong dataSize();
-
-	protected:
-		oop_t * contents;
-
 	};
 }
