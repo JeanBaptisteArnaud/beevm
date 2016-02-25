@@ -9,7 +9,7 @@
 #include "DataStructures/Memory.h"
 #include "GarbageCollector/MarkAndCompactGC.h"
 
-extern cute::suite make_suite_GCMarkAndCompact();
+extern cute::suite make_suite_GCMarkAndCompactTest();
 
 using namespace Bee;
 using namespace std;
@@ -26,7 +26,7 @@ GCMarkAndCompactTest::~GCMarkAndCompactTest()
 	tearDown();
 }
 
-GCMarkAndCompactTest* GCMarkAndCompactTest::compactor()
+MarkAndCompactGC * GCMarkAndCompactTest::compactor()
 {
 	return memory->compactor;
 }
@@ -45,11 +45,11 @@ void GCMarkAndCompactTest::tearDown()
 {
 }
 
-GCMarkAndCompactTest::GCMarkAndCompactTest()
+cute::suite make_suite_GCMarkAndCompactTest()
 {
-}
+	cute::suite s;
 
+	//	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testSynchronousGCSpace));
 
-GCMarkAndCompactTest::~GCMarkAndCompactTest()
-{
+	return s;
 }

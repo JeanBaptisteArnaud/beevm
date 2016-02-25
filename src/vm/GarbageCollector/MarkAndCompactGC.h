@@ -36,6 +36,7 @@ public:
 	void resetFrom();
 	void decommitSlack();
 	void disableRememberedSet();
+	void someEphemeronsRescued();
 	void unseeCharacters();
 	void unseeSKernelMeta();
 	void unseeLibraryObjects();

@@ -11,7 +11,7 @@
 #include "GarbageCollector/GenerationalGC.h"
 
 
-extern cute::suite make_suite_GCTest();
+extern cute::suite make_suite_GCFlipTest();
 
 using namespace Bee;
 using namespace std;

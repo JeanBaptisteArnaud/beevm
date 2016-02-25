@@ -10,7 +10,7 @@ namespace Bee
 {
 
 	class Memory;
-	class GenerationalGC;
+	class MarkAndCompactGC;
 	class GCSpace;
 
 	class GCMarkAndCompactTest : public GCTest
@@ -21,10 +21,7 @@ namespace Bee
 
 		void setUp();
 		void tearDown();
-
-		MarkAndCompactGC* compactor();
-
-		void testGCCollect();
+		MarkAndCompactGC * compactor();
 
 		Memory *memory;
 	};

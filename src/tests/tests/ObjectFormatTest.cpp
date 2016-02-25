@@ -12,7 +12,7 @@
 #include "GarbageCollector/GenerationalGC.h"
 
 
-extern cute::suite make_suite_VMMemoryTest();
+extern cute::suite make_suite_ObjectFormatTest();
 
 using namespace std;
 using namespace Bee;
@@ -249,7 +249,7 @@ void ObjectFormatTest::testMulti()
 	//Memory::current()->setGC(flipper);
 }
 
-cute::suite make_suite_VMMemoryTest()
+cute::suite make_suite_ObjectFormatTest()
 {
 	cute::suite s;
 

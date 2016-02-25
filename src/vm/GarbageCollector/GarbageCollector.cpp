@@ -189,7 +189,7 @@ void GarbageCollector::followStack()
 	ulong *frame = this->framePointerToStartWalkingTheStack();
 	ulong endMarker = 0;
 
-	do 
+	do
 	{
 		ulong nextFrame = *frame;
 		if (nextFrame != endMarker)
@@ -200,21 +200,21 @@ void GarbageCollector::followStack()
 			{
 				this->followCountStartingAt((slot_t*)frame, 5, 3);
 				start = 9;
-			} else
+			}
+			else
 				start = 3;
 
 			this->followFrameCountStartingAt((slot_t*)frame, size, start);
-			frame = (ulong *) nextFrame;
+			frame = (ulong *)nextFrame;
 		}
 		else
 			break;
-	} while(true);
-
-
+	} while (true);
+}
 
 ulong * GarbageCollector::framePointerToStartWalkingTheStack()
 {
-		return vm.framePointerToStartWalkingTheStack();
+	return vm.framePointerToStartWalkingTheStack();
 }
 
 void GarbageCollector::followFrameCountStartingAt(slot_t *frame, ulong size, ulong startIndex)

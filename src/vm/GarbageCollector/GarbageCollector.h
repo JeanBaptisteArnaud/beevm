@@ -68,8 +68,8 @@ public:
 	void forgetNativeObjects();
 	void followFrameCountStartingAt(slot_t *frame, ulong size , ulong startIndex);
 	bool followEphemeronsCollectingUnknowns();
-	virtual void followCountStartingAt(slot_t *roots, int count, long start) = 0;
 	ulong* framePointerToStartWalkingTheStack();
+	virtual void followCountStartingAt(slot_t *roots, int count, long start) = 0;
 	virtual bool checkReachablePropertyOf(oop_t *ephemeron) = 0;
 	virtual void someEphemeronsRescued() = 0;
 	virtual void fixReferencesOrSetTombstone(oop_t *weakArray) = 0;

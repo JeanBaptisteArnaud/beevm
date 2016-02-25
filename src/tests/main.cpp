@@ -9,10 +9,10 @@
 extern cute::suite make_suite_VMArrayTest();
 extern cute::suite make_suite_GCSpaceTest();
 extern cute::suite make_suite_GCSpaceInfoTest();
-extern cute::suite make_suite_VMMemoryTest();
+extern cute::suite make_suite_ObjectFormatTest();
 extern cute::suite make_suite_MemoryTest();
 extern cute::suite make_suite_GCFlipTest();
-
+extern cute::suite make_suite_GCMarkAndCompactTest();
 
 
 void runSuite(int argc, char const *argv[]){
@@ -22,9 +22,10 @@ void runSuite(int argc, char const *argv[]){
 	//scute::makeRunner(lis,argc,argv)(make_suite_GCSpaceInfoTest(), "GCSpaceInfoTest");
 	//cute::makeRunner(lis,argc,argv)(make_suite_VMArrayTest(), "VMArrayTest");
 	cute::makeRunner(lis,argc,argv)(make_suite_GCSpaceTest(), "GCSpaceTest");
-	cute::makeRunner(lis,argc,argv)(make_suite_VMMemoryTest(), "VMMemoryTest");
+	cute::makeRunner(lis,argc,argv)(make_suite_ObjectFormatTest(), "ObjectFormatTest");
 	//cute::makeRunner(lis,argc,argv)(make_suite_MemoryTest(), "MemoryTest");
 	//cute::makeRunner(lis,argc,argv)(make_suite_GCFlipTest(), "GCFlipTest");
+	cute::makeRunner(lis,argc,argv)(make_suite_GCMarkAndCompactTest(), "GCMarkAndCompactTest");
 }
 
 int main(int argc, char const *argv[])
