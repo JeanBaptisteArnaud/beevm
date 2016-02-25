@@ -21,6 +21,8 @@ namespace Bee
 
 		void setUp();
 		void tearDown();
+		void testCompact();
+
 		MarkAndCompactGC * compactor();
 
 		Memory *memory;

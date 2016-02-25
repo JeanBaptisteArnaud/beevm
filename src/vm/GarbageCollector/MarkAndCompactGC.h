@@ -20,7 +20,7 @@ public:
 	MarkAndCompactGC();
 	~MarkAndCompactGC();
 
-	virtual void useOwnVMVariables();
+	//virtual void useOwnVMVariables();
 	virtual void useHostVMVariables();
 
 	void doCollect();

@@ -7,7 +7,7 @@
 #include "DataStructures/ObjectFormat.h"
 
 #include "GarbageCollector/GenerationalGC.h"
-
+#include "GarbageCollector/MarkAndCompactGC.h"
 
 using namespace Bee;
 
@@ -37,18 +37,29 @@ Memory *GCTest::memoryForTesting()
 	memory->rescuedEphemerons        ->slot(0) = smiConst(2); // size = 0
 
 	memory->residueObject = mockedObjects.newObject();
+	
+	GCSpaceInfo info = GCSpaceInfo::newSized(32 * 1024);
 
 	memory->flipper->memory = memory;
-	memory->flipper->localSpace.loadFrom(GCSpaceInfo::newSized(32 * 1024));
+	memory->compactor->memory = memory;
+
+	memory->flipper->localSpace.loadFrom(info);
+	memory->compactor->localSpace.loadFrom(info);
+
 	memory->flipper->initialize();
+	memory->compactor->initialize();
 
 	memory->flipper->useOwnVMVariables();
+	memory->compactor->useOwnVMVariables();
 
 	memory->flipper->vm.framePointerToStartWalkingTheStack(mockedObjects.stackPtr());
-	*memory->flipper->vm.JIT_globalLookupCache = (oop_t*)new ulong[0x4000];
+	memory->compactor->vm.framePointerToStartWalkingTheStack(mockedObjects.stackPtr());
 
+	*memory->flipper->vm.JIT_globalLookupCache = (oop_t*)new ulong[0x4000];
+	*memory->compactor->vm.JIT_globalLookupCache = (oop_t*)new ulong[0x4000];
 
 	memory->flipper->updateFromMemory();
+	memory->compactor->updateFromMemory();
 
 	return memory;
 }
