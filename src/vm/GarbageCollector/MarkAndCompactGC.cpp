@@ -256,7 +256,7 @@ void MarkAndCompactGC::followCountStartingAt(slot_t * root, ulong size, ulong ba
 						}
 						this->rememberIfWeak(object);
 					}
-					//object _threadWith : oldScanned at : oldIndex.
+					object->_threadWithAt((oop_t *) oldScanned, oldIndex);
 				}
 				else
 				{
@@ -279,7 +279,7 @@ void MarkAndCompactGC::followCountStartingAt(slot_t * root, ulong size, ulong ba
 		{
 			limit = stack.pop()->_asNative();
 			index = stack.pop()->_asNative();
-			scanned = (oop_t **)stack.pop();
+			scanned = (slot_t *)stack.pop();
 		}
 		else
 			break;

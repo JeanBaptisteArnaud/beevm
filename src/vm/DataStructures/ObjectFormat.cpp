@@ -320,6 +320,12 @@ ulong oop_t::_unthreadedSize()
 		(nextObject->_asNative() / 0x10000000) & 0xFF : this->_extendedSize();
 }
 
+void oop_t::_threadWithAt(oop_t * object, long index)
+{
+	object->slot(index) = this->slot(-2);
+	this->_setProxee(object->slot(-2));
+}
+
 // tool
 ulong Bee::rotateLeft(ulong n, unsigned int c)
 {

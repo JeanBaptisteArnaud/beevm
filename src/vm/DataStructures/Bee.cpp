@@ -36,5 +36,6 @@ void Bee::error(char *message)
 
 void Bee::debug(char *message)
 {
+	cout << message << endl;
 	OutputDebugString(message);
 }

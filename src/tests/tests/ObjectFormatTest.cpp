@@ -231,18 +231,12 @@ void ObjectFormatTest::testVirtualBehavior()
 
 void ObjectFormatTest::testProxying()
 {
-	//GenerationalGC * flipper = new GenerationalGC();
-	//Memory::current()->setGC(flipper);
-	//GCSpace local = GCSpace::dynamicNew(1024 * 1024 * 4 * 6);
-	//flipper->localSpace = local;
-	//flipper->initLocals();
-	//flipper->initNonLocals();
-	//oop_t *object = flipper->fromSpace.shallowCopy(mockedObjects.newArray(1024));
-	//oop_t *copy = flipper->copyTo(object, flipper->toSpace);
-	//cerr << object[-2] << endl;
-	//cerr << rotateLeft(object[-2],8) << endl;
-	//cerr << (ulong) copy << endl;
-	//cerr << rotateRight((ulong)copy, 8) << endl;	
+		oop_t *object = mockedObjects.newArray(1);
+		ASSERTM("Already detect as Proxy", !(object->_isProxy()));
+		object->_setProxee(object);
+		ASSERTM("Something go Strange Invariant of pointer 0xff[..]00 is broken", !(object->_isSecondGeneration()));
+		ASSERTM("Not a proxy", object->_isProxy());
+		ASSERTM("Recovering Value isnt  good", object->_getProxee() == object);
 }
 
 void ObjectFormatTest::testMulti()
@@ -258,6 +252,8 @@ void ObjectFormatTest::testMulti()
 cute::suite make_suite_VMMemoryTest()
 {
 	cute::suite s;
+
+	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testProxying));
 	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testNextObject));
 	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testHeaderOf));
 	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testBasicSize));
@@ -265,7 +261,6 @@ cute::suite make_suite_VMMemoryTest()
 	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testRotateLeft));
 	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testObjectFlagManipulation));
 	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testVirtualBehavior));
-	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testProxying));
 	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testMulti));
 	return s;
 }

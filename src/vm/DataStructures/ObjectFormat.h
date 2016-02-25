@@ -173,6 +173,7 @@ public:
 
 	// threading objects
 	ulong _unthreadedSize();
+	void _threadWithAt(oop_t *, long);
 
 	ulong _rotate();
 	ulong _unrotate();
