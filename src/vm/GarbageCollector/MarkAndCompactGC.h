@@ -46,7 +46,7 @@ public:
 	void allocateWeakContainersArray();
 	void allocateEphemeronsArray();
 	void forgetNativeObjects();
-	void followCountStartingAt(slot_t *frame, ulong size, ulong startIndex);
+	void followCountStartingAt(slot_t *frame, int size, long startIndex);
 	void setNewPositions(GCSpace * space);
 	void compact(GCSpace * space);
 	void librariesDo();

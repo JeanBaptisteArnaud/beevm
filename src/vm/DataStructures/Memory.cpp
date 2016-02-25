@@ -21,6 +21,7 @@ using namespace std;
 Memory::Memory()
 {
 	flipper = new GenerationalGC();
+	compactor = new MarkAndCompactGC();
 }
 
 void Memory::growIfTime()

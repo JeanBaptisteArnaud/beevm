@@ -210,6 +210,11 @@ void GarbageCollector::followStack()
 			break;
 	} while(true);
 
+
+
+ulong * GarbageCollector::framePointerToStartWalkingTheStack()
+{
+		return vm.framePointerToStartWalkingTheStack();
 }
 
 void GarbageCollector::followFrameCountStartingAt(slot_t *frame, ulong size, ulong startIndex)

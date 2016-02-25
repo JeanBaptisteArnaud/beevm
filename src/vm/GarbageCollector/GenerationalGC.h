@@ -49,7 +49,6 @@ public:
 	oop_t* moveToToSpace(oop_t* object);
 	void spacesDelta(ulong delta);
 	ulong spacesDelta();
-	ulong* framePointerToStartWalkingTheStack();
 	void fixReferencesOrSetTombstone(oop_t *weakContainer);
 	void followCountStartingAt(slot_t *slot, int count, long start);
 	void someEphemeronsRescued();

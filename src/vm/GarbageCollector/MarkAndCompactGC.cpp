@@ -228,9 +228,12 @@ void MarkAndCompactGC::disableRememberedSet()
 	rememberedSet.emptyReserving(0x100);
 }
 
+void MarkAndCompactGC::someEphemeronsRescued() {
+	// Should be empty
+}
 
 
-void MarkAndCompactGC::followCountStartingAt(slot_t * root, ulong size, ulong base)
+void MarkAndCompactGC::followCountStartingAt(slot_t * root, int size, long base)
 {
 	//stack = self localStack.
 	slot_t *scanned = root;

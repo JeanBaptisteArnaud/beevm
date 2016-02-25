@@ -164,11 +164,6 @@ void GenerationalGC::followRememberedSet()
 	}
 }
 
-ulong * GenerationalGC::framePointerToStartWalkingTheStack()
-{
-	return vm.framePointerToStartWalkingTheStack();
-}
-
 oop_t** GenerationalGC::codeCacheReferenceAtOffset(ulong offset)
 {
 	return (oop_t**) ((ulong)vm.codeCache() + offset);
