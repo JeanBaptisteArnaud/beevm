@@ -91,25 +91,23 @@ void GarbageCollector::setUpNonLocals()
 
 void GarbageCollector::useOwnVMVariables()
 {
-	vm.initializeFor(new VMVariables());
-
-	rememberedSet       .setReferer(&memory->rememberedSet);
-	literalsReferences  .setReferer(&memory->literalsReferences);
-	nativizedMethods    .setReferer(&memory->nativizedMethods);
-	classCheckReferences.setReferer(&memory->codeCacheObjectReferences);
-	rescuedEphemerons   .setReferer(&memory->rescuedEphemerons);
+	vm.initializeFor(new VMVariables(memory));
+	this->initializeFromVMVariables();
 }
 
 void GarbageCollector::useHostVMVariables()
 {
 	vm.initializeForHostVM();
+	this->initializeFromVMVariables();
+}
 
-	rememberedSet       .setReferer(vm.hostVMRememberedSet());
-	literalsReferences  .setReferer(vm.hostVMLiteralsReferences());
-	nativizedMethods    .setReferer(vm.hostVMNativizedMethods());
-	classCheckReferences.setReferer(vm.hostVMCodeCacheObjectReferences());
-	rescuedEphemerons   .setReferer(vm.hostVMRescuedEphemerons());
-
+void GarbageCollector::initializeFromVMVariables()
+{
+	rememberedSet       .setReferer(vm.rememberedSet());
+	literalsReferences  .setReferer(vm.literalsReferences());
+	nativizedMethods    .setReferer(vm.nativizedMethods());
+	classCheckReferences.setReferer(vm.codeCacheObjectReferences());
+	rescuedEphemerons   .setReferer(vm.rescuedEphemerons());
 }
 
 void GarbageCollector::updateFromMemory()

@@ -37,6 +37,7 @@ public:
 
 // protected
 
+	void initializeFromVMVariables();
 	virtual void initLocals();
 	virtual void initNonLocals();
 

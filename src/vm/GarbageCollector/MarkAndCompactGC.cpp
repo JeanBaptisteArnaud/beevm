@@ -32,8 +32,8 @@ void MarkAndCompactGC::useHostVMVariables()
 {
 	GarbageCollector::useHostVMVariables();
 
-	sKernelMeta.setBase((ulong *)VMVariablesProxy::hostVMFixedObjectsStart()->_asPointer());
-	sKernelMeta.setNextFree((ulong *)VMVariablesProxy::hostVMFixedObjectsEnd()->_asPointer());
+	sKernelMeta.setBase((ulong *)vm.fixedObjectsStart()->_asPointer());
+	sKernelMeta.setNextFree((ulong *)vm.fixedObjectsEnd()->_asPointer());
 }
 
 void MarkAndCompactGC::doCollect()
@@ -121,12 +121,12 @@ void MarkAndCompactGC::followAll()
 
 void MarkAndCompactGC::followWellKnownObjects()
 {
-	this->followCountStartingAt(VMVariablesProxy::hostVMWellKnownRoots(), VMVariablesProxy::hostVMWellKnownRootsSize(), 1);
+	this->followCountStartingAt(vm.wellKnownRoots(), vm.wellKnownRootsSize(), 1);
 }
 
 void MarkAndCompactGC::followExtraRoots()
 {
-	this->followCountStartingAt(VMVariablesProxy::hostVMExtraRoots(), 3, 1);
+	this->followCountStartingAt(vm.extraRoots(), 3, 1);
 }
 
 void MarkAndCompactGC::followRescuedEphemerons()
@@ -206,14 +206,14 @@ void MarkAndCompactGC::allocateArrays()
 
 void MarkAndCompactGC::allocateWeakContainersArray()
 {
-	tempArray.referer = VMVariablesProxy::hostVMWeakContainers();
+	tempArray.referer = vm.weakContainers();
 	tempArray.loadMDAFrom(&nativizedMethods);
 	tempArray.emptyReserving(0x100);
 }
 
 void MarkAndCompactGC::allocateEphemeronsArray()
 {
-	tempArray.referer = VMVariablesProxy::hostVMEphemerons();
+	tempArray.referer = vm.ephemerons();
 	tempArray.loadMDAFrom(&nativizedMethods);
 	tempArray.emptyReserving(0x100);
 }
@@ -303,9 +303,9 @@ void MarkAndCompactGC::followCountStartingAt(slot_t * root, int size, long base)
 void MarkAndCompactGC::unseeLibraryObjects()
 {
 	SLLInfo  library;
-	oop_t * array = VMVariablesProxy::hostVMLibrariesArray();
+	oop_t * array = vm.librariesArrayStart();
 	ulong size = this->librariesArraySize();
-	for (int index = 0; index < size; index++)
+	for (ulong index = 0; index < size; index++)
 	{
 		library.contents = array->slot(index);
 		oop_t * next = library.firstObject();
@@ -324,7 +324,7 @@ bool MarkAndCompactGC::arenaIncludes(oop_t * object)
 
 ulong MarkAndCompactGC::librariesArraySize()
 {
-	return ((ulong)VMVariablesProxy::hostVMLibrariesArrayEnd() - (ulong)VMVariablesProxy::hostVMLibrariesArray()) / 4;
+	return ((ulong)vm.librariesArrayEnd() - (ulong)vm.librariesArrayStart()) / 4;
 }
 
 void MarkAndCompactGC::fixReferencesOrSetTombstone(oop_t * weakContainer)

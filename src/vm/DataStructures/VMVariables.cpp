@@ -2,10 +2,11 @@
 #include "VMVariables.h"
 #include "ObjectFormat.h"
 #include "GCSpaceInfo.h"
+#include "Memory.h"
 
 using namespace Bee;
 
-VMVariables::VMVariables()
+VMVariables::VMVariables(Memory *memory)
 {
 	debugFrameMarker = (oop_t*)0;
 
@@ -19,6 +20,12 @@ VMVariables::VMVariables()
 	GC_anyCompiledMethodInFromSpace = false;
 	GC_spacesDelta;
 	GC_framePointerToWalkStack = 0;
+
+	rememberedSet              = &memory->rememberedSet;
+	literalsReferences         = &memory->literalsReferences;
+	nativizedMethods           = &memory->nativizedMethods;
+	codeCacheObjectReferences  = &memory->codeCacheObjectReferences;
+	rescuedEphemerons          = &memory->rescuedEphemerons;
 
 }
 
@@ -41,6 +48,26 @@ void VMVariablesProxy::initializeForHostVM()
 	GC_anyCompiledMethodInFromSpace = (bool*)0x10041710;
 	GC_spacesDelta = (ulong*)0x1004175C;
 
+	GC_rememberedSet             = hostVMRememberedSet();
+	GC_literalsReferences        = hostVMLiteralsReferences();
+	GC_nativizedMethods          = hostVMNativizedMethods();
+	GC_codeCacheObjectReferences = hostVMCodeCacheObjectReferences();
+	GC_rescuedEphemerons         = hostVMRescuedEphemerons();
+
+	GC_weakContainers      = hostVMWeakContainers();
+	GC_ephemerons          = hostVMEphemerons();
+	GC_tombstone           = hostVMTombstone();
+	GC_fixedObjectsStart   = hostVMFixedObjectsStart();
+	GC_fixedObjectsEnd     = hostVMFixedObjectsEnd();
+
+	GC_librariesArrayStart = hostVMLibrariesArrayStart();
+	GC_librariesArrayEnd   = hostVMLibrariesArrayEnd();
+	GC_characterBase       = hostVMCharacterBase();
+	GC_characterNextFree   = hostVMCharacterNextFree();
+
+	GC_wellKnownRoots      = hostVMWellKnownRoots();
+	GC_wellKnownRootsSize  = hostVMWellKnownRootsSize();
+	GC_extraRoots          = hostVMExtraRoots();
 }
 
 
@@ -56,111 +83,24 @@ void VMVariablesProxy::initializeFor(VMVariables *variables)
 	GC_anyNativizedCompiledMethodInFromSpace = &variables->GC_anyNativizedCompiledMethodInFromSpace;
 	GC_anyCompiledMethodInFromSpace = &variables->GC_anyCompiledMethodInFromSpace;
 	GC_spacesDelta = &variables->GC_spacesDelta;
+
+
+	GC_weakContainers      = &variables->weakContainers;
+	GC_ephemerons          = &variables->ephemerons;
+	GC_tombstone           = &variables->tombstone;
+	GC_fixedObjectsStart   = &variables->fixedObjectsStart;
+	GC_fixedObjectsEnd     = &variables->fixedObjectsEnd;
+
+	GC_librariesArrayStart = &variables->librariesArrayStart;
+	GC_librariesArrayEnd   = &variables->librariesArrayEnd;
+	GC_characterBase       = &variables->characterBase;
+	GC_characterNextFree   = &variables->characterNextFree;
+
+	GC_wellKnownRoots      = &variables->wellKnownRoots;
+	GC_wellKnownRootsSize  = &variables->wellKnownRootsSize;
+	GC_extraRoots          = &variables->extraRoots;
 }
 
-oop_t* VMVariablesProxy::hostVMCharacterBase()
-{
-	return (oop_t*)0x100260C0;
-}
-
-oop_t* VMVariablesProxy::hostVMCharacterNextFree()
-{
-	return (oop_t*)(12 * 8 + 0x100260C0);
-}
-	
-
-oop_t* VMVariablesProxy::hostVMFixedObjectsEnd()
-{
-	return *(oop_t**)0x100406A0;
-}
-
-oop_t* VMVariablesProxy::hostVMFixedObjectsStart()
-{
-	return *(oop_t**)0x1004069C;
-}
-
-oop_t* VMVariablesProxy::hostVMLibrariesArray()
-{
-	return *(oop_t**)0x10040750;
-}
-
-oop_t* VMVariablesProxy::hostVMLibrariesArrayEnd()
-{
-	return *(oop_t**)0x10040754;
-}
-
-oop_t** VMVariablesProxy::hostVMEphemerons()
-{
-	return (oop_t**)0x1004078C;
-}
-
-
-oop_t** VMVariablesProxy::hostVMWeakContainers()
-{
-	return (oop_t**)0x1004077C;
-}
-
-
-oop_t** VMVariablesProxy::hostVMTombstone()
-{
-	return (oop_t**)0x1004079C;
-}
-
-
-oop_t** VMVariablesProxy::hostVMWellKnownRoots()
-{
-	return (oop_t**)0x100411E0;
-}
-ulong  VMVariablesProxy::hostVMWellKnownRootsSize()
-{
-	return *(ulong *)0x10041694;
-}
-
-oop_t** VMVariablesProxy::hostVMExtraRoots()
-{
-	return (oop_t**)0x10040798;
-}
-
-
-oop_t** VMVariablesProxy::hostVMRememberedSet()
-{
-	return (oop_t**)0x1004070C;
-}
-
-oop_t** VMVariablesProxy::hostVMLiteralsReferences()
-{
-	return (oop_t**)0x10040720;
-}
-
-oop_t** VMVariablesProxy::hostVMNativizedMethods()
-{
-	return (oop_t**)0x10040730;
-}
-
-oop_t** VMVariablesProxy::hostVMCodeCacheObjectReferences()
-{
-	return (oop_t**)0x100406CC;
-}
-
-oop_t** VMVariablesProxy::hostVMRescuedEphemerons()
-{
-	return (oop_t**)0x100407A8;
-}
-
-GCSpaceInfo VMVariablesProxy::hostVMFromSpace()
-{
-	return GCSpaceInfo::withContents((uchar*)0x100416B0);
-}
-
-GCSpaceInfo VMVariablesProxy::hostVMToSpace()
-{
-	return GCSpaceInfo::withContents((uchar*)0x100416C8);
-}
-
-GCSpaceInfo VMVariablesProxy::hostVMOldSpace()
-{
-	return GCSpaceInfo::withContents((uchar*)0x100406B0);
-}
 
 bool VMVariablesProxy::globalCacheHasPointersToFrom()
 {
@@ -227,3 +167,197 @@ char* VMVariablesProxy::codeCache()
 {
 	return *JIT_codeCache;
 }
+
+
+oop_t** VMVariablesProxy::rememberedSet()
+{
+	return GC_rememberedSet;
+}
+
+oop_t** VMVariablesProxy::literalsReferences()
+{
+	return GC_literalsReferences;
+}
+
+oop_t** VMVariablesProxy::nativizedMethods()
+{
+	return GC_nativizedMethods;
+}
+oop_t** VMVariablesProxy::codeCacheObjectReferences()
+{
+	return GC_codeCacheObjectReferences;
+}
+
+oop_t** VMVariablesProxy::rescuedEphemerons()
+{
+	return GC_rescuedEphemerons;
+}
+
+// for compactor
+oop_t** VMVariablesProxy::weakContainers()
+{
+	return GC_weakContainers;
+}
+
+oop_t** VMVariablesProxy::ephemerons()
+{
+	return GC_ephemerons;
+}
+
+oop_t** VMVariablesProxy::tombstone()
+{
+	return GC_tombstone;
+}
+
+oop_t*  VMVariablesProxy::fixedObjectsStart()
+{
+	return *GC_fixedObjectsStart;
+}
+
+oop_t*  VMVariablesProxy::fixedObjectsEnd()
+{
+	return *GC_fixedObjectsEnd;
+}
+
+oop_t*  VMVariablesProxy::librariesArrayStart()
+{
+	return *GC_librariesArrayStart;
+}
+
+oop_t*  VMVariablesProxy::librariesArrayEnd()
+{
+	return *GC_librariesArrayEnd;
+}
+
+oop_t*  VMVariablesProxy::characterBase()
+{
+	return *GC_characterBase;
+}
+
+oop_t*  VMVariablesProxy::characterNextFree()
+{
+	return *GC_characterNextFree;
+}
+
+oop_t** VMVariablesProxy::wellKnownRoots()
+{
+	return GC_wellKnownRoots;
+}
+
+ulong   VMVariablesProxy::wellKnownRootsSize()
+{
+	return *GC_wellKnownRootsSize;
+}
+
+oop_t** VMVariablesProxy::extraRoots()
+{
+	return GC_extraRoots;
+}
+
+
+
+oop_t** VMVariablesProxy::hostVMCharacterBase()
+{
+	return (oop_t**)0x100260C0;
+}
+
+oop_t** VMVariablesProxy::hostVMCharacterNextFree()
+{
+	return (oop_t**)(12 * 8 + 0x100260C0);
+}
+	
+
+oop_t** VMVariablesProxy::hostVMFixedObjectsEnd()
+{
+	return (oop_t**)0x100406A0;
+}
+
+oop_t** VMVariablesProxy::hostVMFixedObjectsStart()
+{
+	return (oop_t**)0x1004069C;
+}
+
+oop_t** VMVariablesProxy::hostVMLibrariesArrayStart()
+{
+	return (oop_t**)0x10040750;
+}
+
+oop_t** VMVariablesProxy::hostVMLibrariesArrayEnd()
+{
+	return (oop_t**)0x10040754;
+}
+
+oop_t** VMVariablesProxy::hostVMEphemerons()
+{
+	return (oop_t**)0x1004078C;
+}
+
+
+oop_t** VMVariablesProxy::hostVMWeakContainers()
+{
+	return (oop_t**)0x1004077C;
+}
+
+
+oop_t** VMVariablesProxy::hostVMTombstone()
+{
+	return (oop_t**)0x1004079C;
+}
+
+
+oop_t** VMVariablesProxy::hostVMWellKnownRoots()
+{
+	return (oop_t**)0x100411E0;
+}
+
+ulong*  VMVariablesProxy::hostVMWellKnownRootsSize()
+{
+	return (ulong *)0x10041694;
+}
+
+oop_t** VMVariablesProxy::hostVMExtraRoots()
+{
+	return (oop_t**)0x10040798;
+}
+
+
+oop_t** VMVariablesProxy::hostVMRememberedSet()
+{
+	return (oop_t**)0x1004070C;
+}
+
+oop_t** VMVariablesProxy::hostVMLiteralsReferences()
+{
+	return (oop_t**)0x10040720;
+}
+
+oop_t** VMVariablesProxy::hostVMNativizedMethods()
+{
+	return (oop_t**)0x10040730;
+}
+
+oop_t** VMVariablesProxy::hostVMCodeCacheObjectReferences()
+{
+	return (oop_t**)0x100406CC;
+}
+
+oop_t** VMVariablesProxy::hostVMRescuedEphemerons()
+{
+	return (oop_t**)0x100407A8;
+}
+
+GCSpaceInfo VMVariablesProxy::hostVMFromSpace()
+{
+	return GCSpaceInfo::withContents((uchar*)0x100416B0);
+}
+
+GCSpaceInfo VMVariablesProxy::hostVMToSpace()
+{
+	return GCSpaceInfo::withContents((uchar*)0x100416C8);
+}
+
+GCSpaceInfo VMVariablesProxy::hostVMOldSpace()
+{
+	return GCSpaceInfo::withContents((uchar*)0x100406B0);
+}
+
