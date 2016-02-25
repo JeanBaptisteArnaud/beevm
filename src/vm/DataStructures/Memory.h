@@ -44,6 +44,8 @@ public:
 	static const ulong instVarCount = 8;
 
 public: // for testing
+	GenerationalGC *flipper;
+	MarkAndCompactGC *compactor;
 
 	GCSpace **spaces;
 	GCSpace **collectedSpaces;
@@ -53,10 +55,6 @@ public: // for testing
 	GCSpace *oldSpace;
 
 	oop_t *residueObject;
-	oop_t *statistics;
-
-	GenerationalGC *flipper;
-
 	oop_t *emptyArray;
 
 	oop_t *rememberedSet;
@@ -65,7 +63,7 @@ public: // for testing
 	oop_t *nativizedMethods;
 	oop_t *rescuedEphemerons;
 
-	MarkAndCompactGC *compactor;
+	oop_t *statistics;
 };
 
 }
