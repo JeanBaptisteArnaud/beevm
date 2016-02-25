@@ -230,46 +230,60 @@ void MarkAndCompactGC::disableRememberedSet()
 
 
 
-void MarkAndCompactGC::followCountStartingAt(slot_t *frame, ulong size, ulong startIndex)
+void MarkAndCompactGC::followCountStartingAt(slot_t * root, ulong size, ulong base)
 {
-	//| index scanned limit |
-	//scanned : = root.
-	//index : = base - 1.
-	//limit : = index + size.
-	//[
-	//	[index < limit] whileTrue:[| object |
-	//	index:= index + 1.
-	//object : = scanned _basicAt : index.
-	//object _isSmallInteger ifFalse : [
-	//	(self arenaIncludes : object)
-	//		ifTrue:[| oldIndex oldScanned |
-	//		oldScanned:= scanned.
-	//		oldIndex : = index.
-	//		object _hasBeenSeenInSpace ifFalse : [
-	//			index < limit ifTrue : [
-	//				stack
-	//					push : scanned;
-	//			push: index;
-	//			push: limit].
-	//				self rememberIfWeak : object].
-	//		object _threadWith : oldScanned at : oldIndex]
-	//		ifFalse: [
-	//					 object _hasBeenSeenInLibrary ifFalse : [
-	//						 object _beSeenInLibrary.
-	//							 index < limit ifTrue : [
-	//								 stack
-	//									 push : scanned;
-	//							 push: index;
-	//							 push: limit].
-	//							 self rememberIfWeak : object].
-	//						 index : = -1.
-	//								 limit : = index + object _strongPointersSize.
-	//								 scanned : = object]]].
-	//stack isEmpty]
-	//	whileFalse: [
-	//					limit:= stack pop.
-	//						index : = stack pop.
-	//						scanned : = stack pop]
+	//stack = self localStack.
+	slot_t *scanned = root;
+	long index = base - 1;
+	long limit = index + size;
+
+	do
+	{
+		while (index < limit)
+		{
+			index = index + 1;
+			oop_t *object = scanned[index - 1];
+			if (!object->isSmallInteger()) {
+				if (this->arenaIncludes(object))
+				{
+					slot_t * oldScanned = scanned;
+					long oldIndex = index;
+					if (!(object->_hasBeenSeenInSpace())) {
+						if (index < limit) {
+							stack.push((oop_t *)scanned);
+							stack.push(smiConst(index));
+							stack.push(smiConst(limit));
+						}
+						this->rememberIfWeak(object);
+					}
+					//object _threadWith : oldScanned at : oldIndex.
+				}
+				else
+				{
+					if (!object->_hasBeenSeenInLibrary()) {
+						object->_beSeenInLibrary();
+						if (index < limit) {
+							stack.push((oop_t *)scanned);
+							stack.push(smiConst(index));
+							stack.push(smiConst(limit));
+						}
+						this->rememberIfWeak(object);
+					}
+					index = -1;
+					limit = index + object->_strongPointersSize();
+					scanned = (slot_t *)object;
+				}
+			}
+		}
+		if (!stack.isEmpty())
+		{
+			limit = stack.pop()->_asNative();
+			index = stack.pop()->_asNative();
+			scanned = (oop_t **)stack.pop();
+		}
+		else
+			break;
+	} while (true);
 }
 
 void MarkAndCompactGC::unseeLibraryObjects()
