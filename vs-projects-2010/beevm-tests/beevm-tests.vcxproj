@@ -78,6 +78,7 @@
     <ClCompile Include="..\..\src\vm\DataStructures\Memory.cpp" />
     <ClCompile Include="..\..\src\vm\DataStructures\ObjectFormat.cpp" />
     <ClCompile Include="..\..\src\vm\DataStructures\ReferencedVMArray.cpp" />
+    <ClCompile Include="..\..\src\vm\DataStructures\SLLInfo.cpp" />
     <ClCompile Include="..\..\src\vm\DataStructures\VMArray.cpp" />
     <ClCompile Include="..\..\src\vm\DataStructures\VMVariables.cpp" />
     <ClCompile Include="..\..\src\vm\GarbageCollector\GarbageCollector.cpp" />
@@ -98,6 +99,7 @@
     <ClInclude Include="..\..\src\vm\DataStructures\Memory.h" />
     <ClInclude Include="..\..\src\vm\DataStructures\ObjectFormat.h" />
     <ClInclude Include="..\..\src\vm\DataStructures\ReferencedVMArray.h" />
+    <ClInclude Include="..\..\src\vm\DataStructures\SLLInfo.h" />
     <ClInclude Include="..\..\src\vm\DataStructures\VMArray.h" />
     <ClInclude Include="..\..\src\vm\DataStructures\VMVariables.h" />
     <ClInclude Include="..\..\src\vm\GarbageCollector\GarbageCollector.h" />
