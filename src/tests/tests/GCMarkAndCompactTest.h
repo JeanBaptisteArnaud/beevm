@@ -21,8 +21,13 @@ namespace Bee
 
 		void setUp();
 		void tearDown();
+		// compact family
 		void testCompact();
 		void testCompactExtended();
+		void testCompactExtendedWEphemeron();
+		void testCompactExtendedWEphemeronRescued();
+		void testCompactOverlapping();
+		
 
 		MarkAndCompactGC * compactor();
 
