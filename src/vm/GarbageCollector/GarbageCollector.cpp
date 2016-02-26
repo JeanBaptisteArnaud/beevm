@@ -290,3 +290,4 @@ void GarbageCollector::makeRescuedEphemeronsNonWeak()
 		rescuedEphemerons[index]->_haveNoWeaks();
 	}
 }
+

@@ -84,7 +84,7 @@ public:
 	static const ulong instVarCount = 8;
 
 
-protected:
+// protected:
 	ulong *info;
 	ulong *base;
 	ulong *commitedLimit;

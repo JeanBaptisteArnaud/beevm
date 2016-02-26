@@ -5,6 +5,9 @@
 #include "../vm/DataStructures/Memory.h"
 #include "../vm/DataStructures/GCSpaceInfo.h"
 #include "../vm/GarbageCollector/GenerationalGC.h"
+#include "../vm/GarbageCollector/MarkAndCompactGC.h"
+
+#include "../vm/GarbageCollector/SanityChecker.h"
 
 using namespace Bee;
 
@@ -32,13 +35,19 @@ void setMemory(Memory *aMemory)
 	KnownObjects::initializeFromHostVM();
 
 	// initialize the already given flipper buffer as a C++ GenerationalGC
-	memory->flipper = new(memory->flipper) GenerationalGC();
+	memory->flipper   = new(memory->flipper) GenerationalGC();
+	memory->compactor = new(memory->compactor) MarkAndCompactGC();
 
 	memory->useHostVMVariables();
 	
 	memory->flipper->memory = memory;
 	memory->flipper->localSpace.loadFrom(GCSpaceInfo::newSized(32 * 1024));
 	memory->flipper->initialize();
+
+	memory->compactor->memory = memory;
+	memory->compactor->localSpace.loadFrom(GCSpaceInfo::newSized(32 * 1024));
+	memory->compactor->initialize();
+
 }
 
 std::string status()
@@ -57,6 +66,7 @@ std::string status()
 	return out.str();
 }
 
+void assertSaneObjects();
 
 void scavengeHostVMFromSpace()
 {
@@ -65,11 +75,25 @@ void scavengeHostVMFromSpace()
 	debug((char*)status().c_str());
 
 	memory->scavengeFromSpace();
-
+	
 	memory->updateToHostVM();
+
 	debug("flip ended");
 	debug((char*)status().c_str());
+	
+	debug("checking sanity... ");
+	assertSaneObjects();
+	debug("ok");
+
 }
+
+void assertSaneObjects()
+{
+	SanityChecker checker(*memory->fromSpace);
+	checker.checkAllSaneIn(*memory->fromSpace);
+	checker.checkAllSaneIn(*memory->oldSpace);
+}
+
 
 void collectOldSpace()
 {

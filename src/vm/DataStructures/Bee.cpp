@@ -27,14 +27,15 @@ void Bee::getOsErrorMessage(ulong code, char buffer[], int buffer_length)
 }
 
 
-void Bee::error(char *message)
+void Bee::error(const char *message)
 {
-	cout << "Error: " << message << endl;
-	system("pause");
+	debug(message);
+	ulong *bad = (ulong*)0xbad;
+	*bad;
 	ExitProcess(-1);
 }
 
-void Bee::debug(char *message)
+void Bee::debug(const char *message)
 {
 	cout << message << endl;
 	OutputDebugString(message);

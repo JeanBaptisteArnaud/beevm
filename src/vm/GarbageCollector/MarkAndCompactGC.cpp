@@ -12,20 +12,19 @@ using namespace Bee;
 
 
 
-
-void MarkAndCompactGC::initNonLocals()
-{
-	GarbageCollector::initNonLocals();
-	tempArray.setSpace(&oldSpace);
-
-}
-
 Bee::MarkAndCompactGC::MarkAndCompactGC()
 {
 }
 
 Bee::MarkAndCompactGC::~MarkAndCompactGC()
 {
+}
+
+void MarkAndCompactGC::initNonLocals()
+{
+	GarbageCollector::initNonLocals();
+	tempArray.setSpace(&oldSpace);
+
 }
 
 void MarkAndCompactGC::useHostVMVariables()

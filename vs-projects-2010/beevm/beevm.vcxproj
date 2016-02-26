@@ -74,6 +74,7 @@
     <ClCompile Include="..\..\src\vm\GarbageCollector\GarbageCollector.cpp" />
     <ClCompile Include="..\..\src\vm\GarbageCollector\GenerationalGC.cpp" />
     <ClCompile Include="..\..\src\vm\GarbageCollector\MarkAndCompactGC.cpp" />
+    <ClCompile Include="..\..\src\vm\GarbageCollector\SanityChecker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\vm\DataStructures\Bee.h" />
@@ -89,6 +90,7 @@
     <ClInclude Include="..\..\src\vm\GarbageCollector\GarbageCollector.h" />
     <ClInclude Include="..\..\src\vm\GarbageCollector\GenerationalGC.h" />
     <ClInclude Include="..\..\src\vm\GarbageCollector\MarkAndCompactGC.h" />
+    <ClInclude Include="..\..\src\vm\GarbageCollector\SanityChecker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
