@@ -73,6 +73,12 @@
     <ClCompile Include="..\..\src\vm\GarbageCollector\MarkAndCompactGC.cpp">
       <Filter>GarbageCollector</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\tests\tests\GCMarkAndCompactTest.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\SLLInfo.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\vm\DataStructures\VMArray.h">
@@ -128,6 +134,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\vm\GarbageCollector\MarkAndCompactGC.h">
       <Filter>GarbageCollector</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\tests\tests\GCMarkAndCompactTest.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\SLLInfo.h">
+      <Filter>DataStructures</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
