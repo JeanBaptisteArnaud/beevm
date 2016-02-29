@@ -52,7 +52,6 @@ public:
 	ulong commitSized(ulong total);
 	ulong commitDelta(ulong delta);
 	void decommitSlack();
-	void release();
 	
 	int percentageOfCommitedUsed();
 

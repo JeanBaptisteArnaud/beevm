@@ -41,14 +41,16 @@ void GCSpaceTest::testAllocate()
 	// test doesn't exist in smalltalk. maybe add it?
 	GCSpace localSpace = GCSpace::dynamicNew(400 * 1024);
 	ASSERTM("init wrong", localSpace.getNextFree() == localSpace.getBase());
-	ulong *address = localSpace.allocateIfPossible(1024);
-	address = localSpace.allocateIfPossible(1024);
+	localSpace.allocateIfPossible(1024);
+	localSpace.allocateIfPossible(1024);
 	ASSERTM("nextFree simple",
-			(ulong)localSpace.getNextFree() == (ulong)localSpace.getBase() + (ulong)pointerConst(1024 + 1024));
-	address = localSpace.allocateIfPossible(1024 * 38);
+			asUObject(localSpace.getNextFree()) == asUObject(localSpace.getBase()) + 1024 + 1024);
+	localSpace.allocateIfPossible(1024 * 38);
 	ASSERTM("nextFree limit",
-			(ulong)localSpace.getNextFree() == (ulong)localSpace.getBase() + (ulong)pointerConst(1024 * 40));
-	address = localSpace.allocateIfPossible(1024 * 30);
+			asUObject(localSpace.getNextFree()) == asUObject(localSpace.getBase()) + 1024 * 40);
+	localSpace.allocateIfPossible(1024 * 30);
+
+	localSpace.dynamicFree();
 }
 
 void GCSpaceTest::testDoesNotIncludeSmallIntegers()
@@ -57,6 +59,7 @@ void GCSpaceTest::testDoesNotIncludeSmallIntegers()
 	oop_t *inside = (oop_t*)localSpace.getBase();
 	ASSERTM("wrongly including small integer", !localSpace.includes(inside));
 
+	localSpace.dynamicFree();
 }
 
 void GCSpaceTest::testIncludesFirstObject()
@@ -64,6 +67,8 @@ void GCSpaceTest::testIncludesFirstObject()
 	GCSpace localSpace = GCSpace::dynamicNew(1024);
 	oop_t *inside = (oop_t*)localSpace.getBase();
 	ASSERTM("first object is not considered inside", localSpace.includes((oop_t*)inside->_asObject()));
+
+	localSpace.dynamicFree();
 }
 
 void GCSpaceTest::testIncludesLastObject()
@@ -72,6 +77,8 @@ void GCSpaceTest::testIncludesLastObject()
 	GCSpace localSpace = GCSpace::dynamicNew(1024);
 	oop_t *inside = (oop_t*)localSpace.getCommitedLimit();
 	ASSERTM("last object is not considered inside", localSpace.includes((oop_t*)inside->_asObject()));
+
+	localSpace.dynamicFree();
 }
 
 bool checkValuenewArray1024(oop_t *array)
@@ -104,8 +111,8 @@ void GCSpaceTest::testExtendedGrowingTo()
 //						(ulong) copy == (ulong)((ulong) localSpace.getBase()) * 2 + 16);
 //	ASSERTM("I feel a perturbation in the force",
 //			_oop(object) + 8 == (_oop(copy) + (size(copy) * 4) + 16));
-	//free(array);
 
+	localSpace.dynamicFree();
 }
 
 
@@ -192,21 +199,24 @@ void GCSpaceTest::testGrowingTo()
 //			_oop(copy) == _asOop((ulong * )(localSpace.getBase()) + 16));
 //	ASSERTM("I feel a perturbation in the force",
 //			_oop(object) + 8 == (_oop(copy) + (size(copy) * 4) + 16));
-	//free(array);
+	
+	localSpace.dynamicFree();
 }
 
 void GCSpaceTest::testNewGCSpaceShallowCopy()
 {
 
-	GCSpace space = GCSpace::dynamicNew(4 * 10 * 1024);
+	GCSpace localSpace = GCSpace::dynamicNew(4 * 10 * 1024);
 	oop_t *array = mockedObjects.newArray(1024);
-	oop_t *copy = space.shallowCopy(array);
+	oop_t *copy = localSpace.shallowCopy(array);
 	ASSERTM("copy is not a Array", isArray(copy));
 	ASSERTM("size of copy is wrong", copy->_size() == array->_size());
 	ASSERTM("first element diverge", array->slot(0) == copy->slot(0));
 	//	Cant touch this tooo doudoudou, doudoudou, doudoudou	assert: array = copy;
 //	ASSERTM("I feel a perturbation in the force",
 //			_oop(copy) == _asOop(space.getBase() + 8));
+
+	localSpace.dynamicFree();
 }
 
 void GCSpaceTest::testShallowCopy()
@@ -218,6 +228,7 @@ void GCSpaceTest::testShallowCopy()
 	ASSERTM("the copy not array", isArray(copy));
 	ASSERTM("size", copy->_size() == array->_size());
 	ASSERTM("first element", array->slot(0) == copy->slot(0));
+	localSpace.dynamicFree();
 }
 
 void GCSpaceTest::testShallowCopyBytes()
@@ -295,6 +306,18 @@ void GCSpaceTest::testShallowCopyExtended()
 //			assert: array = copy
 }
 
+void GCSpaceTest::testShallowCopyGrowingToExtended()
+{
+	GCSpace localSpace = GCSpace::dynamicNew(4 * 1024);
+	oop_t *array = mockedObjects.newArray(1);
+	oop_t *copy = localSpace.shallowCopyGrowingTo(array, 1000);
+	ASSERTM("the original is extended", !array->_isExtended());
+	ASSERTM("the copy is not extended", copy->_isExtended());
+	ASSERTM("the copy extended flags are not correct", 
+		copy->extended_header()->flags == copy->basic_header()->flags);
+	localSpace.dynamicFree();
+}
+
 void GCSpaceTest::testSynchronousGCSpace()
 {
 
@@ -364,7 +387,8 @@ cute::suite make_suite_GCSpaceTest()
 //	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testShallowCopyBytes3));
 //	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testShallowCopyBytesExtended));
 //	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testShallowCopyExtended));
-//	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testSynchronousGCSpace));
+	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testShallowCopyGrowingToExtended));
+	//	s.push_back(CUTE_SMEMFUN(GCSpaceTest, testSynchronousGCSpace));
 
 	return s;
 }

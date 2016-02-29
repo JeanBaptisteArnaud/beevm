@@ -42,6 +42,7 @@ public:
 	void testShallowCopyBytes3();
 	void testShallowCopyBytesExtended();
 	void testShallowCopyExtended();
+	void testShallowCopyGrowingToExtended();
 	void testSynchronousGCSpace();
 	void testObjectsIteration();
 };

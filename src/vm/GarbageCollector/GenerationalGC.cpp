@@ -114,6 +114,13 @@ void GenerationalGC::purgeLiteralsReferences()
 	for (long index = 1; index <= literalsReferences.size()->_asNative(); index = index + 2)
 	{
 		literal = literalsReferences[index];
+		
+		// ==========================
+		// strange things happen here
+		// --------------------------
+		// host vm and smalltalk vm don't do the next line, but if we don't vm crashes at next gc full.
+		literalsReferences[index] = KnownObjects::nil;
+
 		if (this->arenaIncludes(literal))
 		{
 			kept = kept + 2;
@@ -247,6 +254,18 @@ void GenerationalGC::followCodeCacheReferences()
 		vm.anyNativizedCompiledMethodInFromSpace(false);
 		this->moveToOldAll(nativizedMethods);
 	}
+
+	// A small note about the following line:
+	// literals refs are refs from code to /NEW/ objects (i.e. in from space).
+	// The smalltalk gc manages this slightly differently than the host vm (a bit worse but neither
+	// seem 100% correct).
+	// Host VM traverses this array as if it were roots. It makes sense since this is the same than
+	// the remembered set but from code. The problem is that it doesn't follow all contents but only
+	// the used slots. Smalltalk GC does the same but only shallow copying to old instead of following the
+	// graph. This adds literals to the remembered set and followRoots after completes the traversal.
+	// 
+	// Anyway, in both cases literals references array can be left corrupt, but that doesn't seem to be
+	// a problem as long as the literals references array can't be reached from roots.
 	this->moveToOldAll(literalsReferences);
 }
 

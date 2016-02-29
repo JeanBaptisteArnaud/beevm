@@ -81,9 +81,9 @@ void scavengeHostVMFromSpace()
 	debug("flip ended");
 	debug((char*)status().c_str());
 	
-	debug("checking sanity... ");
-	assertSaneObjects();
-	debug("ok");
+	//debug("checking sanity... ");
+	//assertSaneObjects();
+	//debug("ok");
 
 }
 

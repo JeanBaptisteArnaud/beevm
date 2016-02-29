@@ -40,7 +40,7 @@ GCSpace* GCSpace::dynamicNewP(ulong size)
 
 void GCSpace::dynamicFree()
 {
-	this->_free(base, (ulong*)((ulong)reservedLimit - (ulong)base));
+	this->_free(base, 0);
 }
 
 void GCSpace::loadFrom(GCSpace &space)
@@ -96,12 +96,6 @@ bool GCSpace::isReferredBy(oop_t *object)
 	return false;
 }
 
-
-void GCSpace::release()
-{
-	_decommit(base, (ulong *) 0 );
-	_free(base, (ulong *) 0 );
-}
 
 ulong GCSpace::reservedSize()
 {
@@ -193,7 +187,7 @@ oop_t* GCSpace::shallowCopyGrowingTo(oop_t *array, ulong newSize)
 	copy->_basicSize(4);
 	copy->_extendedSize(newSize);
 	
-	copy->slot(-4) = array->slot(-2);
+	copy->slot(-4) = copy->slot(-2);
 	
 	for (ulong index = array->_size(); index < newSize; index++)
 	{
