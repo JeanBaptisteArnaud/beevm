@@ -27,15 +27,16 @@ void MockedObjects::initializeKnownObjects()
 	oop_t *stTrue  = mockTrue();
 	oop_t *stFalse = mockFalse();
 	oop_t *array   = this->newArray(0);
-	Memory *memory  = mockMemory();
+	//Memory *memory  = mockMemory();
 
 	KnownObjects::initialize(nil, stTrue, stFalse);
 	KnownObjects::emptyArray = array;
 
 	// create a fake stack with place for all slots
-	stack.reserve(STACK_SIZE);
+	//stack.reserve(STACK_SIZE);
 	for (int i = 0; i < STACK_SIZE; i++)
-		stack.push_back((ulong)KnownObjects::nil);
+	//	stack.push_back((ulong)KnownObjects::nil);
+		stack[i] = (ulong)KnownObjects::nil;
 
 	stack[0] = (ulong)&stack[STACK_LAST];
 	stack[STACK_LAST] = 0;
@@ -63,15 +64,6 @@ ulong* MockedObjects::stackPtr()
 	return &stack[0];
 }
 
-// mock vars to replace HostVM pointers
-static oop_t*  mock_debugFrameMarker;
-static bool    mock_anyCompiledMethodInFromSpace;
-static bool    mock_anyNativizedCompiledMethodInFromSpace;
-static bool    mock_globalLookupCacheHasPointersToFromSpace;
-static oop_t*  mock_JIT_globalLookupCache[4000];
-static char*   mock_JIT_codeCache;
-static ulong*  mock_framePointerToWalkStack;
-
 
 oop_t* MockedObjects::get(const string &name)
 {
@@ -90,8 +82,8 @@ void MockedObjects::reference(const std::string &name, slot_t *slot)
 {
 	oop_t *referred = get(name);
 	
-	if (referred == NULL)
-		references.push_back(pair<slot_t*, string>(slot, name));
+//	if (referred == NULL)
+//		references.push_back(pair<slot_t*, string>(slot, name));
 	
 	*slot = referred;
 }

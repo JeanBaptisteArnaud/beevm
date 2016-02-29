@@ -20,12 +20,13 @@ void runSuite(int argc, char const *argv[]){
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
 
 	//scute::makeRunner(lis,argc,argv)(make_suite_GCSpaceInfoTest(), "GCSpaceInfoTest");
-	//cute::makeRunner(lis,argc,argv)(make_suite_VMArrayTest(), "VMArrayTest");
-	//cute::makeRunner(lis,argc,argv)(make_suite_GCSpaceTest(), "GCSpaceTest");
+	cute::makeRunner(lis,argc,argv)(make_suite_VMArrayTest(), "VMArrayTest");
+	cute::makeRunner(lis,argc,argv)(make_suite_GCSpaceTest(), "GCSpaceTest");
 	//cute::makeRunner(lis,argc,argv)(make_suite_ObjectFormatTest(), "ObjectFormatTest");
-	//cute::makeRunner(lis,argc,argv)(make_suite_MemoryTest(), "MemoryTest");
-	//cute::makeRunner(lis,argc,argv)(make_suite_GCFlipTest(), "GCFlipTest");
+	cute::makeRunner(lis,argc,argv)(make_suite_MemoryTest(), "MemoryTest");
+	cute::makeRunner(lis,argc,argv)(make_suite_GCFlipTest(), "GCFlipTest");
 	cute::makeRunner(lis,argc,argv)(make_suite_GCMarkAndCompactTest(), "GCMarkAndCompactTest");
+
 }
 
 int main(int argc, char const *argv[])

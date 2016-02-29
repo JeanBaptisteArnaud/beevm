@@ -66,7 +66,8 @@ public:
 	std::vector<std::pair<slot_t*,std::string> > references;
 	std::map<std::string, oop_t*> definitions;
 
-	std::vector<ulong> stack;
+	//std::vector<ulong> stack;
+	ulong stack[16];
 	int stackTempIndex;
 
 };

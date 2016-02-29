@@ -637,10 +637,10 @@ cute::suite make_suite_GCFlipTest()
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testRescueNoEphemerons));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackCallbackTP19064));
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectAndCheckGraph));
-	//s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectCallbackHole));
-	//s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectNestedBlock));
-	//s.push_back(CUTE_SMEMFUN(GCFlipTest, testWeakContainer));
-	//s.push_back(CUTE_SMEMFUN(GCFlipTest, testWeakContainerExtended));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectCallbackHole));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testStackFollowObjectNestedBlock));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testWeakContainer));
+	s.push_back(CUTE_SMEMFUN(GCFlipTest, testWeakContainerExtended));
 
 	
 	s.push_back(CUTE_SMEMFUN(GCFlipTest, testTombstone));

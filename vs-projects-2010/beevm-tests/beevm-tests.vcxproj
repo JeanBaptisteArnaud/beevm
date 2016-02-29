@@ -39,12 +39,13 @@
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProjectDir)/../../src/tests;$(ProjectDir)/../../src/vm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -64,6 +65,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\tests\main.cpp" />
     <ClCompile Include="..\..\src\tests\tests\GCFlipTest.cpp" />
+    <ClCompile Include="..\..\src\tests\tests\GCMarkAndCompactTest.cpp" />
     <ClCompile Include="..\..\src\tests\tests\GCSpaceTest.cpp" />
     <ClCompile Include="..\..\src\tests\tests\GCSpaceTestInfo.cpp" />
     <ClCompile Include="..\..\src\tests\tests\GCTest.cpp" />
@@ -87,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\tests\tests\GCFlipTest.h" />
+    <ClInclude Include="..\..\src\tests\tests\GCMarkAndCompactTest.h" />
     <ClInclude Include="..\..\src\tests\tests\GCSpaceTest.h" />
     <ClInclude Include="..\..\src\tests\tests\GCTest.h" />
     <ClInclude Include="..\..\src\tests\tests\MockedObjects.h" />

@@ -280,10 +280,9 @@ void GenerationalGC::flipSpaces()
 
 void GenerationalGC::updateSpacesDelta()
 {
-	ulong delta;
 	if (!vm.spacesDelta())
 	{
-		delta = toSpace.getBase() - fromSpace.getBase();
+		ulong delta = asUObject(toSpace.getBase()) - asUObject(fromSpace.getBase());
 		vm.spacesDelta(delta);
 	}
 }

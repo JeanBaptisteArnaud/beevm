@@ -38,11 +38,10 @@ Memory *GCTest::memoryForTesting()
 
 	memory->residueObject = mockedObjects.newObject();
 	
-	GCSpaceInfo info = GCSpaceInfo::newSized(32 * 1024);
-
 	memory->flipper->memory = memory;
 	memory->compactor->memory = memory;
 
+	GCSpaceInfo info = GCSpaceInfo::newSized(32 * 1024);
 	memory->flipper->localSpace.loadFrom(info);
 	memory->compactor->localSpace.loadFrom(info);
 

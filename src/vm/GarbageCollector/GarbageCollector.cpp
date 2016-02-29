@@ -177,7 +177,7 @@ void GarbageCollector::rescueEphemerons()
 
 void GarbageCollector::clearPolymorphicMethodCache()
 {
-	for (int index = 1; index <= 0x4000; index++)
+	for (ulong index = 1; index <= 0x4000; index++)
 	{
 		vm.globalLookupCacheAtPut(index, KnownObjects::nil);
 	}
@@ -287,7 +287,7 @@ void GarbageCollector::forgetNativeObjects()
 
 void GarbageCollector::makeRescuedEphemeronsNonWeak()
 {
-	for (long index = 1; index <= rescuedEphemerons.size()->_asNative(); index++) {
+	for (ulong index = 1; index <= rescuedEphemerons.size()->_asNative(); index++) {
 		rescuedEphemerons[index]->_haveNoWeaks();
 	}
 }

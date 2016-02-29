@@ -48,14 +48,14 @@ typedef struct basic_header_t
 	static const uchar ObjectFlagMaxValue = 0xFF;
 
 // header byte offsets? Do we need them?
-	static const ulong ObjectExtendedShortSize = -15;
-	static const ulong ObjectSize = -7;
-	static const ulong ObjectExtendedFlags = -12;
-	static const ulong ObjectExtendedHash = -15;
-	static const ulong ObjectExtendedSize = -2;
-	static const ulong ObjectHash = -7;
-	static const ulong ObjectFlags = -4;
-	static const ulong ObjectHeaderBits = -1;
+	static const int ObjectExtendedShortSize = -15;
+	static const int ObjectSize = -7;
+	static const int ObjectExtendedFlags = -12;
+	static const int ObjectExtendedHash = -15;
+	static const int ObjectExtendedSize = -2;
+	static const int ObjectHash = -7;
+	static const int ObjectFlags = -4;
+	static const int ObjectHeaderBits = -1;
 
 } basic_header_t;
 
