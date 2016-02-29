@@ -44,7 +44,7 @@ void ObjectFormatTest::testHeaderOf()
 	ASSERTM("Array 2 : Flags",    h->flags == basic_header_t::Flag_unseenInSpace);
 	ASSERTM("Array 2 : behavior", h->behavior == (oop_t*)0x0A0792F0);
 
-	object = KnownObjects::stTrue;
+	object = mockedObjects.mockTrue();
 	h = object->basic_header();
 	
 	ASSERTM("True : Size",     h->size == 0);
@@ -54,7 +54,7 @@ void ObjectFormatTest::testHeaderOf()
 											 basic_header_t::Flag_zeroTermOrNamed));
 	ASSERTM("True : behavior", h->behavior == (oop_t*)0x0A0B6BA0);
 
-	object = KnownObjects::nil;
+	object = mockedObjects.mockNil();
 	h = object->basic_header();
 	ASSERTM("Nil : Size",  h->size == 0);
 	ASSERTM("Nil : Hash",  h->hash == 0x3445);
@@ -68,7 +68,7 @@ void ObjectFormatTest::testHeaderOf()
 void ObjectFormatTest::testBasicSize()
 {
 	oop_t *object = mockedObjects.newArray(1);
-	ASSERTM("size ", (object->_basicSize() == 3));
+	ASSERTM("size ", (object->_basicSize() == 1));
 	object->_basicSize(122);
 	ASSERTM("size ", (object->_basicSize() == 122));
 
@@ -223,9 +223,6 @@ void ObjectFormatTest::testVirtualBehavior()
 	VirtualQuery((void *) base, queryAnswer, maxValueQuery);
 	ASSERTM("Memory not commit", queryAnswer->State && MEM_COMMIT == MEM_COMMIT);
 	VirtualFree((void *) base, (ulong) reservedSize, MEM_DECOMMIT);
-	//VirtualQuery((void *) base, queryAnswer, maxValueQuery);
-	//ASSERTM("Memory decommit fail",
-	//	(queryAnswer->State && MEM_DECOMMIT) == MEM_DECOMMIT);
 	free(queryAnswer);
 }
 
@@ -239,29 +236,18 @@ void ObjectFormatTest::testProxying()
 		ASSERTM("Recovering Value isnt  good", object->_getProxee() == object);
 }
 
-void ObjectFormatTest::testMulti()
-{
-	//GenerationalGC * flipper = new GenerationalGC();
-	//Memory::current()->setGC(flipper);
-	//Memory::current()->releaseEverything();
-	//mockedObjects.mockVMValue();
-	//flipper = new GenerationalGC();
-	//Memory::current()->setGC(flipper);
-}
-
 cute::suite make_suite_ObjectFormatTest()
 {
 	cute::suite s;
 
 	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testProxying));
 	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testNextObject));
-	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testHeaderOf));
-	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testBasicSize));
-	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testBeExtended));
-	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testRotateLeft));
-	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testObjectFlagManipulation));
-	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testVirtualBehavior));
-	//s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testMulti));
+	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testHeaderOf));
+	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testBasicSize));
+	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testBeExtended));
+	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testRotateLeft));
+	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testObjectFlagManipulation));
+	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testVirtualBehavior));
 	return s;
 }
 

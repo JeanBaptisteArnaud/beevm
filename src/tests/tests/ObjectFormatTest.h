@@ -22,7 +22,6 @@ public:
 	void testObjectFlagManipulation();
 	void testVirtualBehavior();
 	void testProxying();
-	void testMulti();
 	void testNextObject();
 };
 
