@@ -27,7 +27,21 @@ namespace Bee
 		void testCompactExtendedWEphemeron();
 		void testCompactExtendedWEphemeronRescued();
 		void testCompactOverlapping();
-		
+		void testFollowDontRescueEphemerons();
+		void testFollowEphemeronsNoRescue();
+		void testFollowObjectInFrom();
+		void testFollowObjectInTo();
+		void testFollowObjectInOldWeakArray();
+		void testFollowRescueEphemerons();
+		void testFollowWeak();
+		void testFollowWeakExtended();
+		void testFollowWeakExtendedNested();
+		void testFollowWeakNoTombstones();
+		void testFollowWeakNoTombstonesExtended();
+		void testHoldingNativizedMethods();
+		void testIsNil();
+		void testLibrariesAllObjectsDo();
+		void testLibrariesDo();
 
 		MarkAndCompactGC * compactor();
 

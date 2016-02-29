@@ -46,7 +46,7 @@ void GCMarkAndCompactTest::tearDown()
 }
 
 void GCMarkAndCompactTest::testCompact() {
-	
+
 	MarkAndCompactGC * compactor = this->compactor();
 	oop_t * array = (compactor->localSpace).shallowCopy(mockedObjects.newArray(0x100));
 	oop_t * object = (compactor->oldSpace).shallowCopy(mockedObjects.newArray(3));
@@ -54,7 +54,7 @@ void GCMarkAndCompactTest::testCompact() {
 	oop_t * string = (compactor->oldSpace).shallowCopy(mockedObjects.newString("a String"));
 	array->slot(1) = string;
 	oop_t * stringPointer = string->_asPointer();
-	oop_t * leakedPointer  = ((compactor->oldSpace).shallowCopy(mockedObjects.newString("a String")))->_asPointer();
+	oop_t * leakedPointer = ((compactor->oldSpace).shallowCopy(mockedObjects.newString("a String")))->_asPointer();
 	oop_t * byteArray = ((compactor->oldSpace).shallowCopy(mockedObjects.newByteArray(3)));
 	byteArray->byte(0) = 1;
 	byteArray->byte(1) = 2;
@@ -66,7 +66,7 @@ void GCMarkAndCompactTest::testCompact() {
 	ASSERTM("leakedPointer should be before byteArray pointer", (ulong)leakedPointer < (ulong)byteArrayPointer);
 	GCSpace * space = &(compactor->oldSpace);
 	compactor->initAuxSpace();
-	compactor->followCountStartingAt((slot_t *) array, array->_size(),1);
+	compactor->followCountStartingAt((slot_t *)array, array->_size(), 1);
 	compactor->followRescuedEphemerons();
 	compactor->setNewPositions(space);
 	compactor->prepareForCompact();
@@ -254,19 +254,413 @@ void GCMarkAndCompactTest::testCompactOverlapping() {
 	ASSERTM("size of next's overlapped object is wrong", array->slot(4)->_size() == 3);
 }
 
+void GCMarkAndCompactTest::testFollowDontRescueEphemerons() {
+	oop_t * pointers[3];
+	MarkAndCompactGC * compactor = this->compactor();
+	oop_t * leaked = (compactor->oldSpace).shallowCopy(mockedObjects.newString("leaked"));
+	oop_t * value = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * ephemeron = (compactor->oldSpace).shallowCopy(mockedObjects.newEphemeron(leaked, value));
+	pointers[0] = leaked->_asPointer();
+	pointers[1] = value->_asPointer();
+	pointers[2] = ephemeron->_asPointer();
+	oop_t * root = (compactor->localSpace).shallowCopy(mockedObjects.newArray(0x4));
+	root->slot(0) = root;
+	ephemeron = KnownObjects::nil; // thinks this is useless
+	// maybe missing something; here to check
+	compactor->followCountStartingAt((slot_t *)root, 1, 1);
+	root = KnownObjects::nil;
+	ASSERTM("Ephemeron should not be rescued", !((oop_t *)pointers[0]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("Ephemeron should not be rescued", !((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("Ephemeron should be visible", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+}
+
+void GCMarkAndCompactTest::testFollowEphemeronsNoRescue() {
+	oop_t * pointers[3];
+	MarkAndCompactGC * compactor = this->compactor();
+	oop_t * leaked = (compactor->oldSpace).shallowCopy(mockedObjects.newString("leaked"));
+	oop_t * value = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * ephemeron = (compactor->oldSpace).shallowCopy(mockedObjects.newEphemeron(leaked, value));
+	pointers[0] = leaked->_asPointer();
+	pointers[1] = value->_asPointer();
+	pointers[2] = ephemeron->_asPointer();
+	oop_t * root = (compactor->localSpace).shallowCopy(mockedObjects.newArray(0x4));
+	root->slot(0) = root;
+	ephemeron = KnownObjects::nil; // thinks this is useless
+								   // maybe missing something; here to check
+	compactor->followCountStartingAt((slot_t *)root, 1, 1);
+	compactor->rescueEphemerons();
+	ASSERTM("rescued ephemeron array should be empty", compactor->rescuedEphemerons.isEmpty());
+	compactor->rescuedEphemerons.contents = KnownObjects::nil;
+	root = KnownObjects::nil;
+	ASSERTM("Ephemeron should be rescued", ((oop_t *)pointers[0]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("Ephemeron should be rescued", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("Ephemeron should be visible", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+}
+
+void GCMarkAndCompactTest::testFollowObjectInFrom() {
+	oop_t * pointers[4];
+	MarkAndCompactGC * compactor = this->compactor();
+	oop_t * array = ((compactor->fromSpace).shallowCopy(mockedObjects.newArray(3)));
+	oop_t * string = (compactor->fromSpace).shallowCopy(mockedObjects.newString("a String"));
+	pointers[0] = (compactor->fromSpace).shallowCopy(mockedObjects.newString("leaked"))->_asPointer();
+	oop_t * byteArray = ((compactor->fromSpace).shallowCopy(mockedObjects.newByteArray(3)));
+
+	array->slot(0) = smiConst(1);
+	array->slot(1) = string;
+	array->slot(2) = byteArray;
+
+	oop_t * root = ((compactor->fromSpace).shallowCopy(mockedObjects.newArray(1)));
+	root->slot(0) = array;
+	pointers[1] = array->_asPointer();
+	pointers[2] = string->_asPointer();
+	pointers[3] = byteArray->_asPointer();
+
+	string = KnownObjects::nil;
+	byteArray = KnownObjects::nil;
+	array = KnownObjects::nil;
+
+	ASSERTM("not conform, leaked", ((oop_t *)pointers[0]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("not conform, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("not conform, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("not conform, byteArray", ((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+
+	compactor->followCountStartingAt((slot_t *)root, 1, 1);
+	root = KnownObjects::nil;
+
+	// to fix
+	ASSERTM("should, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, byteArray", ((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+}
+
+void GCMarkAndCompactTest::testFollowObjectInTo() {
+	oop_t * pointers[4];
+	MarkAndCompactGC * compactor = this->compactor();
+	oop_t * array = ((compactor->toSpace).shallowCopy(mockedObjects.newArray(3)));
+	oop_t * string = (compactor->toSpace).shallowCopy(mockedObjects.newString("a String"));
+	pointers[0] = (compactor->toSpace).shallowCopy(mockedObjects.newString("leaked"))->_asPointer();
+	oop_t * byteArray = ((compactor->toSpace).shallowCopy(mockedObjects.newByteArray(3)));
+
+	array->slot(0) = smiConst(1);
+	array->slot(1) = string;
+	array->slot(2) = byteArray;
+
+	oop_t * root = ((compactor->toSpace).shallowCopy(mockedObjects.newArray(1)));
+	root->slot(0) = array;
+	pointers[1] = array->_asPointer();
+	pointers[2] = string->_asPointer();
+	pointers[3] = byteArray->_asPointer();
+
+	string = KnownObjects::nil;
+	byteArray = KnownObjects::nil;
+	array = KnownObjects::nil;
+
+	ASSERTM("not conform, leaked", ((oop_t *)pointers[0]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("not conform, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("not conform, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("not conform, byteArray", ((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+
+	compactor->followCountStartingAt((slot_t *)root, 1, 1);
+	root = KnownObjects::nil;
+
+	// to fix
+	ASSERTM("should, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, byteArray", ((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+}
+
+void GCMarkAndCompactTest::testFollowObjectInOldWeakArray() {
+	oop_t * pointers[4];
+	MarkAndCompactGC * compactor = this->compactor();
+
+	oop_t * array = ((compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(3)));
+	oop_t * string = (compactor->oldSpace).shallowCopy(mockedObjects.newString("a String"));
+	pointers[0] = (compactor->oldSpace).shallowCopy(mockedObjects.newString("leaked"))->_asPointer();
+	oop_t * byteArray = ((compactor->oldSpace).shallowCopy(mockedObjects.newByteArray(3)));
+
+	array->slot(0) = smiConst(1);
+	array->slot(1) = string;
+	array->slot(2) = byteArray;
+
+	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(1)));
+	root->slot(0) = array;
+	oop_t * weak = root->slot(0);
+
+	pointers[1] = array->_asPointer();
+	pointers[2] = string->_asPointer();
+	pointers[3] = byteArray->_asPointer();
+
+	string = KnownObjects::nil;
+	byteArray = KnownObjects::nil;
+	array = KnownObjects::nil;
 
 
+
+	ASSERTM("not conform, leaked", ((oop_t *)pointers[0]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("not conform, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("not conform, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("not conform, byteArray", ((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+
+	compactor->followCountStartingAt((slot_t *)root, 1, 1);
+	ASSERTM("weak should be in weak container", weak == (compactor->weakContainers[0]));
+
+	weak = KnownObjects::nil;
+	root = KnownObjects::nil;
+
+
+	// to fix
+	ASSERTM("should, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, byteArray", ((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+}
+
+
+void GCMarkAndCompactTest::testFollowRescueEphemerons() {
+	//#knownIssue.
+	/*	allocAddress >= 16r40000000 ifTrue : [
+			'have to fix #dereference: to accept high addresses'.
+				self assert : false].
+	*/
+
+	oop_t * pointers[3];
+	MarkAndCompactGC * compactor = this->compactor();
+	oop_t * leaked = (compactor->oldSpace).shallowCopy(mockedObjects.newString("leaked"));
+	oop_t * value = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * ephemeron = (compactor->oldSpace).shallowCopy(mockedObjects.newEphemeron(leaked, value));
+	pointers[0] = leaked->_asPointer();
+	pointers[1] = value->_asPointer();
+	pointers[2] = ephemeron->_asPointer();
+	oop_t * root = (compactor->localSpace).shallowCopy(mockedObjects.newArray(0x4));
+	pointers[3] = (compactor->rescuedEphemerons.contents)->_asPointer();
+	compactor->followCountStartingAt((slot_t *)root, 1, 1);
+	compactor->rescueEphemerons();
+	compactor->followRescuedEphemerons();
+	//ulong size = (pointers[3])  * 2;
+	ulong size = 3;
+	compactor->rescuedEphemerons.contents = KnownObjects::nil;
+	root = KnownObjects::nil;
+	ASSERTM("size ", size == 3);
+
+	ASSERTM("should, leaked", ((oop_t *)pointers[0]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, byteArray", ((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+	
+}
+
+void GCMarkAndCompactTest::testFollowWeak() {
+		oop_t * pointers[3];
+		MarkAndCompactGC * compactor = this->compactor();
+		oop_t * value1 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+		oop_t * value2 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+		oop_t * weak = (compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(2));
+		weak->slot(0) = value1;
+		weak->slot(1) = value2;
+		oop_t * tombstone = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+		compactor->tombstone(tombstone);
+		pointers[0] = value1->_asPointer();
+		pointers[1] = value2->_asPointer();
+		pointers[2] = weak->_asPointer();
+		pointers[3] = tombstone->_asPointer();
+
+	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(2)));
+	root->slot(0) = weak;
+	root->slot(1) = value2;
+
+	weak = KnownObjects::nil;
+	value1 = KnownObjects::nil;
+	value2 = KnownObjects::nil;
+
+	compactor->followCountStartingAt((slot_t *)root, root->_size(), 1);
+	compactor->fixWeakContainers();
+	compactor->tombstone(smiConst(42));
+	
+	root = KnownObjects::nil;
+
+	ASSERTM("should not, leaked", !((oop_t *)pointers[0]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, byteArray", ((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+	
+}
+
+void GCMarkAndCompactTest::testFollowWeakExtended() {
+	oop_t * pointers[3];
+	MarkAndCompactGC * compactor = this->compactor();
+	oop_t * value1 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * value2 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * weak = (compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(300));
+	weak->slot(290) = value1;
+	weak->slot(291) = value2;
+	oop_t * tombstone = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	compactor->tombstone(tombstone);
+	pointers[0] = value1->_asPointer();
+	pointers[1] = value2->_asPointer();
+	pointers[2] = weak->_asPointer();
+	pointers[3] = tombstone->_asPointer();
+
+	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(2)));
+	root->slot(0) = weak;
+	root->slot(1) = value2;
+
+	weak = KnownObjects::nil;
+	value1 = KnownObjects::nil;
+	value2 = KnownObjects::nil;
+
+	compactor->followCountStartingAt((slot_t *)root, root->_size(), 1);
+	compactor->fixWeakContainers();
+	compactor->tombstone(smiConst(42));
+
+	root = KnownObjects::nil;
+
+	ASSERTM("should not, leaked", !((oop_t *)pointers[0]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, byteArray", ((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+
+}
+
+void GCMarkAndCompactTest::testFollowWeakExtendedNested() {
+	oop_t * pointers[3];
+	MarkAndCompactGC * compactor = this->compactor();
+
+	oop_t * array = (compactor->oldSpace).shallowCopy(mockedObjects.newArray(10));
+	oop_t * value1 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * value2 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * weak = (compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(300));
+	weak->slot(290) = value1;
+	weak->slot(291) = value2;
+
+	for (int i = 0; i < 10; i++) array->slot(i) = weak;
+	
+	oop_t * tombstone = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	compactor->tombstone(tombstone);
+	pointers[0] = value1->_asPointer();
+	pointers[1] = value2->_asPointer();
+	pointers[2] = weak->_asPointer();
+	pointers[3] = tombstone->_asPointer();
+
+	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(2)));
+	root->slot(0) = array;
+	root->slot(1) = value2;
+
+	weak = KnownObjects::nil;
+	value1 = KnownObjects::nil;
+	value2 = KnownObjects::nil;
+
+	compactor->followCountStartingAt((slot_t *)root, root->_size(), 1);
+	compactor->fixWeakContainers();
+	compactor->tombstone(smiConst(42));
+
+	root = KnownObjects::nil;
+
+	ASSERTM("should not, leaked", !((oop_t *)pointers[0]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, byteArray", ((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+}
+
+void GCMarkAndCompactTest::testFollowWeakNoTombstones() {
+	oop_t * pointers[3];
+	MarkAndCompactGC * compactor = this->compactor();
+
+	oop_t * value1 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * value2 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * weak = (compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(300));
+	weak->slot(290) = value1;
+	weak->slot(291) = value2;
+	oop_t * tombstone = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+
+	compactor->tombstone(tombstone);
+	pointers[0] = value1->_asPointer();
+	pointers[1] = value2->_asPointer();
+	pointers[2] = weak->_asPointer();
+	pointers[3] = tombstone->_asPointer();
+
+	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(2)));
+	root->slot(0) = weak;
+	root->slot(1) = value1;
+	root->slot(2) = value2;
+
+	weak = KnownObjects::nil;
+	value1 = KnownObjects::nil;
+	value2 = KnownObjects::nil;
+
+	compactor->followCountStartingAt((slot_t *)root, root->_size(), 1);
+	compactor->fixWeakContainers();
+	compactor->tombstone(smiConst(42));
+
+	root = KnownObjects::nil;
+
+	ASSERTM("should not, leaked", !((oop_t *)pointers[0]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, byteArray", !((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+}
+
+void GCMarkAndCompactTest::testFollowWeakNoTombstonesExtended() {
+	oop_t * pointers[3];
+	MarkAndCompactGC * compactor = this->compactor();
+
+	oop_t * value1 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * value2 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * weak = (compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(2));
+	weak->slot(0) = value1;
+	weak->slot(1) = value2;
+	oop_t * tombstone = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+
+	compactor->tombstone(tombstone);
+	pointers[0] = value1->_asPointer();
+	pointers[1] = value2->_asPointer();
+	pointers[2] = weak->_asPointer();
+	pointers[3] = tombstone->_asPointer();
+
+	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(2)));
+	root->slot(0) = weak;
+	root->slot(1) = value1;
+	root->slot(2) = value2;
+
+	weak = KnownObjects::nil;
+	value1 = KnownObjects::nil;
+	value2 = KnownObjects::nil;
+
+	compactor->followCountStartingAt((slot_t *)root, root->_size(), 1);
+	compactor->fixWeakContainers();
+	compactor->tombstone(smiConst(42));
+
+	root = KnownObjects::nil;
+
+	ASSERTM("should not, leaked", !((oop_t *)pointers[0]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, array", ((oop_t *)pointers[1]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, string", ((oop_t *)pointers[2]->_asObject())->_hasBeenSeenInSpace());
+	ASSERTM("should, byteArray", !((oop_t *)pointers[3]->_asObject())->_hasBeenSeenInSpace());
+}
 
 cute::suite make_suite_GCMarkAndCompactTest()
 {
 	cute::suite s;
 
-		s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompact));
-		s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtended));
-		s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtendedWEphemeron));
-		s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtendedWEphemeronRescued));
-		s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactOverlapping));
-
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompact));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtended));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtendedWEphemeron));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtendedWEphemeronRescued));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactOverlapping));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowDontRescueEphemerons));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowEphemeronsNoRescue));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInFrom));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInTo));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInOldWeakArray));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowRescueEphemerons));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowWeak));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowWeakExtended));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowWeakExtendedNested));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowWeakNoTombstones));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowWeakNoTombstonesExtended));
+	// To check next
+//	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testHoldingNativizedMethods));
+//	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testIsNil));
+//	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testLibrariesAllObjectsDo));
+//	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testLibrariesDo));
 
 	return s;
 }
