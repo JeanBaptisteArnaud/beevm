@@ -12,7 +12,7 @@ class Memory;
 class VMVariables
 {
 public:
-	VMVariables(Memory *memory);
+	VMVariables();
 	~VMVariables();
 
 	oop_t *debugFrameMarker;
@@ -25,13 +25,6 @@ public:
 	bool   GC_anyCompiledMethodInFromSpace;
 	ulong  GC_spacesDelta;
 	ulong *GC_framePointerToWalkStack;
-
-	// for flipper
-	oop_t** rememberedSet;
-	oop_t** literalsReferences;
-	oop_t** nativizedMethods;
-	oop_t** codeCacheObjectReferences;
-	oop_t** rescuedEphemerons;
 
 	// added for compactor
 	oop_t* weakContainers;
@@ -54,7 +47,7 @@ class VMVariablesProxy
 {
 public:
 	void initializeForHostVM();
-	void initializeFor(VMVariables *variables);
+	void initializeFor(VMVariables *variables, Memory *memory);
 
 	bool globalCacheHasPointersToFrom();
 	void globalCacheHasPointersToFrom(bool value);

@@ -12,7 +12,7 @@ using namespace Bee;
 
 MockedObjects::MockedObjects()
 {
-	defaultSpace.loadFrom(GCSpaceInfo::newSized(4*1024*1024));
+	defaultSpace.loadFrom(GCSpace::dynamicNew(4*1024*1024));
 	stackTempIndex = STACK_LAST - 5; // -0: end of stack. -1: self. -2: cm. -3: prev env. -4: env. -5: first temp
 }
 

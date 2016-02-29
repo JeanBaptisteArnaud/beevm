@@ -6,7 +6,7 @@
 
 using namespace Bee;
 
-VMVariables::VMVariables(Memory *memory)
+VMVariables::VMVariables()
 {
 	debugFrameMarker = (oop_t*)0;
 
@@ -20,12 +20,6 @@ VMVariables::VMVariables(Memory *memory)
 	GC_anyCompiledMethodInFromSpace = false;
 	GC_spacesDelta;
 	GC_framePointerToWalkStack = 0;
-
-	rememberedSet              = &memory->rememberedSet;
-	literalsReferences         = &memory->literalsReferences;
-	nativizedMethods           = &memory->nativizedMethods;
-	codeCacheObjectReferences  = &memory->codeCacheObjectReferences;
-	rescuedEphemerons          = &memory->rescuedEphemerons;
 
 }
 
@@ -71,7 +65,7 @@ void VMVariablesProxy::initializeForHostVM()
 }
 
 
-void VMVariablesProxy::initializeFor(VMVariables *variables)
+void VMVariablesProxy::initializeFor(VMVariables *variables, Memory *memory)
 {
 	debugFrameMarker = &variables->debugFrameMarker;
 
@@ -84,6 +78,11 @@ void VMVariablesProxy::initializeFor(VMVariables *variables)
 	GC_anyCompiledMethodInFromSpace = &variables->GC_anyCompiledMethodInFromSpace;
 	GC_spacesDelta = &variables->GC_spacesDelta;
 
+	GC_rememberedSet             = &memory->rememberedSet;
+	GC_literalsReferences        = &memory->literalsReferences;
+	GC_nativizedMethods          = &memory->nativizedMethods;
+	GC_codeCacheObjectReferences = &memory->codeCacheObjectReferences;
+	GC_rescuedEphemerons         = &memory->rescuedEphemerons;
 
 	GC_weakContainers      = &variables->weakContainers;
 	GC_ephemerons          = &variables->ephemerons;

@@ -91,7 +91,8 @@ void GarbageCollector::setUpNonLocals()
 
 void GarbageCollector::useOwnVMVariables()
 {
-	vm.initializeFor(new VMVariables(memory));
+	VMVariables *vars = new VMVariables();
+	vm.initializeFor(vars, memory);
 	this->initializeFromVMVariables();
 }
 
