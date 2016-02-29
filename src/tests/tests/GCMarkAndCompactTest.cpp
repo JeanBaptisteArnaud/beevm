@@ -72,9 +72,9 @@ void GCMarkAndCompactTest::testCompact() {
 	compactor->prepareForCompact();
 	compactor->compact(space);
 	ASSERTM("", ((array->slot(1)->_basicSize() + 1 + 3) & -4) + ((ulong)array->slot(1)) == (ulong)array->slot(2) - 8);
-	ASSERTM("", this->isArray(array->slot(0)));
-	//ASSERTM("", this->isString(array->slot(1)));
-	//ASSERTM("", this->isByteArray(array->slot(2)));
+	ASSERTM("slot 0 should be an Array", this->isArray(array->slot(0)));
+	ASSERTM("slot 1 should be a String", this->isString(array->slot(1)));
+	ASSERTM("slot 2 should be a ByteArray", this->isByteArray(array->slot(2)));
 
 }
 
@@ -108,10 +108,10 @@ void GCMarkAndCompactTest::testCompactExtended() {
 	compactor->prepareForCompact();
 	compactor->compact(space);
 	ASSERTM("", ((array->slot(1)->_basicSize() + 1 + 3) & -4) + ((ulong)array->slot(1)) == (ulong)array->slot(2) - 8);
-	ASSERTM("slot 0 should be a array", this->isArray(array->slot(0)));
-	//ASSERTM("", this->isString(array->slot(1)));
-	//ASSERTM("", this->isByteArray(array->slot(2)));
-	ASSERTM("slot 3 should be a array", this->isArray(array->slot(3)));
+	ASSERTM("slot 0 should be an Array", this->isArray(array->slot(0)));
+	ASSERTM("slot 1 should be a String", this->isString(array->slot(1)));
+	ASSERTM("slot 2 should be a ByteArray", this->isByteArray(array->slot(2)));
+	ASSERTM("slot 3 should be an Array", this->isArray(array->slot(3)));
 	oop_t * extended = array->slot(3);
 	ASSERTM("slot 875 should be true, copy go wrong", extended->slot(875) == KnownObjects::stTrue);
 	// assert: (extended count : [:x | x not]) = (extended size - 1 )
@@ -154,10 +154,10 @@ void GCMarkAndCompactTest::testCompactExtendedWEphemeron() {
 	compactor->prepareForCompact();
 	compactor->compact(space);
 	ASSERTM("", ((array->slot(1)->_basicSize() + 1 + 3) & -4) + ((ulong)array->slot(1)) == (ulong)array->slot(2) - 8);
-	ASSERTM("slot 0 should be a array", this->isArray(array->slot(0)));
-	//ASSERTM("", this->isString(array->slot(1)));
-	//ASSERTM("", this->isByteArray(array->slot(2)));
-	ASSERTM("slot 3 should be a array", this->isArray(array->slot(3)));
+	ASSERTM("slot 0 should be an Array", this->isArray(array->slot(0)));
+	ASSERTM("slot 1 should be a String", this->isString(array->slot(1)));
+	ASSERTM("slot 2 should be a ByteArray", this->isByteArray(array->slot(2)));
+	ASSERTM("slot 3 should be an Array", this->isArray(array->slot(3)));
 	oop_t * extended = array->slot(3);
 	ASSERTM("slot 875 should be true, copy go wrong", extended->slot(875) == KnownObjects::stTrue);
 	// assert: (extended count : [:x | x not]) = (extended size - 1 )
@@ -199,10 +199,10 @@ void GCMarkAndCompactTest::testCompactExtendedWEphemeronRescued() {
 	compactor->prepareForCompact();
 	compactor->compact(space);
 	ASSERTM("", ((array->slot(1)->_basicSize() + 1 + 3) & -4) + ((ulong)array->slot(1)) == (ulong)array->slot(2) - 8);
-	ASSERTM("slot 0 should be a array", this->isArray(array->slot(0)));
-	//ASSERTM("", this->isString(array->slot(1)));
-	//ASSERTM("", this->isByteArray(array->slot(2)));
-	ASSERTM("slot 3 should be a array", this->isArray(array->slot(3)));
+	ASSERTM("slot 0 should be an Array", this->isArray(array->slot(0)));
+	ASSERTM("slot 1 should be a String", this->isString(array->slot(1)));
+	ASSERTM("slot 2 should be a ByteArray", this->isByteArray(array->slot(2)));
+	ASSERTM("slot 3 should be an Array", this->isArray(array->slot(3)));
 	oop_t * extended = array->slot(3);
 	ASSERTM("slot 875 should be true, copy go wrong", extended->slot(875) == KnownObjects::stTrue);
 	// assert: (extended count : [:x | x not]) = (extended size - 1 )
@@ -245,10 +245,10 @@ void GCMarkAndCompactTest::testCompactOverlapping() {
 	compactor->prepareForCompact();
 	compactor->compact(space);
 	ASSERTM("", ((array->slot(1)->_basicSize() + 1 + 3) & -4) + ((ulong)array->slot(1)) == (ulong)array->slot(2) - 8);
-	ASSERTM("slot 0 should be a array", this->isArray(array->slot(0)));
-	//ASSERTM("", this->isString(array->slot(1)));
-	//ASSERTM("", this->isByteArray(array->slot(2)));
-	ASSERTM("slot 3 should be a array", this->isArray(array->slot(3)));
+	ASSERTM("slot 0 should be an Array", this->isArray(array->slot(0)));
+	ASSERTM("slot 1 should be a String", this->isString(array->slot(1)));
+	ASSERTM("slot 2 should be a ByteArray", this->isByteArray(array->slot(2)));
+	ASSERTM("slot 3 should be an Array", this->isArray(array->slot(3)));
 	ASSERTM("size of overlapped object is wrong", (array->slot(3))->_size() == 1024);
 	//ASSERTM("slot 4 should be a bytearray", this->isByteArray(array->slot(4)));
 	ASSERTM("size of next's overlapped object is wrong", array->slot(4)->_size() == 3);

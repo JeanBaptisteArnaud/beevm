@@ -26,6 +26,8 @@ protected:
 
 	bool isSameArray(oop_t *object, oop_t *anotherObject);
 	bool isArray(oop_t *object);
+	bool isString(oop_t *object);
+	bool isByteArray(oop_t *object);
 
 protected:
 	MockedObjects mockedObjects;

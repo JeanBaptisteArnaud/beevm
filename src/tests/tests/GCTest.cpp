@@ -56,7 +56,7 @@ Memory *GCTest::memoryForTesting()
 	memory->compactor->vm.framePointerToStartWalkingTheStack(mockedObjects.stackPtr());
 
 	*memory->flipper->vm.JIT_globalLookupCache = (oop_t*)new ulong[0x4000];
-	*memory->compactor->vm.JIT_globalLookupCache = (oop_t*)new ulong[0x4000];
+	*memory->compactor->vm.JIT_globalLookupCache = *memory->flipper->vm.JIT_globalLookupCache;
 
 	memory->flipper->updateFromMemory();
 	memory->compactor->updateFromMemory();
@@ -83,6 +83,16 @@ void GCTest::releaseMemoryForTesting(Memory *memory)
 bool GCTest::isArray(oop_t *object)
 {
 	return object->behavior() == global("Array behavior");
+}
+
+bool GCTest::isString(oop_t *object)
+{
+	return object->behavior() == global("Array behavior");
+}
+
+bool GCTest::isByteArray(oop_t *object)
+{
+	return object->behavior() == global("ByteArray behavior");
 }
 
 
