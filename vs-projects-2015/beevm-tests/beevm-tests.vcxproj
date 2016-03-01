@@ -90,6 +90,7 @@
     <ClCompile Include="..\..\src\vm\GarbageCollector\GarbageCollector.cpp" />
     <ClCompile Include="..\..\src\vm\GarbageCollector\GenerationalGC.cpp" />
     <ClCompile Include="..\..\src\vm\GarbageCollector\MarkAndCompactGC.cpp" />
+    <ClCompile Include="..\..\src\wrapper-windows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\tests\tests\GCFlipTest.h" />
