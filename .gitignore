@@ -4,3 +4,4 @@ Release/
 .vs/
 vs-projects-2015/beevm/beevm.VC.opendb
 *.suo
+vs-projects-2015/beevm-tests/beevm-tests.exe.xml
