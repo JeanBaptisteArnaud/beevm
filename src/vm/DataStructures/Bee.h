@@ -1,11 +1,13 @@
 #ifndef _BEE_H_
 #define _BEE_H_
 
-#define NULL 0
+//#define NULL 0
 
 typedef unsigned long ulong;
 typedef unsigned short ushort;
 typedef unsigned char uchar;
+
+char* strcpy_s(char* dst, int size, const char *src);
 
 namespace Bee {
 
@@ -16,7 +18,9 @@ struct oop_t;
 typedef oop_t* slot_t;
 
 
-//oop_t* Array() { }
+ulong* _commit(ulong limit, ulong delta);
+void _decommit(ulong *limit, ulong *delta);
+void _free(ulong * limit, ulong *delta);
 
 
 void getOsErrorMessage(ulong code, char buffer[], int buffer_length);

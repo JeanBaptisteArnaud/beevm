@@ -125,11 +125,11 @@ void GCFlipTest::testCopyToOldBug()
 
 void GCFlipTest::testEphemeron()
 {
-	GCSpace default = mockedObjects.setDefaultSpace(fromSpace());
+	GCSpace previous = mockedObjects.setDefaultSpace(fromSpace());
 	oop_t *key = mockedObjects.newObject();
 	oop_t *value = mockedObjects.newObject();
 	oop_t *ephemeron = mockedObjects.newEphemeron(key, value);
-	mockedObjects.setDefaultSpace(&default);
+	mockedObjects.setDefaultSpace(&previous);
 	
 	oop_t *tombstone = mockedObjects.newObject();
 	oop_t *root = mockedObjects.newArray(2);
@@ -156,11 +156,11 @@ void GCFlipTest::testEphemeron()
 
 void GCFlipTest::testEphemeronOnce()
 {
-	GCSpace default = mockedObjects.setDefaultSpace(fromSpace());
+	GCSpace previous = mockedObjects.setDefaultSpace(fromSpace());
 	oop_t *key = mockedObjects.newObject();
 	oop_t *ephemeron = mockedObjects.newEphemeron(key, smiConst(2));
 	oop_t *tombstone = mockedObjects.newObject();
-	mockedObjects.setDefaultSpace(&default);
+	mockedObjects.setDefaultSpace(&previous);
 
 
 	oop_t *root = mockedObjects.newArray(2);

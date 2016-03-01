@@ -7,7 +7,6 @@
 #include "KnownObjects.h"
 #include "Memory.h"
 
-#include <windows.h>
 #include <climits>
 #include <iostream>
 

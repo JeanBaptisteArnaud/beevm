@@ -1,13 +1,13 @@
 /*
  * GCSpace.cpp
  *
- *  Created on: 18 dic. 2015
+ *  Created on: 18 dec. 2015
  *      Author: Arnaud Jean-Baptiste
  */
 
 #include <cstdlib>
 #include <iostream>
-#include <windows.h>
+
 
 #include "GCSpace.h"
 #include "ObjectFormat.h"
@@ -24,23 +24,27 @@ GCSpace::GCSpace()
 
 GCSpace GCSpace::dynamicNew(ulong size)
 {
+	GCSpaceInfo info((ulong)Bee::_commit(0, size), size);
+
 	GCSpace result;
-	result.loadFrom(GCSpaceInfo::newSized(size));
+	result.loadFrom(info);
 
 	return result;
 }
 
 GCSpace* GCSpace::dynamicNewP(ulong size)
 {
+	GCSpaceInfo info((ulong)Bee::_commit(0, size), size);
+
 	GCSpace *result = new GCSpace;
-	result->loadFrom(GCSpaceInfo::newSized(size));
+	result->loadFrom(info);
 
 	return result;
 }
 
 void GCSpace::dynamicFree()
 {
-	this->_free(base, 0);
+	Bee::_free(base, 0);
 }
 
 void GCSpace::loadFrom(GCSpace &space)
@@ -213,7 +217,8 @@ void GCSpace::commitMoreMemory()
 	ulong newLimit = (asUObject(nextFree) + padding) & -0x1000;
 
 	ulong limit = this->commitSized(newLimit - asUObject(regionBase));
-	if (limit != (asUObject(regionBase) & -0x1000))
+	if (limit != (asUObject(commitedLimit)))
+	//if (limit != (asUObject(regionBase) & -0x1000))
 		error("commiting more memory failed");
 	
 	commitedLimit = (ulong*)pointerConst(newLimit);
@@ -236,7 +241,9 @@ void GCSpace::commitMoreMemoryIfNeeded()
 
 ulong GCSpace::commitSized(ulong total)
 {
-	return (ulong)_commit(asUObject(regionBase), total);
+	ulong previouslyUsed = asUObject(commitedLimit)-asUObject(base);
+	ulong difference = total-previouslyUsed;
+	return (ulong)_commit(asUObject(commitedLimit), difference);
 }
 
 ulong GCSpace::commitDelta(ulong delta)
@@ -265,21 +272,6 @@ int GCSpace::percentageOfCommitedUsed()
 	return (int)(double(used()) * 100 / asUObject(commitedLimit));
 }
 
-
-ulong* GCSpace::_commit(ulong limit, ulong delta)
-{
-	return (ulong *) VirtualAlloc((ulong *) limit, delta, MEM_COMMIT, PAGE_READWRITE);
-}
-
-void GCSpace::_decommit(ulong *limit, ulong *delta)
-{
-	VirtualFree((void *) limit, (ulong) delta, MEM_DECOMMIT);
-}
-
-void GCSpace::_free(ulong * limit, ulong *delta)
-{
-	VirtualFree((void *) limit, (ulong) delta, MEM_RELEASE);
-}
 
 
 ulong* GCSpace::getBase()

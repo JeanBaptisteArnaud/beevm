@@ -62,6 +62,10 @@ void SanityChecker::error(const char *msg)
 void SanityChecker::errorIn(oop_t *object, long index)
 {
 	char msg[200];
-	sprintf_s(msg, "wrong object 0x%x at slot %d (0x%x)", object, index, &object->slot(index));
+#ifdef WIN32
+	sprintf_s(msg, "wrong object 0x%p at slot %d (0x%p)", object, index, &object->slot(index));
+#else
+	sprintf(msg, "wrong object 0x%p at slot %d (0x%p)", object, (int)index, &object->slot(index));
+#endif
 	error(msg);
 }

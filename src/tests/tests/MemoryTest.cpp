@@ -1,7 +1,6 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <Windows.h>
 #include <cute/cute.h>
 #include <cute/cute_suite.h>
 
@@ -17,8 +16,7 @@ ulong* VM()
 {
 	
 	ulong  size    = 0x42000;
-	ulong* address = (ulong *)VirtualAlloc((void *) 0x10000000, size,
-											  MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	ulong* address = Bee::_commit( 0x10000000, size);
 	
 	if (!address)
 		osError();

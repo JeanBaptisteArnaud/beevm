@@ -8,7 +8,6 @@
 
 #include <iostream>
 #include <vector>
-#include <windows.h>
 
 #include "Memory.h"
 #include "VMVariables.h"
@@ -55,9 +54,13 @@ void Memory::useHostVMVariables()
 
 void Memory::updateFromHostVM()
 {
-	fromSpace->loadFrom(VMVariablesProxy::hostVMFromSpace());
-	  toSpace->loadFrom(VMVariablesProxy::hostVMToSpace());
-	 oldSpace->loadFrom(VMVariablesProxy::hostVMOldSpace());
+	GCSpaceInfo info;
+	info = VMVariablesProxy::hostVMFromSpace();
+	fromSpace->loadFrom(info);
+	info = VMVariablesProxy::hostVMToSpace();
+	  toSpace->loadFrom(info);
+	info = VMVariablesProxy::hostVMOldSpace();
+	 oldSpace->loadFrom(info);
 
 	 KnownObjects::emptyArray = emptyArray;
 	 flipper->tombstone(residueObject);
@@ -65,9 +68,13 @@ void Memory::updateFromHostVM()
 
 void Memory::updateToHostVM()
 {
-	fromSpace->saveTo(VMVariablesProxy::hostVMFromSpace());
-	  toSpace->saveTo(VMVariablesProxy::hostVMToSpace());
-	 oldSpace->saveTo(VMVariablesProxy::hostVMOldSpace());
+	GCSpaceInfo info;
+	info = VMVariablesProxy::hostVMFromSpace();
+	fromSpace->saveTo(info);
+	info = VMVariablesProxy::hostVMToSpace();
+	  toSpace->saveTo(info);
+	info = VMVariablesProxy::hostVMOldSpace();
+	 oldSpace->saveTo(info);
 }
 
 // next methods still need checking

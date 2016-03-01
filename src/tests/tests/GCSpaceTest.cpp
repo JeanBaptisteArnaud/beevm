@@ -1,5 +1,4 @@
 
-#include <windows.h>
 #include <iostream>
 
 #include <cute/cute.h>

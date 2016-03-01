@@ -1,5 +1,10 @@
 
+#define __STDC_WANT_LIB_EXT1__ 1
+
+#include <cstring>
+
 #include "MockedObjects.h"
+#include "DataStructures/Bee.h"
 #include "DataStructures/ObjectFormat.h"
 #include "DataStructures/KnownObjects.h"
 #include "DataStructures/Memory.h"
@@ -12,7 +17,8 @@ using namespace Bee;
 
 MockedObjects::MockedObjects()
 {
-	defaultSpace.loadFrom(GCSpace::dynamicNew(4*1024*1024));
+	GCSpace allocator = GCSpace::dynamicNew(4*1024*1024);
+	defaultSpace.loadFrom(allocator);
 	stackTempIndex = STACK_LAST - 5; // -0: end of stack. -1: self. -2: cm. -3: prev env. -4: env. -5: first temp
 }
 
@@ -82,9 +88,12 @@ void MockedObjects::reference(const std::string &name, slot_t *slot)
 {
 	oop_t *referred = get(name);
 	
-//	if (referred == NULL)
-//		references.push_back(pair<slot_t*, string>(slot, name));
-	
+	if (referred == NULL)
+	{
+		references.push_back(pair<slot_t*, string>(slot, name));
+		referred = smiConst(678); // put a dummy object in place so that we don't have a bad ptr dangling there
+	}
+
 	*slot = referred;
 }
 
@@ -266,8 +275,8 @@ GCSpace* MockedObjects::mockGCSpace(ulong size)
 	uchar flags = basic_header_t::Flag_unseenInSpace | basic_header_t::Flag_notIndexed | basic_header_t::Flag_zeroTermOrNamed;
 	GCSpace *space = (GCSpace*)this->newBasicObject("GCSpace", GCSpace::instVarCount, 0, flags);
 
-	GCSpaceInfo info = GCSpaceInfo::newSized(size);
-	space->loadFrom(info);
+	GCSpace allocator = GCSpace::dynamicNew(size);
+	space->loadFrom(allocator);
 
 	return space;
 }

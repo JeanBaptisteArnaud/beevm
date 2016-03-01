@@ -1,7 +1,7 @@
 /*
  * GCSpace.h
  *
- *  Created on: 18 déc. 2015
+ *  Created on: 18 dec. 2015
  *      Author: Arnaud Jean-Baptiste
  */
 
@@ -60,10 +60,6 @@ public:
 	bool isReferredBy(oop_t *object);
 
 	
-	ulong* _commit  (ulong limit, ulong delta);
-	void   _decommit(ulong *limit, ulong *delta);
-	void   _free    (ulong *limit, ulong *delta);
-
 	ulong* getBase();
 	ulong* getNextFree();
 	ulong* getCommitedLimit();

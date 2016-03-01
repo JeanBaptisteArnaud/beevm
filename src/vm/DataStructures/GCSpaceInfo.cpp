@@ -6,7 +6,7 @@
  */
 
 #include "GCSpaceInfo.h"
-#include "stdlib.h"
+#include <cstdlib>
 
 using namespace Bee;
 

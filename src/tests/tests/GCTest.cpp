@@ -22,7 +22,7 @@ Memory *GCTest::memoryForTesting()
 	Memory *memory = new Memory();
 	memory->fromSpace = GCSpace::dynamicNewP( 8 * 1024);
 	memory->toSpace   = GCSpace::dynamicNewP( 8 * 1024);
-	memory->oldSpace  = GCSpace::dynamicNewP(16 * 1024);
+	memory->oldSpace  = GCSpace::dynamicNewP(64 * 1024);
 
 	memory->rememberedSet             = mockedObjects.newArray(0x200, memory->oldSpace);
 	memory->literalsReferences        = mockedObjects.newArray(0x200, memory->oldSpace);
@@ -41,9 +41,9 @@ Memory *GCTest::memoryForTesting()
 	memory->flipper->memory = memory;
 	memory->compactor->memory = memory;
 
-	GCSpaceInfo info = GCSpaceInfo::newSized(32 * 1024);
-	memory->flipper->localSpace.loadFrom(info);
-	memory->compactor->localSpace.loadFrom(info);
+	GCSpace space = GCSpace::dynamicNew(32 * 1024);
+	memory->flipper->localSpace.loadFrom(space);
+	memory->compactor->localSpace.loadFrom(space);
 
 	memory->flipper->initialize();
 	memory->compactor->initialize();
