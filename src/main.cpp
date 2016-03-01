@@ -7,7 +7,7 @@
 
 #include <cstddef>
 #include <iostream>
-#include "GarbageCollector.h"
+#include "DataStructures/GarbageCollector.h"
 
 //using namespace std;
 using namespace Bee;

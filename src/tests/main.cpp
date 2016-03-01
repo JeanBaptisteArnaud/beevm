@@ -15,7 +15,8 @@ extern cute::suite make_suite_GCFlipTest();
 extern cute::suite make_suite_GCMarkAndCompactTest();
 
 
-void runSuite(int argc, char const *argv[]){
+void runSuite(int argc, char const *argv[])
+{
 	cute::xml_file_opener xmlfile(argc,argv);
 	cute::xml_listener<cute::ide_listener<>  > lis(xmlfile.out);
 
