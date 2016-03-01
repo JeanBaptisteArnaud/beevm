@@ -323,22 +323,21 @@ ulong oop_t::_unrotate()
 
 ulong oop_t::_unthreadedSize()
 {
-	debug("check that _unthreadedSize makes sense");
-	ulong extendedBits = 0x80 / 2;
+	debug("add test to check that _unthreadedSize works correctly in all cases");
 	oop_t *object = this->_getProxee();
-	oop_t *nextObject;
+	oop_t *nextOrFlags;
 	
 	do {
-		nextObject = (oop_t*)object->slot(0)->_unrotate();
-		if (nextObject->isSmallInteger())
+		nextOrFlags = (oop_t*)object->slot(0)->_unrotate();
+		if (nextOrFlags->isSmallInteger())
 			break;
 		
-		object = nextObject;
+		object = nextOrFlags;
 	}
 	while (true);
 
-	return (nextObject->_asNative() & extendedBits) == 0 ? 
-		(nextObject->_asNative() / 0x10000000) & 0xFF : this->_extendedSize();
+	ulong flags = (ulong)nextOrFlags;
+	return (flags & basic_header_t::Flag_isExtended) == 0 ? flags & 0xFF : this->_extendedSize();
 }
 
 void oop_t::_threadWithAt(oop_t *other, long index)
