@@ -471,9 +471,9 @@ void GCMarkAndCompactTest::testFollowWeak() {
 	root->slot(0) = weak;
 	root->slot(1) = value2;
 
-	weak = KnownObjects::nil;
-	value1 = KnownObjects::nil;
-	value2 = KnownObjects::nil;
+//	weak = KnownObjects::nil;
+//	value1 = KnownObjects::nil;
+//	value2 = KnownObjects::nil;
 
 	compactor->followCountStartingAt((slot_t *)root, root->_size(), 1);
 	compactor->fixWeakContainers();
@@ -644,17 +644,17 @@ cute::suite make_suite_GCMarkAndCompactTest()
 {
 	cute::suite s;
 
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompact));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtended));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtendedWEphemeron));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtendedWEphemeronRescued));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactOverlapping));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowDontRescueEphemerons));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowEphemeronsNoRescue));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInFrom));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInTo));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInOldWeakArray));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowRescueEphemerons));
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompact));
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtended));
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtendedWEphemeron));
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtendedWEphemeronRescued));
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactOverlapping));
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowDontRescueEphemerons));
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowEphemeronsNoRescue));
+//	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInFrom));
+//	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInTo));
+//	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInOldWeakArray));
+//	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowRescueEphemerons));
 	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowWeak));
 	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowWeakExtended));
 	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowWeakExtendedNested));
