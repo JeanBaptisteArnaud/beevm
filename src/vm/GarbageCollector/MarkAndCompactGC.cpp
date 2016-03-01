@@ -252,12 +252,12 @@ void MarkAndCompactGC::followCountStartingAt(slot_t * root, int size, long base)
 	slot_t *scanned = root;
 	long index = base - 1;
 	long limit = index + size;
-
 	do
 	{
 		while (index < limit)
 		{
 			index = index + 1;
+
 			oop_t *object = scanned[index - 1];
 			if (!object->isSmallInteger()) {
 				if (this->arenaIncludes(object))
@@ -272,7 +272,10 @@ void MarkAndCompactGC::followCountStartingAt(slot_t * root, int size, long base)
 						}
 						this->rememberIfWeak(object);
 					}
-					object->_threadWithAt((oop_t *) oldScanned, oldIndex - 1);
+					object->_threadWithAt((oop_t *)oldScanned, oldIndex - 1);
+					index = -1;
+					limit = index + object->_strongPointersSize();
+					scanned = (slot_t *)object;
 				}
 				else
 				{
@@ -284,10 +287,11 @@ void MarkAndCompactGC::followCountStartingAt(slot_t * root, int size, long base)
 							stack.push(smiConst(limit));
 						}
 						this->rememberIfWeak(object);
+
+						index = -1;
+						limit = index + object->_strongPointersSize();
+						scanned = (slot_t *)object;
 					}
-					index = -1;
-					limit = index + object->_strongPointersSize();
-					scanned = (slot_t *)object;
 				}
 			}
 		}
@@ -297,8 +301,8 @@ void MarkAndCompactGC::followCountStartingAt(slot_t * root, int size, long base)
 			index = stack.pop()->_asNative();
 			scanned = (slot_t *)stack.pop();
 		}
-		else
-			break;
+		else break;
+		
 	} while (true);
 }
 
