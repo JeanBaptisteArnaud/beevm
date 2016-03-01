@@ -18,9 +18,6 @@
 #include "../DataStructures/Memory.h"
 
 
-// just until I fix my environment
-#define NULL 0
-
 using namespace std;
 using namespace Bee;
 
@@ -177,7 +174,7 @@ void GarbageCollector::rescueEphemerons()
 
 void GarbageCollector::clearPolymorphicMethodCache()
 {
-	for (ulong index = 1; index <= 0x4000; index++)
+	for (ulong index = 1; index <= 4000; index++)
 	{
 		vm.globalLookupCacheAtPut(index, KnownObjects::nil);
 	}

@@ -269,7 +269,7 @@ void MarkAndCompactGC::followCountStartingAt(slot_t * root, int size, long base)
 						}
 						this->rememberIfWeak(object);
 					}
-					object->_threadWithAt((oop_t *) oldScanned, oldIndex);
+					object->_threadWithAt((oop_t *) oldScanned, oldIndex - 1);
 				}
 				else
 				{

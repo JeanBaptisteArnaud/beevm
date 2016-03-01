@@ -1,6 +1,8 @@
 
 #include <iostream>
 #include <cstdio>
+#include <climits>
+#include <cstring>
 
 #include "ObjectFormat.h"
 #include "Bee.h"
@@ -320,10 +322,10 @@ ulong oop_t::_unthreadedSize()
 		(nextObject->_asNative() / 0x10000000) & 0xFF : this->_extendedSize();
 }
 
-void oop_t::_threadWithAt(oop_t * object, long index)
+void oop_t::_threadWithAt(oop_t *other, long index)
 {
-	object->slot(index) = this->slot(-2);
-	this->_setProxee(object->slot(-2));
+	other->slot(index) = this->slot(-2);
+	this->_setProxee(other);
 }
 
 // tool

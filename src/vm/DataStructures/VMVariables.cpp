@@ -18,7 +18,7 @@ VMVariables::VMVariables()
 
 	GC_anyNativizedCompiledMethodInFromSpace = true;
 	GC_anyCompiledMethodInFromSpace = false;
-	GC_spacesDelta;
+	GC_spacesDelta = 1;
 	GC_framePointerToWalkStack = 0;
 
 }
