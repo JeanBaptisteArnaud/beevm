@@ -3,3 +3,4 @@ Release/
 *.sdf
 .vs/
 vs-projects-2015/beevm/beevm.VC.opendb
+*.suo
