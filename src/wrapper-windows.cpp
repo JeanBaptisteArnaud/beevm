@@ -61,3 +61,21 @@ void Bee::debug(const char *message)
 	cout << message << endl;
 	OutputDebugString(message);
 }
+
+/*
+void testVirtualBehavior()
+{
+	ulong reservedSize = 4 * 1024 * 100;
+	ulong maxValueQuery = 28;
+	PMEMORY_BASIC_INFORMATION queryAnswer = (PMEMORY_BASIC_INFORMATION)malloc(maxValueQuery);
+
+	ulong *base = NULL;
+	VirtualAlloc(base, reservedSize, MEM_COMMIT, PAGE_READWRITE);
+
+	VirtualQuery((void *) base, queryAnswer, maxValueQuery);
+	ASSERTM("Memory not commit", queryAnswer->State && MEM_COMMIT == MEM_COMMIT);
+	VirtualFree((void *) base, (ulong) reservedSize, MEM_DECOMMIT);
+	free(queryAnswer);
+}*/
+
+

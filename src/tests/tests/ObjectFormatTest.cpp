@@ -1,5 +1,4 @@
 
-#include <windows.h>
 #include <cstdlib>
 #include <iostream>
 
@@ -233,20 +232,7 @@ void ObjectFormatTest::testObjectFlagManipulation()
 
 }
 
-void ObjectFormatTest::testVirtualBehavior()
-{
-	ulong reservedSize = 4 * 1024 * 100;
-	ulong maxValueQuery = 28;
-	PMEMORY_BASIC_INFORMATION queryAnswer = (PMEMORY_BASIC_INFORMATION)malloc(maxValueQuery);
 
-	ulong *base = NULL;
-	VirtualAlloc(base, reservedSize, MEM_COMMIT, PAGE_READWRITE);
-
-	VirtualQuery((void *) base, queryAnswer, maxValueQuery);
-	ASSERTM("Memory not commit", queryAnswer->State && MEM_COMMIT == MEM_COMMIT);
-	VirtualFree((void *) base, (ulong) reservedSize, MEM_DECOMMIT);
-	free(queryAnswer);
-}
 
 void ObjectFormatTest::testProxying()
 {
@@ -269,7 +255,6 @@ cute::suite make_suite_ObjectFormatTest()
 	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testBeExtended));
 	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testRotateLeft));
 	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testObjectFlagManipulation));
-	s.push_back(CUTE_SMEMFUN(ObjectFormatTest, testVirtualBehavior));
 	return s;
 }
 

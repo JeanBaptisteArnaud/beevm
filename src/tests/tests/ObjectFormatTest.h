@@ -20,7 +20,6 @@ public:
 	void testBeExtended();
 	void testRotateLeft();
 	void testObjectFlagManipulation();
-	void testVirtualBehavior();
 	void testProxying();
 	void testNextObject();
 	void testNextObjectAfterCompact();
