@@ -31,6 +31,11 @@ MarkAndCompactGC * GCMarkAndCompactTest::compactor()
 	return memory->compactor;
 }
 
+GCSpace& GCMarkAndCompactTest::oldSpace()
+{
+	return memory->compactor->oldSpace;
+}
+
 void GCMarkAndCompactTest::setUp()
 {
 	mockedObjects.initializeKnownObjects();
@@ -49,13 +54,13 @@ void GCMarkAndCompactTest::testCompact() {
 
 	MarkAndCompactGC * compactor = this->compactor();
 	oop_t * array = (compactor->localSpace).shallowCopy(mockedObjects.newArray(0x100));
-	oop_t * object = (compactor->oldSpace).shallowCopy(mockedObjects.newArray(3));
+	oop_t * object = oldSpace().shallowCopy(mockedObjects.newArray(3));
 	array->slot(0) = object;
-	oop_t * string = (compactor->oldSpace).shallowCopy(mockedObjects.newString("a String"));
+	oop_t * string = oldSpace().shallowCopy(mockedObjects.newString("a String"));
 	array->slot(1) = string;
 	oop_t * stringPointer = string;
-	oop_t * leakedPointer = ((compactor->oldSpace).shallowCopy(mockedObjects.newString("a String")));
-	oop_t * byteArray = ((compactor->oldSpace).shallowCopy(mockedObjects.newByteArray(3)));
+	oop_t * leakedPointer = (oldSpace().shallowCopy(mockedObjects.newString("a String")));
+	oop_t * byteArray = (oldSpace().shallowCopy(mockedObjects.newByteArray(3)));
 	byteArray->byte(0) = 1;
 	byteArray->byte(1) = 2;
 	byteArray->byte(2) = 3;
@@ -64,7 +69,7 @@ void GCMarkAndCompactTest::testCompact() {
 
 	ASSERTM("leakedPointer should be after string pointer", (ulong)leakedPointer > (ulong)stringPointer);
 	ASSERTM("leakedPointer should be before byteArray pointer", (ulong)leakedPointer < (ulong)byteArrayPointer);
-	GCSpace * space = &(compactor->oldSpace);
+	GCSpace * space = &oldSpace();
 	compactor->initAuxSpace();
 	compactor->followCountStartingAt((slot_t *)array, array->_size(), 1);
 	compactor->followRescuedEphemerons();
@@ -81,26 +86,26 @@ void GCMarkAndCompactTest::testCompact() {
 void GCMarkAndCompactTest::testCompactExtended() {
 	MarkAndCompactGC * compactor = this->compactor();
 	oop_t * array = (compactor->localSpace).shallowCopy(mockedObjects.newArray(0x100));
-	oop_t * object = (compactor->oldSpace).shallowCopy(mockedObjects.newArray(4));
+	oop_t * object = oldSpace().shallowCopy(mockedObjects.newArray(4));
 	array->slot(0) = object;
-	oop_t * string = (compactor->oldSpace).shallowCopy(mockedObjects.newString("a String"));
+	oop_t * string = oldSpace().shallowCopy(mockedObjects.newString("a String"));
 	array->slot(1) = string;
 	oop_t * stringPointer = string;
 	long leakedSize = 678;
-	oop_t * leakedPointer = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(leakedSize)));
+	oop_t * leakedPointer = (oldSpace().shallowCopy(mockedObjects.newArray(leakedSize)));
 
-	oop_t * byteArray = ((compactor->oldSpace).shallowCopy(mockedObjects.newByteArray(3)));
+	oop_t * byteArray = (oldSpace().shallowCopy(mockedObjects.newByteArray(3)));
 	byteArray->byte(0) = 1;
 	byteArray->byte(1) = 2;
 	byteArray->byte(2) = 3;
 	oop_t * byteArrayPointer = byteArray;
 	array->slot(2) = byteArray;
-	oop_t * large = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(876)));
+	oop_t * large = (oldSpace().shallowCopy(mockedObjects.newArray(876)));
 	large->slot(875) = KnownObjects::stTrue;
 	array->slot(3) = large;
 	ASSERTM("leakedPointer should be after string pointer", (ulong)leakedPointer > (ulong)stringPointer);
 	ASSERTM("leakedPointer should be before byteArray pointer", (ulong)leakedPointer < (ulong)byteArrayPointer);
-	GCSpace * space = &(compactor->oldSpace);
+	GCSpace * space = &oldSpace();
 	compactor->initAuxSpace();
 	compactor->followCountStartingAt((slot_t *)array, array->_size(), 1);
 	compactor->followRescuedEphemerons();
@@ -123,32 +128,32 @@ void GCMarkAndCompactTest::testCompactExtendedWEphemeron() {
 	MarkAndCompactGC * compactor = this->compactor();
 	oop_t * array = (compactor->localSpace).shallowCopy(mockedObjects.newArray(0x100));
 	for (int i = 0; i < 256; i++) array->slot(i) = KnownObjects::nil;
-	oop_t * object = (compactor->oldSpace).shallowCopy(mockedObjects.newArray(4));
+	oop_t * object = oldSpace().shallowCopy(mockedObjects.newArray(4));
 	for (int i = 0; i < 4; i++) object->slot(i) = KnownObjects::nil;
 	array->slot(0) = object;
-	oop_t * string = (compactor->oldSpace).shallowCopy(mockedObjects.newString("a String"));
+	oop_t * string = oldSpace().shallowCopy(mockedObjects.newString("a String"));
 	array->slot(1) = string;
 	oop_t * stringPointer = string;
 	long leakedSize = 678;
-	oop_t * leakedPointer = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(leakedSize)));
+	oop_t * leakedPointer = (oldSpace().shallowCopy(mockedObjects.newArray(leakedSize)));
 
-	oop_t * byteArray = ((compactor->oldSpace).shallowCopy(mockedObjects.newByteArray(3)));
+	oop_t * byteArray = (oldSpace().shallowCopy(mockedObjects.newByteArray(3)));
 	byteArray->byte(0) = 1;
 	byteArray->byte(1) = 2;
 	byteArray->byte(2) = 3;
 	oop_t * byteArrayPointer = byteArray;
 	array->slot(2) = byteArray;
-	oop_t * large = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(876)));
+	oop_t * large = (oldSpace().shallowCopy(mockedObjects.newArray(876)));
 	large->slot(875) = KnownObjects::stTrue;
 	array->slot(3) = large;
-	oop_t *key = (compactor->oldSpace).shallowCopy(mockedObjects.newString("key"));
-	oop_t *value = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t *ephemeron = (compactor->oldSpace).shallowCopy(mockedObjects.newEphemeron(key, value));
+	oop_t *key = oldSpace().shallowCopy(mockedObjects.newString("key"));
+	oop_t *value = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t *ephemeron = oldSpace().shallowCopy(mockedObjects.newEphemeron(key, value));
 	array->slot(4) = key;
 	array->slot(5) = ephemeron;
 	ASSERTM("leakedPointer should be after string pointer", (ulong)leakedPointer > (ulong)stringPointer);
 	ASSERTM("leakedPointer should be before byteArray pointer", (ulong)leakedPointer < (ulong)byteArrayPointer);
-	GCSpace * space = &(compactor->oldSpace);
+	GCSpace * space = &oldSpace();
 	compactor->initAuxSpace();
 	compactor->followCountStartingAt((slot_t *)array, array->_size(), 1);
 	compactor->followRescuedEphemerons();
@@ -169,31 +174,31 @@ void GCMarkAndCompactTest::testCompactExtendedWEphemeron() {
 void GCMarkAndCompactTest::testCompactExtendedWEphemeronRescued() {
 	MarkAndCompactGC * compactor = this->compactor();
 	oop_t * array = (compactor->localSpace).shallowCopy(mockedObjects.newArray(0x100));
-	oop_t * object = (compactor->oldSpace).shallowCopy(mockedObjects.newArray(4));
+	oop_t * object = oldSpace().shallowCopy(mockedObjects.newArray(4));
 	array->slot(0) = object;
-	oop_t * string = (compactor->oldSpace).shallowCopy(mockedObjects.newString("a String"));
+	oop_t * string = oldSpace().shallowCopy(mockedObjects.newString("a String"));
 	array->slot(1) = string;
 	oop_t * stringPointer = string;
 	long leakedSize = 678;
-	oop_t * leakedPointer = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(leakedSize)));
+	oop_t * leakedPointer = (oldSpace().shallowCopy(mockedObjects.newArray(leakedSize)));
 
-	oop_t * byteArray = ((compactor->oldSpace).shallowCopy(mockedObjects.newByteArray(3)));
+	oop_t * byteArray = (oldSpace().shallowCopy(mockedObjects.newByteArray(3)));
 	byteArray->byte(0) = 1;
 	byteArray->byte(1) = 2;
 	byteArray->byte(2) = 3;
 	oop_t * byteArrayPointer = byteArray;
 	array->slot(2) = byteArray;
-	oop_t * large = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(876)));
+	oop_t * large = (oldSpace().shallowCopy(mockedObjects.newArray(876)));
 	large->slot(875) = KnownObjects::stTrue;
 	array->slot(3) = large;
-	oop_t *key = (compactor->oldSpace).shallowCopy(mockedObjects.newString("key"));
-	oop_t *value = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t *ephemeron = (compactor->oldSpace).shallowCopy(mockedObjects.newEphemeron(key, value));
+	oop_t *key = oldSpace().shallowCopy(mockedObjects.newString("key"));
+	oop_t *value = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t *ephemeron = oldSpace().shallowCopy(mockedObjects.newEphemeron(key, value));
 	array->slot(4) = KnownObjects::nil;
 	array->slot(5) = ephemeron;
 	ASSERTM("leakedPointer should be after string pointer", (ulong)leakedPointer > (ulong)stringPointer);
 	ASSERTM("leakedPointer should be before byteArray pointer", (ulong)leakedPointer < (ulong)byteArrayPointer);
-	GCSpace * space = &(compactor->oldSpace);
+	GCSpace * space = &oldSpace();
 	compactor->initAuxSpace();
 	compactor->followCountStartingAt((slot_t *)array, array->_size(), 1);
 	compactor->followRescuedEphemerons();
@@ -215,23 +220,23 @@ void GCMarkAndCompactTest::testCompactExtendedWEphemeronRescued() {
 void GCMarkAndCompactTest::testCompactOverlapping() {
 	MarkAndCompactGC * compactor = this->compactor();
 	oop_t * array = (compactor->localSpace).shallowCopy(mockedObjects.newArray(0x100));
-	oop_t * object = (compactor->oldSpace).shallowCopy(mockedObjects.newArray(4));
+	oop_t * object = oldSpace().shallowCopy(mockedObjects.newArray(4));
 	array->slot(0) = object;
-	oop_t * string = (compactor->oldSpace).shallowCopy(mockedObjects.newString("a String"));
+	oop_t * string = oldSpace().shallowCopy(mockedObjects.newString("a String"));
 	array->slot(1) = string;
 	oop_t * stringPointer = string;
 	long leakedSize = 678;
-	oop_t * leakedPointer = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(leakedSize)));
+	oop_t * leakedPointer = oldSpace().shallowCopy(mockedObjects.newArray(leakedSize));
 
-	oop_t * byteArray = ((compactor->oldSpace).shallowCopy(mockedObjects.newByteArray(3)));
+	oop_t * byteArray = oldSpace().shallowCopy(mockedObjects.newByteArray(3));
 	byteArray->byte(0) = 1;
 	byteArray->byte(1) = 2;
 	byteArray->byte(2) = 3;
 	oop_t * byteArrayPointer = byteArray;
 	array->slot(2) = byteArray;
-	oop_t * overlapped = ((compactor->oldSpace).shallowCopy(mockedObjects.newByteArray(1024)));
+	oop_t * overlapped = oldSpace().shallowCopy(mockedObjects.newByteArray(1024));
 	array->slot(3) = overlapped;
-	oop_t * next = ((compactor->oldSpace).shallowCopy(mockedObjects.newByteArray(3)));
+	oop_t * next = oldSpace().shallowCopy(mockedObjects.newByteArray(3));
 	next->byte(0) = 4;
 	next->byte(1) = 5;
 	next->byte(2) = 6;
@@ -239,7 +244,7 @@ void GCMarkAndCompactTest::testCompactOverlapping() {
 
 	ASSERTM("leakedPointer should be after string pointer", (ulong)leakedPointer > (ulong)stringPointer);
 	ASSERTM("leakedPointer should be before byteArray pointer", (ulong)leakedPointer < (ulong)byteArrayPointer);
-	GCSpace * space = &(compactor->oldSpace);
+	GCSpace * space = &oldSpace();
 	compactor->initAuxSpace();
 	compactor->followCountStartingAt((slot_t *)array, array->_size(), 1);
 	compactor->followRescuedEphemerons();
@@ -259,9 +264,9 @@ void GCMarkAndCompactTest::testCompactOverlapping() {
 void GCMarkAndCompactTest::testFollowDontRescueEphemerons() {
 	oop_t * pointers[3];
 	MarkAndCompactGC * compactor = this->compactor();
-	oop_t * leaked = (compactor->oldSpace).shallowCopy(mockedObjects.newString("leaked"));
-	oop_t * value = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t * ephemeron = (compactor->oldSpace).shallowCopy(mockedObjects.newEphemeron(leaked, value));
+	oop_t * leaked = oldSpace().shallowCopy(mockedObjects.newString("leaked"));
+	oop_t * value = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * ephemeron = oldSpace().shallowCopy(mockedObjects.newEphemeron(leaked, value));
 	pointers[0] = leaked;
 	pointers[1] = value;
 	pointers[2] = ephemeron;
@@ -281,9 +286,9 @@ void GCMarkAndCompactTest::testFollowDontRescueEphemerons() {
 void GCMarkAndCompactTest::testFollowEphemeronsNoRescue() {
 	oop_t * pointers[3];
 	MarkAndCompactGC * compactor = this->compactor();
-	oop_t * leaked = (compactor->oldSpace).shallowCopy(mockedObjects.newString("leaked"));
-	oop_t * value = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t * ephemeron = (compactor->oldSpace).shallowCopy(mockedObjects.newEphemeron(leaked, value));
+	oop_t * leaked = oldSpace().shallowCopy(mockedObjects.newString("leaked"));
+	oop_t * value = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * ephemeron = oldSpace().shallowCopy(mockedObjects.newEphemeron(leaked, value));
 	pointers[0] = leaked;
 	pointers[1] = value;
 	pointers[2] = ephemeron;
@@ -377,16 +382,16 @@ void GCMarkAndCompactTest::testFollowObjectInOldWeakArray() {
 	oop_t * pointers[4];
 	MarkAndCompactGC * compactor = this->compactor();
 
-	oop_t * array = ((compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(3)));
-	oop_t * string = (compactor->oldSpace).shallowCopy(mockedObjects.newString("a String"));
-	pointers[0] = (compactor->oldSpace).shallowCopy(mockedObjects.newString("leaked"));
-	oop_t * byteArray = ((compactor->oldSpace).shallowCopy(mockedObjects.newByteArray(3)));
+	oop_t * array = (oldSpace().shallowCopy(mockedObjects.newWeakArray(3)));
+	oop_t * string = oldSpace().shallowCopy(mockedObjects.newString("a String"));
+	pointers[0] = oldSpace().shallowCopy(mockedObjects.newString("leaked"));
+	oop_t * byteArray = (oldSpace().shallowCopy(mockedObjects.newByteArray(3)));
 
 	array->slot(0) = smiConst(1);
 	array->slot(1) = string;
 	array->slot(2) = byteArray;
 
-	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(1)));
+	oop_t * root = (oldSpace().shallowCopy(mockedObjects.newArray(1)));
 	root->slot(0) = array;
 	oop_t * weak = root->slot(0);
 
@@ -428,9 +433,9 @@ void GCMarkAndCompactTest::testFollowRescueEphemerons() {
 
 	oop_t * pointers[3];
 	MarkAndCompactGC * compactor = this->compactor();
-	oop_t * leaked = (compactor->oldSpace).shallowCopy(mockedObjects.newString("leaked"));
-	oop_t * value = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t * ephemeron = (compactor->oldSpace).shallowCopy(mockedObjects.newEphemeron(leaked, value));
+	oop_t * leaked = oldSpace().shallowCopy(mockedObjects.newString("leaked"));
+	oop_t * value = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * ephemeron = oldSpace().shallowCopy(mockedObjects.newEphemeron(leaked, value));
 	pointers[0] = leaked;
 	pointers[1] = value;
 	pointers[2] = ephemeron;
@@ -452,22 +457,23 @@ void GCMarkAndCompactTest::testFollowRescueEphemerons() {
 	
 }
 
-void GCMarkAndCompactTest::testFollowWeak() {
-		oop_t * pointers[3];
-		MarkAndCompactGC * compactor = this->compactor();
-		oop_t * value1 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-		oop_t * value2 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-		oop_t * weak = (compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(2));
-		weak->slot(0) = value1;
-		weak->slot(1) = value2;
-		oop_t * tombstone = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-		compactor->tombstone(tombstone);
-		pointers[0] = value1;
-		pointers[1] = value2;
-		pointers[2] = weak;
-		pointers[3] = tombstone;
+void GCMarkAndCompactTest::testFollowWeak()
+{
+	oop_t * pointers[3];
+	MarkAndCompactGC * compactor = this->compactor();
+	oop_t * value1 = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * value2 = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * weak = oldSpace().shallowCopy(mockedObjects.newWeakArray(2));
+	weak->slot(0) = value1;
+	weak->slot(1) = value2;
+	oop_t * tombstone = oldSpace().shallowCopy(mockedObjects.newObject());
+	compactor->tombstone(tombstone);
+	pointers[0] = value1;
+	pointers[1] = value2;
+	pointers[2] = weak;
+	pointers[3] = tombstone;
 
-	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(2)));
+	oop_t * root = (oldSpace().shallowCopy(mockedObjects.newArray(2)));
 	root->slot(0) = weak;
 	root->slot(1) = value2;
 
@@ -491,19 +497,19 @@ void GCMarkAndCompactTest::testFollowWeak() {
 void GCMarkAndCompactTest::testFollowWeakExtended() {
 	oop_t * pointers[3];
 	MarkAndCompactGC * compactor = this->compactor();
-	oop_t * value1 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t * value2 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t * weak = (compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(300));
+	oop_t * value1 = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * value2 = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * weak = oldSpace().shallowCopy(mockedObjects.newWeakArray(300));
 	weak->slot(290) = value1;
 	weak->slot(291) = value2;
-	oop_t * tombstone = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * tombstone = oldSpace().shallowCopy(mockedObjects.newObject());
 	compactor->tombstone(tombstone);
 	pointers[0] = value1;
 	pointers[1] = value2;
 	pointers[2] = weak;
 	pointers[3] = tombstone;
 
-	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(2)));
+	oop_t * root = (oldSpace().shallowCopy(mockedObjects.newArray(2)));
 	root->slot(0) = weak;
 	root->slot(1) = value2;
 
@@ -528,23 +534,23 @@ void GCMarkAndCompactTest::testFollowWeakExtendedNested() {
 	oop_t * pointers[3];
 	MarkAndCompactGC * compactor = this->compactor();
 
-	oop_t * array = (compactor->oldSpace).shallowCopy(mockedObjects.newArray(10));
-	oop_t * value1 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t * value2 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t * weak = (compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(300));
+	oop_t * array = oldSpace().shallowCopy(mockedObjects.newArray(10));
+	oop_t * value1 = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * value2 = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * weak = oldSpace().shallowCopy(mockedObjects.newWeakArray(300));
 	weak->slot(290) = value1;
 	weak->slot(291) = value2;
 
 	for (int i = 0; i < 10; i++) array->slot(i) = weak;
 	
-	oop_t * tombstone = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * tombstone = oldSpace().shallowCopy(mockedObjects.newObject());
 	compactor->tombstone(tombstone);
 	pointers[0] = value1;
 	pointers[1] = value2;
 	pointers[2] = weak;
 	pointers[3] = tombstone;
 
-	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(2)));
+	oop_t * root = (oldSpace().shallowCopy(mockedObjects.newArray(2)));
 	root->slot(0) = array;
 	root->slot(1) = value2;
 
@@ -568,12 +574,12 @@ void GCMarkAndCompactTest::testFollowWeakNoTombstones() {
 	oop_t * pointers[3];
 	MarkAndCompactGC * compactor = this->compactor();
 
-	oop_t * value1 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t * value2 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t * weak = (compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(300));
+	oop_t * value1 = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * value2 = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * weak = oldSpace().shallowCopy(mockedObjects.newWeakArray(300));
 	weak->slot(290) = value1;
 	weak->slot(291) = value2;
-	oop_t * tombstone = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * tombstone = oldSpace().shallowCopy(mockedObjects.newObject());
 
 	compactor->tombstone(tombstone);
 	pointers[0] = value1;
@@ -581,7 +587,7 @@ void GCMarkAndCompactTest::testFollowWeakNoTombstones() {
 	pointers[2] = weak;
 	pointers[3] = tombstone;
 
-	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(2)));
+	oop_t * root = (oldSpace().shallowCopy(mockedObjects.newArray(2)));
 	root->slot(0) = weak;
 	root->slot(1) = value1;
 	root->slot(2) = value2;
@@ -606,12 +612,12 @@ void GCMarkAndCompactTest::testFollowWeakNoTombstonesExtended() {
 	oop_t * pointers[3];
 	MarkAndCompactGC * compactor = this->compactor();
 
-	oop_t * value1 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t * value2 = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
-	oop_t * weak = (compactor->oldSpace).shallowCopy(mockedObjects.newWeakArray(2));
+	oop_t * value1 = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * value2 = oldSpace().shallowCopy(mockedObjects.newObject());
+	oop_t * weak = oldSpace().shallowCopy(mockedObjects.newWeakArray(2));
 	weak->slot(0) = value1;
 	weak->slot(1) = value2;
-	oop_t * tombstone = (compactor->oldSpace).shallowCopy(mockedObjects.newObject());
+	oop_t * tombstone = oldSpace().shallowCopy(mockedObjects.newObject());
 
 	compactor->tombstone(tombstone);
 	pointers[0] = value1;
@@ -619,7 +625,7 @@ void GCMarkAndCompactTest::testFollowWeakNoTombstonesExtended() {
 	pointers[2] = weak;
 	pointers[3] = tombstone;
 
-	oop_t * root = ((compactor->oldSpace).shallowCopy(mockedObjects.newArray(2)));
+	oop_t * root = (oldSpace().shallowCopy(mockedObjects.newArray(2)));
 	root->slot(0) = weak;
 	root->slot(1) = value1;
 	root->slot(2) = value2;

@@ -44,6 +44,7 @@ namespace Bee
 		void testLibrariesDo();
 
 		MarkAndCompactGC * compactor();
+		GCSpace& oldSpace();
 
 		Memory *memory;
 	};
