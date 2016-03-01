@@ -45,6 +45,7 @@ public:
 	void testShallowCopyGrowingToExtended();
 	void testSynchronousGCSpace();
 	void testObjectsIteration();
+	void testObjectsIterationAfterCompact();
 };
 
 }

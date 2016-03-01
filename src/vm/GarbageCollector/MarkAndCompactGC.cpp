@@ -153,7 +153,10 @@ void MarkAndCompactGC::setNewPositions(GCSpace * space)
 				headerBits = reference->slot(0);
 				reference->slot(0) = newPosition;
 				oop_t * nextReference = (oop_t *)(headerBits->_unrotate());
-				if (nextReference->isSmallInteger()) break; else reference = nextReference;
+				if (nextReference->isSmallInteger()) 
+					break; 
+				else 
+					reference = nextReference;
 			} while (true);
 			next->slot(-2) = headerBits;
 			next->_beSeenInSpace();

@@ -32,17 +32,17 @@ void ObjectFormatTest::testHeaderOf()
 	oop_t *object = mockedObjects.newArray(1);
 	basic_header_t * h = object->basic_header();
 
-	ASSERTM("Array 1 : Size",     h->size == 3);
-	ASSERTM("Array 1 : Hash",     h->hash == 0x37F8);
+	ASSERTM("Array 1 : Size",     h->size == 1);
+	ASSERTM("Array 1 : Hash",     h->hash == 0x0000);
 	ASSERTM("Array 1 : Flags",    h->flags == basic_header_t::Flag_unseenInSpace);
-	ASSERTM("Array 1 : behavior", h->behavior == (oop_t*)0x0A0792F0);
+	ASSERTM("Array 1 : behavior", h->behavior == (oop_t*)0x00000000);
 
 	object = mockedObjects.newArray(3);
 	h = object->basic_header();
 	ASSERTM("Array 2 : Size",     h->size == 3);
 	ASSERTM("Array 2 : Hash",     h->hash == 0x0000);
 	ASSERTM("Array 2 : Flags",    h->flags == basic_header_t::Flag_unseenInSpace);
-	ASSERTM("Array 2 : behavior", h->behavior == (oop_t*)0x0A0792F0);
+	ASSERTM("Array 2 : behavior", h->behavior == (oop_t*)0x00000000);
 
 	object = mockedObjects.mockTrue();
 	h = object->basic_header();
@@ -52,7 +52,7 @@ void ObjectFormatTest::testHeaderOf()
 	ASSERTM("True : Flags",    h->flags ==  (basic_header_t::Flag_unseenInSpace |
 											 basic_header_t::Flag_notIndexed |
 											 basic_header_t::Flag_zeroTermOrNamed));
-	ASSERTM("True : behavior", h->behavior == (oop_t*)0x0A0B6BA0);
+	ASSERTM("True : behavior", h->behavior == (oop_t*)0x00000000);
 
 	object = mockedObjects.mockNil();
 	h = object->basic_header();
@@ -61,7 +61,7 @@ void ObjectFormatTest::testHeaderOf()
 	ASSERTM("Nil : Flags", h->flags == (basic_header_t::Flag_unseenInSpace |
 										basic_header_t::Flag_notIndexed |
 										basic_header_t::Flag_zeroTermOrNamed));
-	ASSERTM("Nil : behavior", h->behavior == (oop_t*)0x0A0DDC10);
+	ASSERTM("Nil : behavior", h->behavior == (oop_t*)0x00000000);
 
 }
 
@@ -86,6 +86,28 @@ void ObjectFormatTest::testNextObject()
 	oop_t *extended2 = mockedObjects.newArray(256);
 	oop_t *array2 = mockedObjects.newArray(5);
 	oop_t *array3 = mockedObjects.newArray(4);
+
+	ASSERTM("nextObject basic to extended ", (array1->nextObject() == extended1));
+	ASSERTM("nextObject extended to extended", (extended1->nextObject() == extended2));
+	ASSERTM("nextObject extended to basic", (extended2->nextObject() == array2));
+	ASSERTM("nextObject basic to basic", (array2->nextObject() == array3));
+
+}
+
+
+void ObjectFormatTest::testNextObjectAfterCompact()
+{
+	oop_t *array1 = mockedObjects.newArray(1);
+	oop_t *extended1 = mockedObjects.newArray(256);
+	oop_t *extended2 = mockedObjects.newArray(256);
+	oop_t *array2 = mockedObjects.newArray(5);
+	oop_t *array3 = mockedObjects.newArray(4);
+
+	array1->_setProxee(array1);
+	extended1->_setProxee(extended1);
+	array2->_setProxee(array2);
+	array3->_setProxee(array3);
+	extended2->_setProxee(extended2);
 
 	ASSERTM("nextObject basic to extended ", (array1->nextObject() == extended1));
 	ASSERTM("nextObject extended to extended", (extended1->nextObject() == extended2));

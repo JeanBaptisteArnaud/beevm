@@ -207,6 +207,11 @@ oop_t * GCSpace::firstObject()
 	return headerToObject(asObject(this->getBase()));
 }
 
+oop_t * GCSpace::firstObjectAfterCompact()
+{
+	return headerToObjectCheckProxee(asObject(this->getBase()));
+}
+
 
 void GCSpace::commitMoreMemory()
 {

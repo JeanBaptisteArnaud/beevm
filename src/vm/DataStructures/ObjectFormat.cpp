@@ -26,6 +26,15 @@ oop_t * Bee::headerToObject(void * buffer)
 	return object->_isExtended() ? (oop_t *)((ulong)buffer + 16) : object;
 }
 
+oop_t * Bee::headerToObjectCheckProxee(void * buffer)
+{	
+	oop_t * object = ((oop_t *)((ulong)buffer + 8));
+	bool test = object->_isProxy();
+	return 	object->_isProxy() || (!object->_isExtended()) ? object : (oop_t *)((ulong)buffer + 16)  ;
+}
+
+
+
 oop_t* Bee::smiConst(int number)
 {
 	return (oop_t*)((number << 1) | 1);
@@ -276,6 +285,16 @@ oop_t * oop_t::nextObject()
 	return headerToObject((ulong *) nextHeader);
 }
 
+oop_t * oop_t::nextObjectAfterCompact()
+{
+
+	ulong completeSizeOfObject = this->_sizeInBytes();
+	ulong nextHeader = ((ulong) this + completeSizeOfObject);
+	return headerToObjectCheckProxee((ulong *)nextHeader);
+}
+
+
+
 // proxiing method
 bool oop_t::_isProxy()
 {
@@ -325,7 +344,7 @@ ulong oop_t::_unthreadedSize()
 void oop_t::_threadWithAt(oop_t *other, long index)
 {
 	other->slot(index) = this->slot(-2);
-	this->_setProxee(other);
+	this->_setProxee((oop_t *) &other->slot(index));
 }
 
 // tool

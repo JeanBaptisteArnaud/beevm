@@ -7,7 +7,10 @@ typedef unsigned long ulong;
 typedef unsigned short ushort;
 typedef unsigned char uchar;
 
+#ifndef _WIN32
 char* strcpy_s(char* dst, int size, const char *src);
+#endif // !WIN32
+
 
 namespace Bee {
 

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <windows.h>
 
-#include "Bee.h"
+#include "DataStructures/Bee.h"
 
 using namespace std;
 using namespace Bee;

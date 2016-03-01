@@ -160,6 +160,7 @@ public:
 	slot_t& slot(long index) { ulong *pos = (ulong*)this + index; return *((slot_t*)pos); }
 	uchar&  byte(long index) { uchar *pos = (uchar*)this + index; return *pos; }
 	oop_t* nextObject();
+	oop_t* nextObjectAfterCompact();
 
 	//done
 	ulong _basicAt(int index);
@@ -188,7 +189,7 @@ public:
 basic_header_t* basic_header_cast(void* buffer);
 extended_header_t* extended_header_cast(void* buffer);
 oop_t* headerToObject(void* buffer);
-
+oop_t * headerToObjectCheckProxee(void * buffer);
 // others
 
 void   _free(ulong * limit, ulong * delta);
