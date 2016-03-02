@@ -86,7 +86,7 @@ bool GCTest::isArray(oop_t *object)
 
 bool GCTest::isString(oop_t *object)
 {
-	return object->behavior() == global("Array behavior");
+	return object->behavior() == global("String behavior");
 }
 
 bool GCTest::isByteArray(oop_t *object)
