@@ -52,6 +52,7 @@
     <ClCompile Include="..\..\src\vm\GarbageCollector\SanityChecker.cpp">
       <Filter>GarbageCollector</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\wrapper-windows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\vm\DataStructures\VMArray.h">
