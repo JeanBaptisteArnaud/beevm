@@ -53,13 +53,13 @@ void GCMarkAndCompactTest::tearDown()
 void GCMarkAndCompactTest::testCompact() {
 
 	MarkAndCompactGC * compactor = this->compactor();
-	oop_t * array = compactor->localSpace.shallowCopy(mockedObjects.newArray(0x100));
-	oop_t * object = oldSpace().shallowCopy(mockedObjects.newArray(3));
+	oop_t * array = compactor->localSpace.shallowCopy(mockedObjects.newArray(3));
+	oop_t * object = oldSpace().shallowCopy(mockedObjects.newByteArray(256));
 	array->slot(0) = object;
 	oop_t * string = oldSpace().shallowCopy(mockedObjects.newString("a String"));
 	array->slot(1) = string;
 	oop_t * stringPointer = string;
-	oop_t * leakedPointer = oldSpace().shallowCopy(mockedObjects.newString("a String"));
+	oop_t * leakedPointer = oldSpace().shallowCopy(mockedObjects.newString("Leaked"));
 	oop_t * byteArray = oldSpace().shallowCopy(mockedObjects.newByteArray(3));
 	byteArray->byte(0) = 1;
 	byteArray->byte(1) = 2;
@@ -76,10 +76,10 @@ void GCMarkAndCompactTest::testCompact() {
 	compactor->setNewPositions(space);
 	compactor->prepareForCompact();
 	compactor->compact(space);
-	//ASSERTM("", ((array->slot(1)->_basicSize() + 1 + 3) & -4) + ((ulong)array->slot(1)) == (ulong)array->slot(2) - 8);
-	ASSERTM("slot 0 should be an Array", this->isArray(array->slot(0)));
-	ASSERTM("slot 1 should be a String", this->isString(array->slot(1)));
-	ASSERTM("slot 2 should be a ByteArray", this->isByteArray(array->slot(2)));
+	ASSERTM("", (array->slot(1)->_sizeInBytes()) + ((ulong)array->slot(1)) == (ulong)array->slot(2) - 8);
+	//ASSERTM("slot 0 should be an Array", this->isArray(array->slot(0)));
+	//ASSERTM("slot 1 should be a String", this->isString(array->slot(1)));
+	//ASSERTM("slot 2 should be a ByteArray", this->isByteArray(array->slot(2)));
 
 }
 
@@ -658,7 +658,7 @@ cute::suite make_suite_GCMarkAndCompactTest()
 {
 	cute::suite s;
 
-	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompact));
+	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompact));
 	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtended));
 	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtendedWEphemeron));
 	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testCompactExtendedWEphemeronRescued));

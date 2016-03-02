@@ -144,7 +144,6 @@ public:
 	bool _hasBeenSeenInSpace();
 	bool _hasBeenSeenInLibrary();
 
-
 	bool testFlags    (unsigned char flag);
 	bool testExtFlags (unsigned char flag);
 	void setFlags     (unsigned char flag);
@@ -160,7 +159,7 @@ public:
 	slot_t& slot(long index) { ulong *pos = (ulong*)this + index; return *((slot_t*)pos); }
 	uchar&  byte(long index) { uchar *pos = (uchar*)this + index; return *pos; }
 	oop_t* nextObject();
-	oop_t* nextObjectAfterCompact();
+	oop_t * nextObjectAfterMark();
 
 	//done
 	ulong _basicAt(int index);
@@ -190,6 +189,8 @@ basic_header_t* basic_header_cast(void* buffer);
 extended_header_t* extended_header_cast(void* buffer);
 oop_t* headerToObject(void* buffer);
 oop_t * headerToObjectCheckProxee(void * buffer);
+ulong _unthreadedHeaderSizeInBytes(ulong buffer);
+
 // others
 
 void   _free(ulong * limit, ulong * delta);

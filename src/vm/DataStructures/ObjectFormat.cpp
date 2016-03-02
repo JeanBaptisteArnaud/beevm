@@ -29,9 +29,15 @@ oop_t * Bee::headerToObject(void * buffer)
 oop_t * Bee::headerToObjectCheckProxee(void * buffer)
 {	
 	oop_t * object = ((oop_t *)((ulong)buffer + 8));
-	bool test = object->_isProxy();
 	return 	object->_isProxy() || (!object->_isExtended()) ? object : (oop_t *)((ulong)buffer + 16)  ;
 }
+
+ulong Bee::_unthreadedHeaderSizeInBytes(ulong buffer)
+{
+	oop_t * object = ((oop_t *)(buffer + 8));
+	return 	object->_isProxy() || (!object->_isExtended()) ? 8 : 16;
+}
+
 
 
 
@@ -106,6 +112,8 @@ ulong oop_t::_sizeInBytes()
 	} else
 		return this->_size() * 4;
 }
+
+
 
 ulong oop_t::_headerSizeInBytes()
 {
@@ -285,7 +293,7 @@ oop_t * oop_t::nextObject()
 	return headerToObject((ulong *) nextHeader);
 }
 
-oop_t * oop_t::nextObjectAfterCompact()
+oop_t * oop_t::nextObjectAfterMark()
 {
 
 	ulong completeSizeOfObject = this->_sizeInBytes();

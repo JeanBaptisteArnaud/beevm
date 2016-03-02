@@ -46,7 +46,7 @@ public:
 	oop_t* shallowCopy(oop_t *object);
 	oop_t* shallowCopyGrowingTo(oop_t *array , ulong newSize);
 	oop_t* firstObject();
-	oop_t* firstObjectAfterCompact();
+	oop_t * firstObjectAfterMark();
 
 	void commitMoreMemory();
 	void commitMoreMemoryIfNeeded();

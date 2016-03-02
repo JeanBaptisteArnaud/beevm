@@ -207,7 +207,7 @@ oop_t * GCSpace::firstObject()
 	return headerToObject(asObject(this->getBase()));
 }
 
-oop_t * GCSpace::firstObjectAfterCompact()
+oop_t * GCSpace::firstObjectAfterMark()
 {
 	return headerToObjectCheckProxee(asObject(this->getBase()));
 }

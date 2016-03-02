@@ -143,10 +143,13 @@ void MarkAndCompactGC::setNewPositionsAndCompact()
 }
 void MarkAndCompactGC::setNewPositions(GCSpace * space)
 {
-	oop_t * next = space->firstObject();
+	ulong nextBuffer = asUObject(space->getBase());
+	ulong nextHeaderSize = _unthreadedHeaderSizeInBytes(nextBuffer);
+	oop_t * next = (oop_t *)(nextBuffer + nextHeaderSize);
+
 	while (space->isBelowNextFree(next)) {
 		if (next->_hasBeenSeenInSpace()) {
-			oop_t * newPosition = asObject(auxSpace.getNextFree()) + next->_headerSizeInBytes();
+			oop_t * newPosition = (oop_t *)(asUObject(auxSpace.getNextFree()) + nextHeaderSize);
 			oop_t * reference = next->_getProxee();
 			oop_t * headerBits;
 			do {
@@ -162,7 +165,9 @@ void MarkAndCompactGC::setNewPositions(GCSpace * space)
 			next->_beSeenInSpace();
 			auxSpace.setNextFree((ulong *)pointerConst((ulong)newPosition + next->_sizeInBytes()));
 		}
-		next = next->nextObject();
+		nextBuffer = (ulong)next + next->_sizeInBytes();
+		nextHeaderSize = _unthreadedHeaderSizeInBytes(nextBuffer);
+		next = (oop_t *)(nextBuffer + nextHeaderSize);
 	}
 }
 
