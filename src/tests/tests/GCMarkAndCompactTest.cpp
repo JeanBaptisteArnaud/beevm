@@ -576,7 +576,7 @@ void GCMarkAndCompactTest::testFollowWeakExtendedNested()
 	ASSERTM("should, byteArray", pointers[3]->_hasBeenSeenInSpace());
 }
 
-void GCMarkAndCompactTest::testFollowWeakNoTombstones()
+void GCMarkAndCompactTest::testFollowWeakNoTombstonesExtended()
 {
 	oop_t * pointers[4];
 	MarkAndCompactGC * compactor = this->compactor();
@@ -594,7 +594,7 @@ void GCMarkAndCompactTest::testFollowWeakNoTombstones()
 	pointers[2] = weak;
 	pointers[3] = tombstone;
 
-	oop_t * root = oldSpace().shallowCopy(mockedObjects.newArray(2));
+	oop_t * root = oldSpace().shallowCopy(mockedObjects.newArray(3));
 	root->slot(0) = weak;
 	root->slot(1) = value1;
 	root->slot(2) = value2;
@@ -609,13 +609,13 @@ void GCMarkAndCompactTest::testFollowWeakNoTombstones()
 
 	root = KnownObjects::nil;
 
-	ASSERTM("should not, leaked", !pointers[0]->_hasBeenSeenInSpace());
-	ASSERTM("should, array", pointers[1]->_hasBeenSeenInSpace());
-	ASSERTM("should, string", pointers[2]->_hasBeenSeenInSpace());
-	ASSERTM("should, byteArray", !pointers[3]->_hasBeenSeenInSpace());
+	ASSERTM("first object lost", pointers[0]->_hasBeenSeenInSpace());
+	ASSERTM("second object lost", pointers[1]->_hasBeenSeenInSpace());
+	ASSERTM("weak array lost", pointers[2]->_hasBeenSeenInSpace());
+	ASSERTM("tombstone should not have been seen", !pointers[3]->_hasBeenSeenInSpace());
 }
 
-void GCMarkAndCompactTest::testFollowWeakNoTombstonesExtended()
+void GCMarkAndCompactTest::testFollowWeakNoTombstones()
 {
 	oop_t * pointers[4];
 	MarkAndCompactGC * compactor = this->compactor();
@@ -633,7 +633,7 @@ void GCMarkAndCompactTest::testFollowWeakNoTombstonesExtended()
 	pointers[2] = weak;
 	pointers[3] = tombstone;
 
-	oop_t * root = oldSpace().shallowCopy(mockedObjects.newArray(2));
+	oop_t * root = oldSpace().shallowCopy(mockedObjects.newArray(3));
 	root->slot(0) = weak;
 	root->slot(1) = value1;
 	root->slot(2) = value2;
@@ -648,10 +648,10 @@ void GCMarkAndCompactTest::testFollowWeakNoTombstonesExtended()
 
 	root = KnownObjects::nil;
 
-	ASSERTM("should not, leaked", !pointers[0]->_hasBeenSeenInSpace());
-	ASSERTM("should, array", pointers[1]->_hasBeenSeenInSpace());
-	ASSERTM("should, string", pointers[2]->_hasBeenSeenInSpace());
-	ASSERTM("should, byteArray", !pointers[3]->_hasBeenSeenInSpace());
+	ASSERTM("first object lost", pointers[0]->_hasBeenSeenInSpace());
+	ASSERTM("second object lost", pointers[1]->_hasBeenSeenInSpace());
+	ASSERTM("weak array lost", pointers[2]->_hasBeenSeenInSpace());
+	ASSERTM("tombstone should not have been seen", !pointers[3]->_hasBeenSeenInSpace());
 }
 
 cute::suite make_suite_GCMarkAndCompactTest()
