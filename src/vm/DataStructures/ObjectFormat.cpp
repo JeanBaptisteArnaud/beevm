@@ -337,7 +337,7 @@ ulong oop_t::_unthreadedSize()
 	while (true);
 
 	ulong flags = (ulong)nextOrFlags;
-	return (flags & basic_header_t::Flag_isExtended) == 0 ? flags & 0xFF : this->_extendedSize();
+	return (flags & basic_header_t::Flag_isExtended) == 0 ? (flags >> 8) & 0xFF : this->_extendedSize();
 }
 
 void oop_t::_threadWithAt(oop_t *other, long index)
