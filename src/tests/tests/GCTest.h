@@ -16,6 +16,9 @@ class Memory;
 
 class GCTest
 {
+public:
+	GCTest();
+
 protected:
 	oop_t* global(const std::string &name);
 
@@ -30,7 +33,8 @@ protected:
 	bool isByteArray(oop_t *object);
 
 protected:
-	MockedObjects mockedObjects;
+	MockedObjects mockedFrom;
+	MockedObjects mockedLocal;
 };
 
 }

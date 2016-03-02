@@ -15,11 +15,12 @@ using namespace Bee;
 #define STACK_SIZE 16
 #define STACK_LAST (STACK_SIZE - 1)
 
-MockedObjects::MockedObjects()
+MockedObjects::MockedObjects(bool itIsLibrary)
 {
 	GCSpace allocator = GCSpace::dynamicNew(4*1024*1024);
 	defaultSpace.loadFrom(allocator);
 	stackTempIndex = STACK_LAST - 5; // -0: end of stack. -1: self. -2: cm. -3: prev env. -4: env. -5: first temp
+	seenFlag = itIsLibrary ? 0 : basic_header_t::Flag_unseenInSpace;
 }
 
 MockedObjects::~MockedObjects()
@@ -29,6 +30,15 @@ MockedObjects::~MockedObjects()
 
 void MockedObjects::initializeKnownObjects()
 {
+	uchar flags = seenFlag | basic_header_t::Flag_zeroTermOrNamed | basic_header_t::Flag_notIndexed;
+	basic_header_t *header = (basic_header_t*)defaultSpace.allocateUnsafe(8);
+	header->size = 0;
+	header->hash = 0;
+	header->flags = flags;
+
+	define("Object behavior", header->slots());
+	header->behavior = header->slots();
+
 	oop_t *nil     = mockNil();
 	oop_t *stTrue  = mockTrue();
 	oop_t *stFalse = mockFalse();
@@ -76,7 +86,11 @@ oop_t* MockedObjects::get(const string &name)
 	if (definitions.find(name) != definitions.end())
 		return definitions[name];
 	else
-		return NULL;
+	{
+		oop_t * mock = this->newObject();
+		define(name, mock);
+		return mock;
+	}
 }
 
 void MockedObjects::define(const string &name, oop_t *value)
@@ -178,14 +192,14 @@ oop_t* MockedObjects::mockFalse()
 
 oop_t* MockedObjects::newObject()
 {
-	uchar flags = basic_header_t::Flag_unseenInSpace | basic_header_t::Flag_zeroTermOrNamed | basic_header_t::Flag_notIndexed;
+	uchar flags = seenFlag | basic_header_t::Flag_zeroTermOrNamed | basic_header_t::Flag_notIndexed;
 	return this->newBasicObject("Object", 0, 0, flags);
 }
 
 oop_t* MockedObjects::newEphemeron(oop_t *key, oop_t *value)
 {
 	uchar flags = basic_header_t::Flag_isEphemeron | basic_header_t::Flag_zeroTermOrNamed |
-				basic_header_t::Flag_notIndexed | basic_header_t::Flag_isExtended | basic_header_t::Flag_unseenInSpace;
+				basic_header_t::Flag_notIndexed | basic_header_t::Flag_isExtended | seenFlag;
 
 	oop_t *ephemeron = this->newExtendedObject("Ephemeron", 3, 0, flags);
 
@@ -199,7 +213,7 @@ oop_t* MockedObjects::newEphemeron(oop_t *key, oop_t *value)
 
 oop_t* MockedObjects::newArray(ulong slots, GCSpace *space)
 {
-	oop_t *array = this->newObject("Array", slots, 0, basic_header_t::Flag_unseenInSpace, *space);
+	oop_t *array = this->newObject("Array", slots, 0, seenFlag, *space);
 
 	for (ulong index = 0; index <= slots; index++)
 		array->slot(index) = smiConst(index);
@@ -214,7 +228,7 @@ oop_t* MockedObjects::newArray(ulong slots)
 
 oop_t* MockedObjects::newByteArray(ulong size)
 {
-	uchar flags = basic_header_t::Flag_isBytes | basic_header_t::Flag_unseenInSpace;
+	uchar flags = basic_header_t::Flag_isBytes | seenFlag;
 
 	oop_t *array = this->newObject("ByteArray", size, 0, flags, defaultSpace);
 
@@ -228,7 +242,7 @@ oop_t* MockedObjects::newByteArray(ulong size)
 oop_t* MockedObjects::newString(const char *value)
 {
 	ulong size  = strlen(value) + 1;
-	uchar flags = basic_header_t::Flag_isBytes | basic_header_t::Flag_zeroTermOrNamed | basic_header_t::Flag_unseenInSpace;
+	uchar flags = basic_header_t::Flag_isBytes | basic_header_t::Flag_zeroTermOrNamed | seenFlag;
 
 	oop_t *result = this->newObject("String", size, 0, flags, defaultSpace);
 
@@ -239,7 +253,7 @@ oop_t* MockedObjects::newString(const char *value)
 
 oop_t* MockedObjects::newWeakArray(ulong slots)
 {
-	oop_t *array = this->newObject("Array", slots, 0, basic_header_t::Flag_isEphemeron | basic_header_t::Flag_unseenInSpace, defaultSpace);
+	oop_t *array = this->newObject("Array", slots, 0, basic_header_t::Flag_isEphemeron | seenFlag, defaultSpace);
 
 	// if extended we have to unset ephemeron/weak flag or it will be confused with an ephemeron
 	array->unsetExtFlags(basic_header_t::Flag_isEphemeron);
@@ -259,7 +273,7 @@ GCSpace MockedObjects::setDefaultSpace(GCSpace *newSpace)
 
 Memory* MockedObjects::mockMemory()
 {
-	uchar flags = basic_header_t::Flag_unseenInSpace | basic_header_t::Flag_notIndexed | basic_header_t::Flag_zeroTermOrNamed;
+	uchar flags = seenFlag | basic_header_t::Flag_notIndexed | basic_header_t::Flag_zeroTermOrNamed;
 	Memory *memory = (Memory*)this->newBasicObject("Memory", Memory::instVarCount, 0, flags);
 
 
@@ -272,7 +286,7 @@ Memory* MockedObjects::mockMemory()
 
 GCSpace* MockedObjects::mockGCSpace(ulong size)
 {
-	uchar flags = basic_header_t::Flag_unseenInSpace | basic_header_t::Flag_notIndexed | basic_header_t::Flag_zeroTermOrNamed;
+	uchar flags = seenFlag | basic_header_t::Flag_notIndexed | basic_header_t::Flag_zeroTermOrNamed;
 	GCSpace *space = (GCSpace*)this->newBasicObject("GCSpace", GCSpace::instVarCount, 0, flags);
 
 	GCSpace allocator = GCSpace::dynamicNew(size);

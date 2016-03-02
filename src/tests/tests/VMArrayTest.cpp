@@ -24,7 +24,7 @@ VMArrayTest::~VMArrayTest()
 
 void VMArrayTest::setUp()
 {
-	mockedObjects.initializeKnownObjects();
+	mockedLocal.initializeKnownObjects();
 }
 
 void VMArrayTest::tearDown()
@@ -33,7 +33,7 @@ void VMArrayTest::tearDown()
 
 void VMArrayTest::testAdd()
 {
-	oop_t* contents = mockedObjects.newArray(1024);
+	oop_t* contents = mockedLocal.newArray(1024);
 	VMArray array;
 	array.emptyWith(contents);
 	array.reset();
@@ -48,7 +48,7 @@ void VMArrayTest::testAdd()
 
 void VMArrayTest::testGrow2()
 {
-	oop_t* contents = mockedObjects.newArray(1024);
+	oop_t* contents = mockedLocal.newArray(1024);
 	VMArray array;
 	array.emptyWith(contents);
 	array.add(smiConst(1));
@@ -83,8 +83,8 @@ void VMArrayTest::testGrow2()
 
 void VMArrayTest::testAddAll()
 {
-	oop_t* contents = mockedObjects.newArray(1024);
-	oop_t* other = mockedObjects.newArray(3);
+	oop_t* contents = mockedLocal.newArray(1024);
+	oop_t* other = mockedLocal.newArray(3);
 	other->slot(0) = smiConst(5);
 	other->slot(1) = smiConst(6);
 	other->slot(2) = smiConst(7);
@@ -112,7 +112,7 @@ void VMArrayTest::testAddAll()
 
 void VMArrayTest::testDo()
 {
-	oop_t* contents = mockedObjects.newArray(1024);
+	oop_t* contents = mockedLocal.newArray(1024);
 	VMArray array;
 	array.emptyWith(contents);
 	array.reset();
@@ -157,7 +157,7 @@ void VMArrayTest::testGrow()
 
 void VMArrayTest::testPop()
 {
-	oop_t* contents = mockedObjects.newArray(1024);
+	oop_t* contents = mockedLocal.newArray(1024);
 	VMArray array;
 	array.emptyWith(contents);
 	array.reset();
@@ -176,8 +176,8 @@ void VMArrayTest::testPop()
 
 void VMArrayTest::testReset()
 {
-	oop_t* contents = mockedObjects.newArray(1024);
-	oop_t* other    = mockedObjects.newArray(3); // 3
+	oop_t* contents = mockedLocal.newArray(1024);
+	oop_t* other    = mockedLocal.newArray(3); // 3
 	other->slot(0) = smiConst(5);
 	other->slot(1) = smiConst(6);
 	other->slot(2) = smiConst(7);

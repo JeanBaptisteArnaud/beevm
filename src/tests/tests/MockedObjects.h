@@ -17,7 +17,7 @@ class Memory;
 class MockedObjects
 {
 public:
-	MockedObjects();
+	MockedObjects(bool itIslibrary);
 	~MockedObjects();
 	void initializeKnownObjects();
 
@@ -69,6 +69,7 @@ public:
 	//std::vector<ulong> stack;
 	ulong stack[16];
 	int stackTempIndex;
+	uchar seenFlag;
 
 };
 

@@ -11,7 +11,8 @@ namespace Bee
 class ObjectFormatTest : public GCTest
 {
 public:
-
+	ObjectFormatTest();
+	~ObjectFormatTest();
 	void setUp();
 	void tearDown();
 

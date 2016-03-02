@@ -16,10 +16,19 @@ extern cute::suite make_suite_ObjectFormatTest();
 using namespace std;
 using namespace Bee;
 
+ObjectFormatTest::ObjectFormatTest()
+{
+	this->setUp();
+}
+ObjectFormatTest::~ObjectFormatTest()
+{
+	this->tearDown();
+}
+
 
 void ObjectFormatTest::setUp()
 {
-	mockedObjects.initializeKnownObjects();
+	mockedLocal.initializeKnownObjects();
 }
 
 void ObjectFormatTest::tearDown()
@@ -28,7 +37,7 @@ void ObjectFormatTest::tearDown()
 
 void ObjectFormatTest::testHeaderOf()
 {
-	oop_t *object = mockedObjects.newArray(1);
+	oop_t *object = mockedLocal.newArray(1);
 	basic_header_t * h = object->basic_header();
 
 	ASSERTM("Array 1 : Size",     h->size == 1);
@@ -36,14 +45,14 @@ void ObjectFormatTest::testHeaderOf()
 	ASSERTM("Array 1 : Flags",    h->flags == basic_header_t::Flag_unseenInSpace);
 	ASSERTM("Array 1 : behavior", h->behavior == (oop_t*)0x00000000);
 
-	object = mockedObjects.newArray(3);
+	object = mockedLocal.newArray(3);
 	h = object->basic_header();
 	ASSERTM("Array 2 : Size",     h->size == 3);
 	ASSERTM("Array 2 : Hash",     h->hash == 0x0000);
 	ASSERTM("Array 2 : Flags",    h->flags == basic_header_t::Flag_unseenInSpace);
 	ASSERTM("Array 2 : behavior", h->behavior == (oop_t*)0x00000000);
 
-	object = mockedObjects.mockTrue();
+	object = mockedLocal.mockTrue();
 	h = object->basic_header();
 	
 	ASSERTM("True : Size",     h->size == 0);
@@ -53,7 +62,7 @@ void ObjectFormatTest::testHeaderOf()
 											 basic_header_t::Flag_zeroTermOrNamed));
 	ASSERTM("True : behavior", h->behavior == (oop_t*)0x00000000);
 
-	object = mockedObjects.mockNil();
+	object = mockedLocal.mockNil();
 	h = object->basic_header();
 	ASSERTM("Nil : Size",  h->size == 0);
 	ASSERTM("Nil : Hash",  h->hash == 0x3445);
@@ -66,12 +75,12 @@ void ObjectFormatTest::testHeaderOf()
 
 void ObjectFormatTest::testBasicSize()
 {
-	oop_t *object = mockedObjects.newArray(1);
+	oop_t *object = mockedLocal.newArray(1);
 	ASSERTM("size ", (object->_basicSize() == 1));
 	object->_basicSize(122);
 	ASSERTM("size ", (object->_basicSize() == 122));
 
-	object = mockedObjects.newArray(1024);
+	object = mockedLocal.newArray(1024);
 	ASSERTM("size ", (object->_size() == 1024));
 	object->_extendedSize(122);
 	ASSERTM("size ", (object->_size() == 122));
@@ -80,11 +89,11 @@ void ObjectFormatTest::testBasicSize()
 
 void ObjectFormatTest::testNextObject()
 {
-	oop_t *array1 = mockedObjects.newArray(1);
-	oop_t *extended1 = mockedObjects.newArray(256);
-	oop_t *extended2 = mockedObjects.newArray(256);
-	oop_t *array2 = mockedObjects.newArray(5);
-	oop_t *array3 = mockedObjects.newArray(4);
+	oop_t *array1 = mockedLocal.newArray(1);
+	oop_t *extended1 = mockedLocal.newArray(256);
+	oop_t *extended2 = mockedLocal.newArray(256);
+	oop_t *array2 = mockedLocal.newArray(5);
+	oop_t *array3 = mockedLocal.newArray(4);
 
 	ASSERTM("nextObject basic to extended ", (array1->nextObject() == extended1));
 	ASSERTM("nextObject extended to extended", (extended1->nextObject() == extended2));
@@ -96,11 +105,11 @@ void ObjectFormatTest::testNextObject()
 
 void ObjectFormatTest::testNextObjectAfterCompact()
 {
-	oop_t *array1 = mockedObjects.newArray(1);
-	oop_t *extended1 = mockedObjects.newArray(256);
-	oop_t *extended2 = mockedObjects.newArray(256);
-	oop_t *array2 = mockedObjects.newArray(5);
-	oop_t *array3 = mockedObjects.newArray(4);
+	oop_t *array1 = mockedLocal.newArray(1);
+	oop_t *extended1 = mockedLocal.newArray(256);
+	oop_t *extended2 = mockedLocal.newArray(256);
+	oop_t *array2 = mockedLocal.newArray(5);
+	oop_t *array3 = mockedLocal.newArray(4);
 
 	array1->_setProxee(array1);
 	extended1->_setProxee(extended1);
@@ -118,7 +127,7 @@ void ObjectFormatTest::testNextObjectAfterCompact()
 
 void ObjectFormatTest::testBeExtended()
 {
-	oop_t *object = mockedObjects.newArray(1024);
+	oop_t *object = mockedLocal.newArray(1024);
 	object->_beExtended();
 	extended_header_t *h = object->extended_header();
 	ASSERTM("sizeInWordBis", (h->basicSize == 4));
@@ -203,7 +212,7 @@ void ObjectFormatTest::testRotateLeft()
 
 void ObjectFormatTest::testObjectFlagManipulation()
 {
-	oop_t *object = mockedObjects.newArray(1);
+	oop_t *object = mockedLocal.newArray(1);
 
 	ASSERTM("check reserved1", !object->testFlags(basic_header_t::Flag_isEphemeron));
 	object->setFlags(basic_header_t::Flag_isEphemeron);
@@ -223,10 +232,10 @@ void ObjectFormatTest::testObjectFlagManipulation()
 	ASSERTM("_isZeroTerminated", object->_isZeroTerminated());
 
 
-	oop_t *ephemeron = mockedObjects.newEphemeron(object, object);
+	oop_t *ephemeron = mockedLocal.newEphemeron(object, object);
 	ASSERTM("Ephemeron", ephemeron->_isActiveEphemeron());
 
-	oop_t *weakArray = mockedObjects.newWeakArray(1);
+	oop_t *weakArray = mockedLocal.newWeakArray(1);
 	ASSERTM("should not be Ephemeron", !weakArray->_isEphemeron());
 	ASSERTM("but should weak", weakArray->_hasWeaks());
 
@@ -236,7 +245,7 @@ void ObjectFormatTest::testObjectFlagManipulation()
 
 void ObjectFormatTest::testProxying()
 {
-		oop_t *object = mockedObjects.newArray(1);
+		oop_t *object = mockedLocal.newArray(1);
 		ASSERTM("Already detect as Proxy", !(object->_isProxy()));
 		object->_setProxee(object);
 		ASSERTM("Something go Strange Invariant of pointer 0xff[..]00 is broken", !(object->_isSecondGeneration()));

@@ -30,7 +30,7 @@ GCFlipTest::~GCFlipTest()
 
 void GCFlipTest::setUp()
 {
-	mockedObjects.initializeKnownObjects();
+	mockedLocal.initializeKnownObjects();
 	memory = this->memoryForTesting();
 
 	flipper()->setUpLocals();
@@ -70,7 +70,7 @@ void GCFlipTest::testGCCollect()
 
 void GCFlipTest::testCopyToFlip()
 {
-	oop_t *array = mockedObjects.newArray(1);
+	oop_t *array = mockedFrom.newArray(1);
 	oop_t *copy  = fromSpace()->shallowCopy(array);
 	copy = flipper()->moveToOldOrTo(copy);
 
@@ -84,7 +84,7 @@ void GCFlipTest::testCopyToFlip()
 
 void GCFlipTest::testCopyToOld()
 {
-	oop_t *array = mockedObjects.newArray(1);
+	oop_t *array = mockedFrom.newArray(1);
 	array->slot(0) = smiConst(1);
 	oop_t *copy = fromSpace()->shallowCopy(array);
 	copy->slot(0) = smiConst(3);
@@ -104,7 +104,7 @@ void GCFlipTest::testCopyToOld()
 void GCFlipTest::testCopyToOldBug()
 {
 
-	oop_t *array = mockedObjects.newArray(1);
+	oop_t *array = mockedFrom.newArray(1);
 	array->slot(0) = smiConst(1);
 	oop_t *copy = fromSpace()->shallowCopy(array);
 	copy->slot(0) = smiConst(3);
@@ -125,14 +125,12 @@ void GCFlipTest::testCopyToOldBug()
 
 void GCFlipTest::testEphemeron()
 {
-	GCSpace previous = mockedObjects.setDefaultSpace(fromSpace());
-	oop_t *key = mockedObjects.newObject();
-	oop_t *value = mockedObjects.newObject();
-	oop_t *ephemeron = mockedObjects.newEphemeron(key, value);
-	mockedObjects.setDefaultSpace(&previous);
+	oop_t *key = mockedFrom.newObject();
+	oop_t *value = mockedFrom.newObject();
+	oop_t *ephemeron = mockedFrom.newEphemeron(key, value);
 	
-	oop_t *tombstone = mockedObjects.newObject();
-	oop_t *root = mockedObjects.newArray(2);
+	oop_t *tombstone = mockedLocal.newObject();
+	oop_t *root = mockedLocal.newArray(2);
 	root->slot(0) = ephemeron;
 	root->slot(1) = key;
 
@@ -156,14 +154,12 @@ void GCFlipTest::testEphemeron()
 
 void GCFlipTest::testEphemeronOnce()
 {
-	GCSpace previous = mockedObjects.setDefaultSpace(fromSpace());
-	oop_t *key = mockedObjects.newObject();
-	oop_t *ephemeron = mockedObjects.newEphemeron(key, smiConst(2));
-	oop_t *tombstone = mockedObjects.newObject();
-	mockedObjects.setDefaultSpace(&previous);
+	oop_t *key = mockedFrom.newObject();
+	oop_t *ephemeron = mockedFrom.newEphemeron(key, smiConst(2));
+	oop_t *tombstone = mockedFrom.newObject();
+	
 
-
-	oop_t *root = mockedObjects.newArray(2);
+	oop_t *root = mockedLocal.newArray(2);
 	root->slot(0) = ephemeron;
 	root->slot(1) = ephemeron;
 
@@ -192,10 +188,10 @@ ulong padTo(ulong number, ulong padding)
 
 void GCFlipTest::testFollowObject()
 {
-	oop_t *array = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	oop_t *string = fromSpace()->shallowCopy(mockedObjects.newString("a string"));
-	fromSpace()->shallowCopy(mockedObjects.newString("leaked"));
-	oop_t *byteArray = fromSpace()->shallowCopy(mockedObjects.newByteArray(3));
+	oop_t *array = mockedFrom.newArray(3);
+	oop_t *string = mockedFrom.newString("a string");
+	mockedFrom.newString("leaked");
+	oop_t *byteArray = mockedFrom.newByteArray(3);
 
 	long toUsed = toSpace()->used();
 	long fromUsed = fromSpace()->used();
@@ -208,7 +204,7 @@ void GCFlipTest::testFollowObject()
 	array->slot(1) = string;
 	array->slot(2) = byteArray;
 
-	oop_t *root = mockedObjects.newArray(1);
+	oop_t *root = mockedLocal.newArray(1);
 	root->slot(0) = array;
 
 	//string = byteArray = array = nil;
@@ -246,12 +242,12 @@ void GCFlipTest::testGCReferencesAfterCollect()
 
 void GCFlipTest::testTombstone()
 {
-	oop_t *weakArray = fromSpace()->shallowCopy(mockedObjects.newWeakArray(1));
-	oop_t *object = fromSpace()->shallowCopy(mockedObjects.newObject());
+	oop_t *weakArray = mockedFrom.newWeakArray(1);
+	oop_t *object = mockedFrom.newObject();
 
 	weakArray->slot(0) = object;
 
-	oop_t *root = mockedObjects.newArray(1);
+	oop_t *root = mockedLocal.newArray(1);
 	root->slot(0) = weakArray;
 
 	ASSERTM("from space include", flipper()->arenaIncludes(object));
@@ -270,10 +266,10 @@ void GCFlipTest::testTombstone()
 
 void GCFlipTest::testFollowObjectAndCheckGraph()
 {
-	oop_t *array = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	oop_t *string = fromSpace()->shallowCopy(mockedObjects.newString("a String"));
-	fromSpace()->shallowCopy(mockedObjects.newString("leaked"));
-	oop_t *byteArray = fromSpace()->shallowCopy(mockedObjects.newByteArray(3));
+	oop_t *array = mockedFrom.newArray(3);
+	oop_t *string = mockedFrom.newString("a String");
+	mockedFrom.newString("leaked");
+	oop_t *byteArray = mockedFrom.newByteArray(3);
 
 	long toUsed = toSpace()->used();
 	long fromUsed = fromSpace()->used();
@@ -287,7 +283,7 @@ void GCFlipTest::testFollowObjectAndCheckGraph()
 	array->slot(1) = string;
 	array->slot(2) = byteArray;
 
-	oop_t *root = mockedObjects.newArray(1);
+	oop_t *root = mockedLocal.newArray(1);
 	root->slot(0) = array;
 	//string = byteArray = array = nil;
 
@@ -303,7 +299,7 @@ void GCFlipTest::testFollowObjectAndCheckGraph()
 	ASSERTM("root 1 change", root->slot(0)->slot(0) == smiConst(1));
 	ASSERTM("root 2 newArray 2 change", root->slot(0)->slot(1)->equalsStr("a String") );
 
-	byteArray = mockedObjects.newByteArray(3);
+	byteArray = mockedLocal.newByteArray(3);
 	ASSERTM("root 3 newArray 3 change", root->slot(0)->slot(2)->equalsByteArray(byteArray));
 
 }
@@ -312,10 +308,10 @@ void GCFlipTest::testFollowObjectAndCheckGraph()
 
 void GCFlipTest::testFollowObjectCheckGraphAndOop()
 {
-	oop_t *array = fromSpace()->shallowCopy(mockedObjects.newArray(3));
-	oop_t *string = fromSpace()->shallowCopy(mockedObjects.newString("a String"));
-	fromSpace()->shallowCopy(mockedObjects.newString("leaked"));
-	oop_t *byteArray = fromSpace()->shallowCopy(mockedObjects.newByteArray(3));
+	oop_t *array = mockedFrom.newArray(3);
+	oop_t *string = mockedFrom.newString("a String");
+	mockedFrom.newString("leaked");
+	oop_t *byteArray = mockedFrom.newByteArray(3);
 
 	long toUsed = toSpace()->used();
 	long fromUsed = fromSpace()->used();
@@ -329,7 +325,7 @@ void GCFlipTest::testFollowObjectCheckGraphAndOop()
 	array->slot(1) = string;
 	array->slot(2) = byteArray;
 
-	oop_t *root = mockedObjects.newArray(1);
+	oop_t *root = mockedLocal.newArray(1);
 	root->slot(0) = array;
 	//string = byteArray = array = nil;
 
@@ -348,7 +344,7 @@ void GCFlipTest::testFollowObjectCheckGraphAndOop()
 
 	ASSERTM("flipper didn't save the string", toSpace()->includes(root->slot(0)->slot(1)));
 
-	byteArray = mockedObjects.newByteArray(3);
+	byteArray = mockedLocal.newByteArray(3);
 	ASSERTM("root 3 newArray 3 change", root->slot(0)->slot(2)->equalsByteArray(byteArray));
 
 	ASSERTM("flipper didn't save the byte array", toSpace()->includes(root->slot(0)->slot(2)));
@@ -367,7 +363,7 @@ void GCFlipTest::testPurgeLiteralsWithNewObject()
 	ReferencedVMArray *rememberedSet = &flipper()->rememberedSet;
 	ReferencedVMArray *literalsReferences = &flipper()->literalsReferences;
 
-	oop_t *anObject = fromSpace()->shallowCopy(mockedObjects.newObject());
+	oop_t *anObject = mockedFrom.newObject();
 	rememberedSet->add(anObject);
 	literalsReferences->add(anObject);
 	literalsReferences->add(smiConst(2));
@@ -381,7 +377,7 @@ void GCFlipTest::testPurgeLiteralsWithOldObject()
 	ReferencedVMArray *rememberedSet = &flipper()->rememberedSet;
 	ReferencedVMArray *literalsReferences = &flipper()->literalsReferences;
 
-	oop_t* anOldObject = mockedObjects.newObject();
+	oop_t* anOldObject = mockedLocal.newObject();
 	rememberedSet->add(anOldObject);
 	literalsReferences->add(anOldObject);
 	literalsReferences->add(smiConst(2));
@@ -393,13 +389,13 @@ void GCFlipTest::testPurgeLiteralsWithOldObject()
 
 void GCFlipTest::testRescuedEphemeron()
 {
-	oop_t *key = fromSpace()->shallowCopy(mockedObjects.newObject());
-	oop_t *ephemeron = fromSpace()->shallowCopy(mockedObjects.newEphemeron(key, smiConst(2)));
+	oop_t *key = mockedFrom.newObject();
+	oop_t *ephemeron = mockedFrom.newEphemeron(key, smiConst(2));
 	
-	oop_t *root = mockedObjects.newArray(1);
+	oop_t *root = mockedLocal.newArray(1);
 	root->slot(0) = ephemeron;
 
-	oop_t *tombstone = mockedObjects.newObject();
+	oop_t *tombstone = mockedLocal.newObject();
 
 	flipper()->addRoot(root);
 	flipper()->tombstone(tombstone);
@@ -419,15 +415,15 @@ void GCFlipTest::testRescuedEphemeron()
 
 void GCFlipTest::testRescuedEphemeronNoRescuedByValue()
 {
-	oop_t *key   = fromSpace()->shallowCopy(mockedObjects.newObject());
-	oop_t *value = fromSpace()->shallowCopy(mockedObjects.newObject());
-	oop_t *ephemeron = fromSpace()->shallowCopy(mockedObjects.newEphemeron(key, smiConst(2)));
+	oop_t *key   = mockedFrom.newObject();
+	oop_t *value = mockedFrom.newObject();
+	oop_t *ephemeron = mockedFrom.newEphemeron(key, smiConst(2));
 	
-	oop_t *root = mockedObjects.newArray(2);
+	oop_t *root = mockedLocal.newArray(2);
 	root->slot(0) = ephemeron;
 	root->slot(1) = key;
 
-	oop_t *tombstone = mockedObjects.newObject();
+	oop_t *tombstone = mockedLocal.newObject();
 
 	flipper()->addRoot(root);
 	flipper()->tombstone(tombstone);
@@ -448,16 +444,16 @@ void GCFlipTest::testRescuedEphemeronNoRescuedByValue()
 
 void GCFlipTest::testRescueEphemeronRescuedInRoots()
 {
-	oop_t *key   = fromSpace()->shallowCopy(mockedObjects.newObject());
-	oop_t *value = fromSpace()->shallowCopy(mockedObjects.newObject());
-	oop_t *ephemeron = fromSpace()->shallowCopy(mockedObjects.newEphemeron(key, smiConst(2)));
+	oop_t *key   = mockedFrom.newObject();
+	oop_t *value = mockedFrom.newObject();
+	oop_t *ephemeron = mockedFrom.newEphemeron(key, smiConst(2));
 	
-	oop_t *root = mockedObjects.newArray(1);
+	oop_t *root = mockedLocal.newArray(1);
 	root->slot(0) = ephemeron;
 
 	oop_t *clearRescuedEphemeronsArray = flipper()->localSpace.shallowCopy(flipper()->rescuedEphemerons.contents);
 
-	oop_t *tombstone = mockedObjects.newObject();
+	oop_t *tombstone = mockedLocal.newObject();
 
 	flipper()->addRoot(root);
 	flipper()->tombstone(tombstone);
@@ -515,29 +511,29 @@ void GCFlipTest::testStackCallbackTP19064()
 
 void GCFlipTest::testStackFollowObjectAndCheckGraph()
 {
-	oop_t *inEnvironmentContext = mockedObjects.newArray(1);
+	oop_t *inEnvironmentContext = mockedLocal.newArray(1);
 	
-	oop_t *arrayInStack = fromSpace()->shallowCopy(mockedObjects.newArray(3));
+	oop_t *arrayInStack = mockedFrom.newArray(3);
 	
-	arrayInStack->slot(1) = fromSpace()->shallowCopy(mockedObjects.newString("a String"));
+	arrayInStack->slot(1) = mockedFrom.newString("a String");
 	
-	fromSpace()->shallowCopy(mockedObjects.newString("leaked"));
+	mockedFrom.newString("leaked");
 	
-	arrayInStack->slot(2) = fromSpace()->shallowCopy(mockedObjects.newByteArray(3));
+	arrayInStack->slot(2) = mockedFrom.newByteArray(3);
 	arrayInStack->slot(0) = smiConst(1);
 
 	// This was done in smalltalk to make inEnvironment be put in an environment context. In C that is done manually.
 	// inEnvironmentContext->slot(0) = arrayInStack;
 
-	mockedObjects.stackAddTemporary(arrayInStack);
-	mockedObjects.stackEnvironment() = mockedObjects.newArray(1);
-	mockedObjects.stackEnvironment()->slot(0) = inEnvironmentContext;
+	mockedLocal.stackAddTemporary(arrayInStack);
+	mockedLocal.stackEnvironment() = mockedLocal.newArray(1);
+	mockedLocal.stackEnvironment()->slot(0) = inEnvironmentContext;
 
 	inEnvironmentContext->slot(0) = KnownObjects::nil;
 
 	flipper()->followStack();
 
-	oop_t *movedInStack = mockedObjects.stackTemporary(0);;
+	oop_t *movedInStack = mockedLocal.stackTemporary(0);;
 
 	ulong toUsed = toSpace()->used();
 	ulong fromUsed = fromSpace()->used();
@@ -549,7 +545,7 @@ void GCFlipTest::testStackFollowObjectAndCheckGraph()
 	ASSERTM("integer was modified", movedInStack->slot(0) == smiConst(1));
 	ASSERTM("string was modified", movedInStack->slot(1)->equalsStr("a String") );
 
-	oop_t *byteArray = mockedObjects.newByteArray(3);
+	oop_t *byteArray = mockedLocal.newByteArray(3);
 	ASSERTM("byte array was modified", movedInStack->slot(2)->equalsByteArray(byteArray));
 }
 
@@ -563,16 +559,16 @@ void GCFlipTest::testStackFollowObjectNestedBlock()
 
 void GCFlipTest::testWeakContainer()
 {
-	oop_t *weakArray = fromSpace()->shallowCopy(mockedObjects.newWeakArray(1));
-	oop_t *object = fromSpace()->shallowCopy(mockedObjects.newObject());
+	oop_t *weakArray = mockedFrom.newWeakArray(1);
+	oop_t *object = mockedFrom.newObject();
 
 	weakArray->slot(0) = object;
 
-	oop_t *root = mockedObjects.newArray(2);
+	oop_t *root = mockedLocal.newArray(2);
 	root->slot(0) = weakArray;
 	root->slot(1) = object;
 	
-	oop_t *tombstone = mockedObjects.newObject();
+	oop_t *tombstone = mockedLocal.newObject();
 	flipper()->addRoot(root);
 	flipper()->tombstone(tombstone);
 	flipper()->followRoots();
@@ -589,16 +585,16 @@ void GCFlipTest::testWeakContainer()
 
 void GCFlipTest::testWeakContainerExtended()
 {
-	oop_t *weakArray = fromSpace()->shallowCopy(mockedObjects.newWeakArray(1024));
-	oop_t *object = fromSpace()->shallowCopy(mockedObjects.newObject());
+	oop_t *weakArray = mockedFrom.newWeakArray(1024);
+	oop_t *object = mockedFrom.newObject();
 
 	weakArray->slot(0) = object;
 
-	oop_t *root = mockedObjects.newArray(2);
+	oop_t *root = mockedLocal.newArray(2);
 	root->slot(0) = weakArray;
 	root->slot(1) = object;
 	
-	oop_t *tombstone = mockedObjects.newObject();
+	oop_t *tombstone = mockedLocal.newObject();
 	flipper()->addRoot(root);
 	flipper()->tombstone(tombstone);
 	flipper()->followRoots();

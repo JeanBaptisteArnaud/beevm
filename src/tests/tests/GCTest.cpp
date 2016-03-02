@@ -16,6 +16,12 @@ oop_t* GCTest::global(const std::string &name)
 	return mockedObjects.get(name);
 }
 
+GCTest::GCTest() :
+	mockedFrom(false),
+	mockedLocal(true)
+{
+}
+
 // was gcForTesting
 Memory *GCTest::memoryForTesting()
 {
@@ -24,11 +30,12 @@ Memory *GCTest::memoryForTesting()
 	memory->toSpace   = GCSpace::dynamicNewP( 8 * 1024);
 	memory->oldSpace  = GCSpace::dynamicNewP(64 * 1024);
 
-	memory->rememberedSet             = mockedObjects.newArray(0x200, memory->oldSpace);
-	memory->literalsReferences        = mockedObjects.newArray(0x200, memory->oldSpace);
-	memory->nativizedMethods          = mockedObjects.newArray(0x10,  memory->oldSpace);
-	memory->codeCacheObjectReferences = mockedObjects.newArray(0x10,  memory->oldSpace);
-	memory->rescuedEphemerons         = mockedObjects.newArray(0x200, memory->oldSpace);
+
+	memory->rememberedSet             = mockedFrom.newArray(0x200, memory->oldSpace);
+	memory->literalsReferences        = mockedFrom.newArray(0x200, memory->oldSpace);
+	memory->nativizedMethods          = mockedFrom.newArray(0x10,  memory->oldSpace);
+	memory->codeCacheObjectReferences = mockedFrom.newArray(0x10,  memory->oldSpace);
+	memory->rescuedEphemerons         = mockedFrom.newArray(0x200, memory->oldSpace);
 
 	memory->rememberedSet            ->slot(0) = smiConst(2); // size = 0
 	memory->literalsReferences       ->slot(0) = smiConst(2); // size = 0
@@ -36,7 +43,7 @@ Memory *GCTest::memoryForTesting()
 	memory->codeCacheObjectReferences->slot(0) = smiConst(2); // size = 0
 	memory->rescuedEphemerons        ->slot(0) = smiConst(2); // size = 0
 
-	memory->residueObject = mockedObjects.newObject();
+	memory->residueObject = mockedLocal.newObject();
 	
 	memory->flipper->memory = memory;
 	memory->compactor->memory = memory;
