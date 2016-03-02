@@ -463,7 +463,7 @@ void GCMarkAndCompactTest::testFollowRescueEphemerons() {
 
 void GCMarkAndCompactTest::testFollowWeak()
 {
-	oop_t * pointers[3];
+	oop_t * pointers[4];
 	MarkAndCompactGC * compactor = this->compactor();
 	oop_t * value1 = oldSpace().shallowCopy(mockedObjects.newObject());
 	oop_t * value2 = oldSpace().shallowCopy(mockedObjects.newObject());
@@ -488,18 +488,19 @@ void GCMarkAndCompactTest::testFollowWeak()
 	compactor->followCountStartingAt((slot_t *)root, root->_size(), 1);
 	compactor->fixWeakContainers();
 	compactor->tombstone(smiConst(42));
-	
+
 	root = KnownObjects::nil;
 
 	ASSERTM("should not, leaked", !pointers[0]->_hasBeenSeenInSpace());
 	ASSERTM("should, array", pointers[1]->_hasBeenSeenInSpace());
 	ASSERTM("should, string", pointers[2]->_hasBeenSeenInSpace());
 	ASSERTM("should, byteArray", pointers[3]->_hasBeenSeenInSpace());
-	
+
 }
 
-void GCMarkAndCompactTest::testFollowWeakExtended() {
-	oop_t * pointers[3];
+void GCMarkAndCompactTest::testFollowWeakExtended()
+{
+	oop_t * pointers[4];
 	MarkAndCompactGC * compactor = this->compactor();
 	oop_t * value1 = oldSpace().shallowCopy(mockedObjects.newObject());
 	oop_t * value2 = oldSpace().shallowCopy(mockedObjects.newObject());
@@ -536,7 +537,7 @@ void GCMarkAndCompactTest::testFollowWeakExtended() {
 
 void GCMarkAndCompactTest::testFollowWeakExtendedNested()
 {
-	oop_t * pointers[3];
+	oop_t * pointers[4];
 	MarkAndCompactGC * compactor = this->compactor();
 
 	oop_t * array = oldSpace().shallowCopy(mockedObjects.newArray(10));
@@ -577,7 +578,7 @@ void GCMarkAndCompactTest::testFollowWeakExtendedNested()
 
 void GCMarkAndCompactTest::testFollowWeakNoTombstones()
 {
-	oop_t * pointers[3];
+	oop_t * pointers[4];
 	MarkAndCompactGC * compactor = this->compactor();
 
 	oop_t * value1 = oldSpace().shallowCopy(mockedObjects.newObject());
@@ -616,7 +617,7 @@ void GCMarkAndCompactTest::testFollowWeakNoTombstones()
 
 void GCMarkAndCompactTest::testFollowWeakNoTombstonesExtended()
 {
-	oop_t * pointers[3];
+	oop_t * pointers[4];
 	MarkAndCompactGC * compactor = this->compactor();
 
 	oop_t * value1 = oldSpace().shallowCopy(mockedObjects.newObject());
