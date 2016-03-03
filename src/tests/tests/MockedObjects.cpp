@@ -48,7 +48,9 @@ void MockedObjects::initializeKnownObjects()
 	oop_t *array   = this->newArray(0);
 	//Memory *memory  = mockMemory();
 
-	KnownObjects::initialize(nil, stTrue, stFalse);
+	oop_t *frameMarker = this->newObject();
+
+	KnownObjects::initialize(nil, stTrue, stFalse, frameMarker);
 	KnownObjects::emptyArray = array;
 
 	// create a fake stack with place for all slots

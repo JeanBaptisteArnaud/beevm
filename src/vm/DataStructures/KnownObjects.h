@@ -25,10 +25,11 @@ public:
 	static oop_t *nil;
 	static oop_t *stTrue;
 	static oop_t *stFalse;
+	static oop_t *frameMarker;
 
 	static oop_t *emptyArray;
 
-	static void initialize(oop_t *aNil, oop_t *aTrue, oop_t *aFalse);
+	static void initialize(oop_t *aNil, oop_t *aTrue, oop_t *aFalse, oop_t *aFrameMarker);
 	static void initializeFromHostVM();
 
 };

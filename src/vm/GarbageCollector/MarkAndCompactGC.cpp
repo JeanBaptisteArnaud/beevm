@@ -14,6 +14,7 @@ using namespace Bee;
 
 Bee::MarkAndCompactGC::MarkAndCompactGC()
 {
+	characters.base = VMVariablesProxy::hostVMCharactersSpaceBase();
 }
 
 Bee::MarkAndCompactGC::~MarkAndCompactGC()
@@ -74,8 +75,7 @@ void MarkAndCompactGC::unseeWellKnownObjects()
 	KnownObjects::nil->_beUnseenInLibrary();
 	KnownObjects::stTrue->_beUnseenInLibrary();
 	KnownObjects::stFalse->_beUnseenInLibrary();
-
-	(*vm.debugFrameMarker)->_beUnseenInLibrary();
+	KnownObjects::frameMarker->_beUnseenInLibrary();
 
 	this->unseeCharacters();
 	this->unseeSKernelMeta();

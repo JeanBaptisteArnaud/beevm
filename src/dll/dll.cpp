@@ -15,7 +15,7 @@ Memory *memory;
 
 extern "C" __declspec(dllexport) void setMemory(Memory *aMemory);
 extern "C" __declspec(dllexport) void scavengeHostVMFromSpace();
-extern "C" __declspec(dllexport) void collectOldSpace();
+extern "C" __declspec(dllexport) void markAndCompactArena();
 
 
 BOOL WINAPI DllMain(HINSTANCE hModule, DWORD fwdReason, LPVOID reserved)
@@ -111,18 +111,4 @@ void assertSaneObjects()
 	SanityChecker checker(*memory->fromSpace);
 	checker.checkAllSaneIn(*memory->fromSpace);
 	checker.checkAllSaneIn(*memory->oldSpace);
-}
-
-
-void collectOldSpace()
-{
-	debug("flip starting");
-	memory->updateFromHostVM();
-	debug((char*)status().c_str());
-
-	memory->collectOldSpace();
-
-	memory->updateToHostVM();
-	debug("flip ended");
-	debug((char*)status().c_str());
 }

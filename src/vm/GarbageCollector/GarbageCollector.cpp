@@ -192,7 +192,7 @@ void GarbageCollector::followStack()
 		{
 			ulong start;
 			ulong size = ((ulong)nextFrame - (ulong)frame) / 4;
-			if (frame[0] == (ulong)*vm.debugFrameMarker) // was frame[1]
+			if (frame[1] == (ulong)vm.debugFrameMarker) // was frame[1]
 			{
 				this->followCountStartingAt((slot_t*)frame, 5, 3);
 				start = 9;
