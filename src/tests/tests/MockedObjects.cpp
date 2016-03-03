@@ -21,6 +21,7 @@ MockedObjects::MockedObjects(bool itIsLibrary)
 	defaultSpace.loadFrom(allocator);
 	stackTempIndex = STACK_LAST - 5; // -0: end of stack. -1: self. -2: cm. -3: prev env. -4: env. -5: first temp
 	seenFlag = itIsLibrary ? 0 : basic_header_t::Flag_unseenInSpace;
+	parent = NULL;
 }
 
 MockedObjects::~MockedObjects()
@@ -38,6 +39,8 @@ void MockedObjects::initializeKnownObjects()
 
 	define("Object behavior", header->slots());
 	header->behavior = header->slots();
+
+	
 
 	oop_t *nil     = mockNil();
 	oop_t *stTrue  = mockTrue();
@@ -87,9 +90,14 @@ oop_t* MockedObjects::get(const string &name)
 		return definitions[name];
 	else
 	{
-		oop_t * mock = this->newObject();
-		define(name, mock);
-		return mock;
+		if (parent) {
+			return parent->get(name);
+		}
+		else {
+			oop_t * mock = this->newObject();
+			define(name, mock);
+			return mock;
+		}
 	}
 }
 
@@ -215,7 +223,7 @@ oop_t* MockedObjects::newArray(ulong slots, GCSpace *space)
 {
 	oop_t *array = this->newObject("Array", slots, 0, seenFlag, *space);
 
-	for (ulong index = 0; index <= slots; index++)
+	for (ulong index = 0; index < slots; index++)
 		array->slot(index) = smiConst(index);
 	
 	return array;
@@ -256,9 +264,9 @@ oop_t* MockedObjects::newWeakArray(ulong slots)
 	oop_t *array = this->newObject("Array", slots, 0, basic_header_t::Flag_isEphemeron | seenFlag, defaultSpace);
 
 	// if extended we have to unset ephemeron/weak flag or it will be confused with an ephemeron
-	array->unsetExtFlags(basic_header_t::Flag_isEphemeron);
+	if(array->_isExtended()) array->unsetExtFlags(basic_header_t::Flag_isEphemeron);
 
-	for (ulong index = 0; index <= slots; index++)
+	for (ulong index = 0; index < slots; index++)
 		array->slot(index) = KnownObjects::nil;
 
 	return array;
@@ -269,6 +277,11 @@ GCSpace MockedObjects::setDefaultSpace(GCSpace *newSpace)
 	GCSpace previous = defaultSpace;
 	defaultSpace.loadFrom(*newSpace);
 	return previous;
+}
+
+void Bee::MockedObjects::setParent(MockedObjects * localParent)
+{
+	parent = localParent;
 }
 
 Memory* MockedObjects::mockMemory()

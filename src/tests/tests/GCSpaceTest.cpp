@@ -28,6 +28,8 @@ GCSpaceTest::~GCSpaceTest()
 void GCSpaceTest::setUp()
 {
 	mockedLocal.initializeKnownObjects();
+	mockedFrom.setParent(&mockedLocal);
+
 }
 
 void GCSpaceTest::tearDown()

@@ -13,7 +13,10 @@ using namespace Bee;
 
 oop_t* GCTest::global(const std::string &name)
 {
-	return mockedObjects.get(name);
+	oop_t * result = mockedLocal.get(name);
+	if(result == NULL) 
+		return mockedFrom.get(name);
+		else return result;
 }
 
 GCTest::GCTest() :
@@ -58,8 +61,8 @@ Memory *GCTest::memoryForTesting()
 	memory->flipper->useOwnVMVariables();
 	memory->compactor->useOwnVMVariables();
 
-	memory->flipper->vm.framePointerToStartWalkingTheStack(mockedObjects.stackPtr());
-	memory->compactor->vm.framePointerToStartWalkingTheStack(mockedObjects.stackPtr());
+	memory->flipper->vm.framePointerToStartWalkingTheStack(mockedLocal.stackPtr());
+	memory->compactor->vm.framePointerToStartWalkingTheStack(mockedLocal.stackPtr());
 
 	*memory->flipper->vm.JIT_globalLookupCache = (oop_t*)new ulong[0x4000];
 	*memory->compactor->vm.JIT_globalLookupCache = *memory->flipper->vm.JIT_globalLookupCache;

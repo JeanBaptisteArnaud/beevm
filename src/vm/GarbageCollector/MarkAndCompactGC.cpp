@@ -276,12 +276,11 @@ void MarkAndCompactGC::followCountStartingAt(slot_t * root, int size, long base)
 							stack.push(smiConst(limit));
 						}
 						this->rememberIfWeak(object);
+						index = -1;
+						limit = index + object->_strongPointersSize();
+						scanned = (slot_t *)object;
 					}
-					index = -1;
-					limit = index + object->_strongPointersSize();
-					scanned = (slot_t *)object;
 					object->_threadWithAt((oop_t *)oldScanned, oldIndex - 1);
-					
 				}
 				else
 				{

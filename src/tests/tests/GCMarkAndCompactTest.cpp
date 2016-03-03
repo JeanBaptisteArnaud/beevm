@@ -39,6 +39,7 @@ GCSpace& GCMarkAndCompactTest::oldSpace()
 void GCMarkAndCompactTest::setUp()
 {
 	mockedLocal.initializeKnownObjects();
+	mockedFrom.setParent(&mockedLocal);
 	memory = this->memoryForTesting();
 
 	compactor()->setUpLocals();
@@ -54,7 +55,7 @@ void GCMarkAndCompactTest::testCompact() {
 
 	MarkAndCompactGC * compactor = this->compactor();
 	oop_t * array = mockedLocal.newArray(3);
-	oop_t * object = oldSpace().shallowCopy(mockedFrom.newByteArray(256));
+	oop_t * object = oldSpace().shallowCopy(mockedFrom.newArray(256));
 	array->slot(0) = object;
 	oop_t * string = oldSpace().shallowCopy(mockedFrom.newString("a String"));
 	array->slot(1) = string;
@@ -77,9 +78,9 @@ void GCMarkAndCompactTest::testCompact() {
 	compactor->prepareForCompact();
 	compactor->compact(space);
 	ASSERTM("", (array->slot(1)->_sizeInBytes()) + ((ulong)array->slot(1)) == (ulong)array->slot(2) - 8);
-	//ASSERTM("slot 0 should be an Array", this->isArray(array->slot(0)));
-	//ASSERTM("slot 1 should be a String", this->isString(array->slot(1)));
-	//ASSERTM("slot 2 should be a ByteArray", this->isByteArray(array->slot(2)));
+	ASSERTM("slot 0 should be an Array", this->isArray(array->slot(0)));
+	ASSERTM("slot 1 should be a String", this->isString(array->slot(1)));
+	ASSERTM("slot 2 should be a ByteArray", this->isByteArray(array->slot(2)));
 
 }
 
@@ -112,7 +113,7 @@ void GCMarkAndCompactTest::testCompactExtended() {
 	compactor->setNewPositions(space);
 	compactor->prepareForCompact();
 	compactor->compact(space);
-	//ASSERTM("", ((array->slot(1)->_basicSize() + 1 + 3) & -4) + ((ulong)array->slot(1)) == (ulong)array->slot(2) - 8);
+	ASSERTM("", array->slot(1)->_sizeInBytes() + (ulong)array->slot(1) == (ulong)array->slot(2) - 8);
 	ASSERTM("slot 0 should be an Array", this->isArray(array->slot(0)));
 	ASSERTM("slot 1 should be a String", this->isString(array->slot(1)));
 	ASSERTM("slot 2 should be a ByteArray", this->isByteArray(array->slot(2)));
@@ -160,6 +161,7 @@ void GCMarkAndCompactTest::testCompactExtendedWEphemeron() {
 	GCSpace * space = &oldSpace();
 	compactor->initAuxSpace();
 	compactor->followCountStartingAt((slot_t *)array, array->_size(), 1);
+	compactor->rescueEphemerons();
 	compactor->followRescuedEphemerons();
 	compactor->setNewPositions(space);
 	compactor->prepareForCompact();
@@ -205,6 +207,7 @@ void GCMarkAndCompactTest::testCompactExtendedWEphemeronRescued() {
 	GCSpace * space = &oldSpace();
 	compactor->initAuxSpace();
 	compactor->followCountStartingAt((slot_t *)array, array->_size(), 1);
+	compactor->rescueEphemerons();
 	compactor->followRescuedEphemerons();
 	compactor->setNewPositions(space);
 	compactor->prepareForCompact();
@@ -218,19 +221,19 @@ void GCMarkAndCompactTest::testCompactExtendedWEphemeronRescued() {
 	ASSERTM("slot 875 should be true, copy go wrong", extended->slot(875) == KnownObjects::stTrue);
 	// assert: (extended count : [:x | x not]) = (extended size - 1 )
 	ASSERTM("1 Ephemeron should be rescued", !compactor->rescuedEphemerons.isEmpty());
-	ASSERTM("the ephemeron is wrong check the ", compactor->rescuedEphemerons[0] == array->slot(5));
+	ASSERTM("the ephemeron is wrong check the ", compactor->rescuedEphemerons[1] == array->slot(5));
 }
 
 void GCMarkAndCompactTest::testCompactOverlapping() {
 	MarkAndCompactGC * compactor = this->compactor();
 	oop_t * array = mockedLocal.newArray(0x100);
-	oop_t * object = oldSpace().shallowCopy(mockedFrom.newArray(4));
+	oop_t * object = oldSpace().shallowCopy(mockedFrom.newArray(3));
 	array->slot(0) = object;
 	oop_t * string = oldSpace().shallowCopy(mockedFrom.newString("a String"));
 	array->slot(1) = string;
 	oop_t * stringPointer = string;
-	long leakedSize = 678;
-	oop_t * leakedPointer = oldSpace().shallowCopy(mockedFrom.newArray(leakedSize));
+
+	oop_t * leakedPointer = oldSpace().shallowCopy(mockedFrom.newString("leaked"));
 
 	oop_t * byteArray = oldSpace().shallowCopy(mockedFrom.newByteArray(3));
 	byteArray->byte(0) = 1;
@@ -238,7 +241,7 @@ void GCMarkAndCompactTest::testCompactOverlapping() {
 	byteArray->byte(2) = 3;
 	oop_t * byteArrayPointer = byteArray;
 	array->slot(2) = byteArray;
-	oop_t * overlapped = oldSpace().shallowCopy(mockedFrom.newByteArray(1024));
+	oop_t * overlapped = oldSpace().shallowCopy(mockedFrom.newArray(1024));
 	array->slot(3) = overlapped;
 	oop_t * next = oldSpace().shallowCopy(mockedFrom.newByteArray(3));
 	next->byte(0) = 4;
@@ -261,7 +264,7 @@ void GCMarkAndCompactTest::testCompactOverlapping() {
 	ASSERTM("slot 2 should be a ByteArray", this->isByteArray(array->slot(2)));
 	ASSERTM("slot 3 should be an Array", this->isArray(array->slot(3)));
 	ASSERTM("size of overlapped object is wrong", (array->slot(3))->_size() == 1024);
-	//ASSERTM("slot 4 should be a bytearray", this->isByteArray(array->slot(4)));
+	ASSERTM("slot 4 should be a bytearray", this->isByteArray(array->slot(4)));
 	ASSERTM("size of next's overlapped object is wrong", array->slot(4)->_size() == 3);
 }
 
@@ -275,8 +278,8 @@ void GCMarkAndCompactTest::testFollowDontRescueEphemerons() {
 	pointers[1] = value;
 	pointers[2] = ephemeron;
 	oop_t * root = mockedLocal.newArray(0x4);
-	root->slot(0) = root;
-	//root->slot(0) = ephemeron;
+	//root->slot(0) = root;
+	root->slot(0) = ephemeron;
 	 
 	ephemeron = KnownObjects::nil; // thinks this is useless
 	// maybe missing something; here to check
@@ -290,23 +293,28 @@ void GCMarkAndCompactTest::testFollowDontRescueEphemerons() {
 void GCMarkAndCompactTest::testFollowEphemeronsNoRescue() {
 	oop_t * pointers[3];
 	MarkAndCompactGC * compactor = this->compactor();
-	oop_t * leaked = oldSpace().shallowCopy(mockedFrom.newString("leaked"));
+	oop_t * key = oldSpace().shallowCopy(mockedFrom.newString("Key"));
 	oop_t * value = oldSpace().shallowCopy(mockedFrom.newObject());
-	oop_t * ephemeron = oldSpace().shallowCopy(mockedFrom.newEphemeron(leaked, value));
-	pointers[0] = leaked;
+	oop_t * ephemeron = oldSpace().shallowCopy(mockedFrom.newEphemeron(key, value));
+	pointers[0] = key;
 	pointers[1] = value;
 	pointers[2] = ephemeron;
-	oop_t * root = mockedLocal.newArray(0x4);
-	root->slot(0) = root;
-	ephemeron = KnownObjects::nil; // thinks this is useless
+	oop_t * root = mockedLocal.newArray(0x2);
+	root->slot(0) = ephemeron;
+	root->slot(1) = key;
+	//ephemeron = KnownObjects::nil; // thinks this is useless
 								   // maybe missing something; here to check
-	compactor->followCountStartingAt((slot_t *)root, 1, 1);
+	compactor->followCountStartingAt((slot_t *)root, root->_size(), 1);
+	ASSERTM("Key should be seen", pointers[0]->_hasBeenSeenInSpace());
+	ASSERTM("Ephemeron should be not seen Value yet", ! pointers[1]->_hasBeenSeenInSpace());
+	ASSERTM("Ephemeron should be seen", pointers[2]->_hasBeenSeenInSpace());
 	compactor->rescueEphemerons();
+
 	ASSERTM("rescued ephemeron array should be empty", compactor->rescuedEphemerons.isEmpty());
 	compactor->rescuedEphemerons.contents = KnownObjects::nil;
-	root = KnownObjects::nil;
-	ASSERTM("Ephemeron should be rescued", pointers[0]->_hasBeenSeenInSpace());
-	ASSERTM("Ephemeron should be rescued", pointers[1]->_hasBeenSeenInSpace());
+	//root = KnownObjects::nil;
+	ASSERTM("Ephemeron should be rescued Key", pointers[0]->_hasBeenSeenInSpace());
+	ASSERTM("Ephemeron should be rescued Value", pointers[1]->_hasBeenSeenInSpace());
 	ASSERTM("Ephemeron should be visible", pointers[2]->_hasBeenSeenInSpace());
 }
 
@@ -332,10 +340,10 @@ void GCMarkAndCompactTest::testFollowObjectInFrom() {
 	byteArray = KnownObjects::nil;
 	array = KnownObjects::nil;
 
-	ASSERTM("not conform, leaked", pointers[0]->_hasBeenSeenInSpace());
-	ASSERTM("not conform, array", pointers[1]->_hasBeenSeenInSpace());
-	ASSERTM("not conform, string", pointers[2]->_hasBeenSeenInSpace());
-	ASSERTM("not conform, byteArray", pointers[3]->_hasBeenSeenInSpace());
+	ASSERTM("not conform, leaked", !pointers[0]->_hasBeenSeenInSpace());
+	ASSERTM("not conform, array", !pointers[1]->_hasBeenSeenInSpace());
+	ASSERTM("not conform, string", !pointers[2]->_hasBeenSeenInSpace());
+	ASSERTM("not conform, byteArray", !pointers[3]->_hasBeenSeenInSpace());
 
 	compactor->followCountStartingAt((slot_t *)root, 1, 1);
 	root = KnownObjects::nil;
@@ -409,22 +417,21 @@ void GCMarkAndCompactTest::testFollowObjectInOldWeakArray() {
 
 
 
-	ASSERTM("not conform, leaked", pointers[0]->_hasBeenSeenInSpace());
-	ASSERTM("not conform, array", pointers[1]->_hasBeenSeenInSpace());
-	ASSERTM("not conform, string", pointers[2]->_hasBeenSeenInSpace());
-	ASSERTM("not conform, byteArray", pointers[3]->_hasBeenSeenInSpace());
+	ASSERTM("not conform, leaked", !pointers[0]->_hasBeenSeenInSpace());
+	ASSERTM("not conform, array", !pointers[1]->_hasBeenSeenInSpace());
+	ASSERTM("not conform, string", !pointers[2]->_hasBeenSeenInSpace());
+	ASSERTM("not conform, byteArray", !pointers[3]->_hasBeenSeenInSpace());
 
-	compactor->followCountStartingAt((slot_t *)root, 1, 1);
-	ASSERTM("weak should be in weak container", weak == compactor->weakContainers[0]);
+	compactor->followCountStartingAt((slot_t *)root, root->_size(), 1);
+	ASSERTM("weak should be in weak container", weak == compactor->weakContainers[1]);
 
 	weak = KnownObjects::nil;
 	root = KnownObjects::nil;
 
-
-	// to fix
-	ASSERTM("should, array", pointers[1]->_hasBeenSeenInSpace());
-	ASSERTM("should, string", pointers[2]->_hasBeenSeenInSpace());
-	ASSERTM("should, byteArray", pointers[3]->_hasBeenSeenInSpace());
+	ASSERTM("should not seen", !pointers[0]->_hasBeenSeenInSpace());
+	ASSERTM("should be seen, array", pointers[1]->_hasBeenSeenInSpace());
+	ASSERTM("should not seen, string", !pointers[2]->_hasBeenSeenInSpace());
+	ASSERTM("should not seen, byteArray", !pointers[3]->_hasBeenSeenInSpace());
 }
 
 
@@ -435,7 +442,7 @@ void GCMarkAndCompactTest::testFollowRescueEphemerons() {
 				self assert : false].
 	*/
 
-	oop_t * pointers[3];
+	oop_t * pointers[4];
 	MarkAndCompactGC * compactor = this->compactor();
 	oop_t * leaked = oldSpace().shallowCopy(mockedFrom.newString("leaked"));
 	oop_t * value = oldSpace().shallowCopy(mockedFrom.newObject());
@@ -482,9 +489,9 @@ void GCMarkAndCompactTest::testFollowWeak()
 	root->slot(0) = weak;
 	root->slot(1) = value2;
 
-//	weak = KnownObjects::nil;
-//	value1 = KnownObjects::nil;
-//	value2 = KnownObjects::nil;
+	weak = KnownObjects::nil;
+	value1 = KnownObjects::nil;
+	value2 = KnownObjects::nil;
 
 	compactor->followCountStartingAt((slot_t *)root, root->_size(), 1);
 	compactor->fixWeakContainers();
@@ -660,12 +667,12 @@ cute::suite make_suite_GCMarkAndCompactTest()
 	cute::suite s;
 
 
-	
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInFrom));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInTo));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInOldWeakArray));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowRescueEphemerons));
-	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowDontRescueEphemerons));
+	//
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInFrom));
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInTo));
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowObjectInOldWeakArray));
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowRescueEphemerons));
+	//s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowDontRescueEphemerons));
 	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowEphemeronsNoRescue));
 	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowWeak));
 	s.push_back(CUTE_SMEMFUN(GCMarkAndCompactTest, testFollowWeakExtended));

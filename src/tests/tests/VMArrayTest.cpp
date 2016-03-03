@@ -25,6 +25,7 @@ VMArrayTest::~VMArrayTest()
 void VMArrayTest::setUp()
 {
 	mockedLocal.initializeKnownObjects();
+	mockedFrom.setParent(&mockedLocal);
 }
 
 void VMArrayTest::tearDown()

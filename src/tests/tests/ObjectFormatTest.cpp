@@ -29,6 +29,7 @@ ObjectFormatTest::~ObjectFormatTest()
 void ObjectFormatTest::setUp()
 {
 	mockedLocal.initializeKnownObjects();
+	mockedFrom.setParent(&mockedLocal);
 }
 
 void ObjectFormatTest::tearDown()

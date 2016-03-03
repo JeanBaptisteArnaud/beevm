@@ -61,6 +61,8 @@ public:
 	void   freeComplexObject(oop_t *object);
 
 	bool   checknewArray2(oop_t *object);
+	void	setParent(MockedObjects * localParent);
+
 
 	Bee::GCSpace defaultSpace;
 	std::vector<std::pair<slot_t*,std::string> > references;
@@ -70,7 +72,7 @@ public:
 	ulong stack[16];
 	int stackTempIndex;
 	uchar seenFlag;
-
+	MockedObjects * parent;
 };
 
 }
