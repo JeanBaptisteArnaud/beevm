@@ -31,7 +31,7 @@ public:
 	void followAll();
 	void setNewPositionsAndCompact();
 	void updateOldSpace();
-	void updateNativeRescuedphemerons();
+	void updateNativeRescuedEphemerons();
 	void allocateArrays();
 	void resetFrom();
 	void decommitSlack();

@@ -68,6 +68,7 @@ public:
 	oop_t* globalLookupCacheAt(ulong index);
 	void globalLookupCacheAtPut(ulong index, oop_t *value);
 
+	void flushCodeCache();
 	// for flipper
 	oop_t** rememberedSet();
 	oop_t** literalsReferences();
@@ -93,6 +94,9 @@ public:
 	oop_t** extraRoots();
 
 //private:
+	typedef void (*voidFunc)(void);
+	voidFunc JIT_flushCodeCache;
+
 	oop_t**  debugFrameMarker;
 	ulong**  GC_framePointerToWalkStack;
 
@@ -129,6 +133,8 @@ public:
 
 private:
 	// host vm addresses
+	static voidFunc hostVMFlushCodeCache();
+
 	static oop_t** hostVMWeakContainers();
 	static oop_t** hostVMEphemerons();
 	static oop_t** hostVMTombstone();

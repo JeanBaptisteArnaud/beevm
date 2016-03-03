@@ -87,6 +87,25 @@ void scavengeHostVMFromSpace()
 
 }
 
+void markAndCompactArena()
+{
+	debug("mark and compact starting");
+	memory->updateFromHostVM();
+	debug((char*)status().c_str());
+
+	memory->collectOldSpace();
+	
+	memory->updateToHostVM();
+
+	debug("mark and compact ended");
+	debug((char*)status().c_str());
+	
+	//debug("checking sanity... ");
+	//assertSaneObjects();
+	//debug("ok");
+
+}
+
 void assertSaneObjects()
 {
 	SanityChecker checker(*memory->fromSpace);

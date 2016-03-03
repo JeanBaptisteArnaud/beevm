@@ -36,6 +36,7 @@ void VMVariablesProxy::initializeForHostVM()
 	JIT_globalLookupCache = (oop_t**)0x1002EC20;
 	JIT_codeCache = (char **)0x1002E820;
 
+	JIT_flushCodeCache = hostVMFlushCodeCache();
 
 	GC_framePointerToWalkStack = (ulong**)0x100407C4;
 	GC_anyNativizedCompiledMethodInFromSpace = (bool*)0x10041714;
@@ -64,6 +65,7 @@ void VMVariablesProxy::initializeForHostVM()
 	GC_extraRoots          = hostVMExtraRoots();
 }
 
+void dummyFunc() {}
 
 void VMVariablesProxy::initializeFor(VMVariables *variables, Memory *memory)
 {
@@ -72,6 +74,8 @@ void VMVariablesProxy::initializeFor(VMVariables *variables, Memory *memory)
 	JIT_globalLookupCacheHasPointersToFrom = &variables->JIT_globalLookupCacheHasPointersToFrom;
 	JIT_globalLookupCache = variables->JIT_globalLookupCache;
 	JIT_codeCache = &variables->JIT_codeCache;
+
+	JIT_flushCodeCache = dummyFunc;
 
 	GC_framePointerToWalkStack = &variables->GC_framePointerToWalkStack;
 	GC_anyNativizedCompiledMethodInFromSpace = &variables->GC_anyNativizedCompiledMethodInFromSpace;
@@ -167,6 +171,10 @@ char* VMVariablesProxy::codeCache()
 	return *JIT_codeCache;
 }
 
+void VMVariablesProxy::flushCodeCache()
+{
+	JIT_flushCodeCache();
+}
 
 oop_t** VMVariablesProxy::rememberedSet()
 {
@@ -254,6 +262,10 @@ oop_t** VMVariablesProxy::extraRoots()
 }
 
 
+VMVariablesProxy::voidFunc VMVariablesProxy::hostVMFlushCodeCache()
+{
+	return (voidFunc)0x10008CB0;
+}
 
 oop_t** VMVariablesProxy::hostVMCharacterBase()
 {

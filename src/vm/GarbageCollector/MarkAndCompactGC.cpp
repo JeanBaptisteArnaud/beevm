@@ -45,7 +45,7 @@ void MarkAndCompactGC::doCollect()
 	this->setNewPositionsAndCompact();
 	this->updateOldSpace();
 	this->makeRescuedEphemeronsNonWeak();
-	this->updateNativeRescuedphemerons();
+	this->updateNativeRescuedEphemerons();
 	this->allocateArrays();
 	this->resetFrom();
 	this->decommitSlack();
@@ -103,7 +103,7 @@ void MarkAndCompactGC::unseeSKernelMeta()
 
 void MarkAndCompactGC::flushCodeCache()
 {
-	//this->_flushCodeCache();
+	vm.flushCodeCache();
 	vm.anyNativizedCompiledMethodInFromSpace(false);
 }
 
@@ -194,7 +194,7 @@ void MarkAndCompactGC::updateOldSpace()
 	oldSpace.loadFrom(auxSpace);
 }
 
-void MarkAndCompactGC::updateNativeRescuedphemerons()
+void MarkAndCompactGC::updateNativeRescuedEphemerons()
 {
 	rescuedEphemerons.updateReference();
 }
