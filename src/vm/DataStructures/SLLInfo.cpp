@@ -12,15 +12,27 @@ SLLInfo::~SLLInfo()
 {
 }
 
-ulong * SLLInfo::getBase() {
-	return (ulong *) contents->slot(13)->_asPointer();
+oop_t* SLLInfo::firstObject()
+{
+	return headerToObject(asObject(this->getBase()));
 }
 
-ulong * SLLInfo::getNextFree() {
-	return (ulong *) this->end();
+ulong* SLLInfo::getBase()
+{
+	return (ulong*)pointerConst(contents[13]);
 }
 
-oop_t * SLLInfo::end() {
-	return contents->slot(14)->_asPointer();
+ulong* SLLInfo::getNextFree()
+{
+	return (ulong*)this->end();
 }
 
+ulong* SLLInfo::end()
+{
+	return (ulong*)pointerConst(contents[14]);
+}
+
+bool SLLInfo::isBelowNextFree(oop_t *object)
+{
+	return  (ulong *) object <= this->getNextFree();
+}

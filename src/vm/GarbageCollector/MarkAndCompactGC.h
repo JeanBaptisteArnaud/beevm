@@ -21,7 +21,7 @@ public:
 	~MarkAndCompactGC();
 
 	//virtual void useOwnVMVariables();
-	virtual void useHostVMVariables();
+	//virtual void useHostVMVariables();
 
 	void doCollect();
 	void unmarkRememberedSet();

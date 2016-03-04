@@ -57,8 +57,8 @@ void VMVariablesProxy::initializeForHostVM()
 
 	GC_librariesArrayStart = hostVMLibrariesArrayStart();
 	GC_librariesArrayEnd   = hostVMLibrariesArrayEnd();
-	GC_characterBase       = hostVMCharacterBase();
-	GC_characterNextFree   = hostVMCharacterNextFree();
+	GC_charactersBase      = hostVMCharactersBase();
+	GC_charactersNextFree  = hostVMCharactersNextFree();
 
 	GC_wellKnownRoots      = hostVMWellKnownRoots();
 	GC_wellKnownRootsSize  = hostVMWellKnownRootsSize();
@@ -96,8 +96,8 @@ void VMVariablesProxy::initializeFor(VMVariables *variables, Memory *memory)
 
 	GC_librariesArrayStart = &variables->librariesArrayStart;
 	GC_librariesArrayEnd   = &variables->librariesArrayEnd;
-	GC_characterBase       = &variables->characterBase;
-	GC_characterNextFree   = &variables->characterNextFree;
+	GC_charactersBase      = &variables->charactersBase;
+	GC_charactersNextFree  = &variables->charactersNextFree;
 
 	GC_wellKnownRoots      = &variables->wellKnownRoots;
 	GC_wellKnownRootsSize  = &variables->wellKnownRootsSize;
@@ -216,34 +216,34 @@ oop_t** VMVariablesProxy::tombstone()
 	return GC_tombstone;
 }
 
-oop_t*  VMVariablesProxy::fixedObjectsStart()
-{
-	return *GC_fixedObjectsStart;
-}
-
-oop_t*  VMVariablesProxy::fixedObjectsEnd()
-{
-	return *GC_fixedObjectsEnd;
-}
-
-oop_t*  VMVariablesProxy::librariesArrayStart()
+ulong*  VMVariablesProxy::librariesArrayStart()
 {
 	return *GC_librariesArrayStart;
 }
 
-oop_t*  VMVariablesProxy::librariesArrayEnd()
+ulong*  VMVariablesProxy::librariesArrayEnd()
 {
 	return *GC_librariesArrayEnd;
 }
 
-oop_t*  VMVariablesProxy::characterBase()
+ulong*  VMVariablesProxy::charactersBase()
 {
-	return *GC_characterBase;
+	return (ulong*)pointerConst((ulong)*GC_charactersBase);
 }
 
-oop_t*  VMVariablesProxy::characterNextFree()
+ulong*  VMVariablesProxy::charactersNextFree()
 {
-	return *GC_characterNextFree;
+	return (ulong*)pointerConst((ulong)*GC_charactersNextFree);
+}
+
+ulong*  VMVariablesProxy::fixedObjectsStart()
+{
+	return *GC_fixedObjectsStart;
+}
+
+ulong*  VMVariablesProxy::fixedObjectsEnd()
+{
+	return *GC_fixedObjectsEnd;
 }
 
 oop_t** VMVariablesProxy::wellKnownRoots()
@@ -267,35 +267,37 @@ VMVariablesProxy::voidFunc VMVariablesProxy::hostVMFlushCodeCache()
 	return (voidFunc)0x10008CB0;
 }
 
-oop_t** VMVariablesProxy::hostVMCharacterBase()
+ulong** VMVariablesProxy::hostVMCharactersBase()
 {
-	return (oop_t**)0x100260C0;
+	//return (ulong**)0x100260C0;
+	return (ulong**)0x10040684;
 }
 
-oop_t** VMVariablesProxy::hostVMCharacterNextFree()
+ulong** VMVariablesProxy::hostVMCharactersNextFree()
 {
-	return (oop_t**)(12 * 8 + 0x100260C0);
+	//return (ulong**)(0x100260C0 + 12 * 8);
+	return (ulong**)0x10040688;
 }
 	
-
-oop_t** VMVariablesProxy::hostVMFixedObjectsEnd()
+ulong** VMVariablesProxy::hostVMFixedObjectsStart()
 {
-	return (oop_t**)0x100406A0;
+	return (ulong**)0x1004069C;
 }
 
-oop_t** VMVariablesProxy::hostVMFixedObjectsStart()
+ulong** VMVariablesProxy::hostVMFixedObjectsEnd()
 {
-	return (oop_t**)0x1004069C;
+	return (ulong**)0x100406A0;
 }
 
-oop_t** VMVariablesProxy::hostVMLibrariesArrayStart()
+
+ulong** VMVariablesProxy::hostVMLibrariesArrayStart()
 {
-	return (oop_t**)0x10040750;
+	return (ulong**)0x10040750;
 }
 
-oop_t** VMVariablesProxy::hostVMLibrariesArrayEnd()
+ulong** VMVariablesProxy::hostVMLibrariesArrayEnd()
 {
-	return (oop_t**)0x10040754;
+	return (ulong**)0x10040754;
 }
 
 oop_t** VMVariablesProxy::hostVMEphemerons()

@@ -30,13 +30,13 @@ public:
 	oop_t* weakContainers;
 	oop_t* ephemerons;
 	oop_t* tombstone;
-	oop_t* fixedObjectsStart;
-	oop_t* fixedObjectsEnd;
 
-	oop_t* librariesArrayStart;
-	oop_t* librariesArrayEnd;
-	oop_t* characterBase;
-	oop_t* characterNextFree;
+	ulong* librariesArrayStart;
+	ulong* librariesArrayEnd;
+	ulong* charactersBase;
+	ulong* charactersNextFree;
+	ulong* fixedObjectsStart;
+	ulong* fixedObjectsEnd;
 
 	oop_t* wellKnownRoots;
 	ulong  wellKnownRootsSize;
@@ -81,13 +81,13 @@ public:
 	oop_t** weakContainers();
 	oop_t** ephemerons();
 	oop_t** tombstone();
-	oop_t*  fixedObjectsStart();
-	oop_t*  fixedObjectsEnd();
 
-	oop_t*  librariesArrayStart();
-	oop_t*  librariesArrayEnd();
-	oop_t*  characterBase();
-	oop_t*  characterNextFree();
+	ulong*  librariesArrayStart();
+	ulong*  librariesArrayEnd();
+	ulong*  charactersBase();
+	ulong*  charactersNextFree();
+	ulong*  fixedObjectsStart();
+	ulong*  fixedObjectsEnd();
 
 	oop_t** wellKnownRoots();
 	ulong   wellKnownRootsSize();
@@ -119,13 +119,13 @@ public:
 	oop_t** GC_weakContainers;
 	oop_t** GC_ephemerons;
 	oop_t** GC_tombstone;
-	oop_t** GC_fixedObjectsStart;
-	oop_t** GC_fixedObjectsEnd;
 
-	oop_t** GC_librariesArrayStart;
-	oop_t** GC_librariesArrayEnd;
-	oop_t** GC_characterBase;
-	oop_t** GC_characterNextFree;
+	ulong** GC_librariesArrayStart;
+	ulong** GC_librariesArrayEnd;
+	ulong** GC_charactersBase;
+	ulong** GC_charactersNextFree;
+	ulong** GC_fixedObjectsStart;
+	ulong** GC_fixedObjectsEnd;
 
 	oop_t** GC_wellKnownRoots;
 	ulong*  GC_wellKnownRootsSize;
@@ -138,13 +138,13 @@ private:
 	static oop_t** hostVMWeakContainers();
 	static oop_t** hostVMEphemerons();
 	static oop_t** hostVMTombstone();
-	static oop_t** hostVMFixedObjectsStart();
-	static oop_t** hostVMFixedObjectsEnd();
 
-	static oop_t** hostVMLibrariesArrayStart();
-	static oop_t** hostVMLibrariesArrayEnd();
-	static oop_t** hostVMCharacterBase();
-	static oop_t** hostVMCharacterNextFree();
+	static ulong** hostVMLibrariesArrayStart();
+	static ulong** hostVMLibrariesArrayEnd();
+	static ulong** hostVMCharactersBase();
+	static ulong** hostVMCharactersNextFree();
+	static ulong** hostVMFixedObjectsStart();
+	static ulong** hostVMFixedObjectsEnd();
 
 	static oop_t** hostVMWellKnownRoots();
 	static ulong*  hostVMWellKnownRootsSize();

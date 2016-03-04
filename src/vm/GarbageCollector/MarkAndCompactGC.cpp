@@ -14,7 +14,6 @@ using namespace Bee;
 
 Bee::MarkAndCompactGC::MarkAndCompactGC()
 {
-	characters.base = VMVariablesProxy::hostVMCharactersSpaceBase();
 }
 
 Bee::MarkAndCompactGC::~MarkAndCompactGC()
@@ -26,14 +25,12 @@ void MarkAndCompactGC::initNonLocals()
 	GarbageCollector::initNonLocals();
 	tempArray.setSpace(&oldSpace);
 
-}
+	characters.base     = vm.charactersBase();
+	characters.nextFree = vm.charactersNextFree();
 
-void MarkAndCompactGC::useHostVMVariables()
-{
-	GarbageCollector::useHostVMVariables();
+	sKernelMeta.base     = vm.fixedObjectsStart();
+	sKernelMeta.nextFree = vm.fixedObjectsEnd();
 
-	sKernelMeta.setBase((ulong *)vm.fixedObjectsStart()->_asPointer());
-	sKernelMeta.setNextFree((ulong *)vm.fixedObjectsEnd()->_asPointer());
 }
 
 void MarkAndCompactGC::doCollect()
@@ -98,7 +95,30 @@ void MarkAndCompactGC::unseeSKernelMeta()
 		next->_beUnseenInLibrary();
 		next = next->nextObject();
 	}
+}
 
+void MarkAndCompactGC::unseeLibraryObjects()
+{
+	SLLInfo  library;
+	ulong *array = vm.librariesArrayStart();
+	ulong size = this->librariesArraySize();
+	for (ulong index = 0; index < size; index++)
+	{
+		library.contents = (ulong*)array[index];
+		oop_t * next = library.firstObject();
+		while (library.isBelowNextFree(next)) 
+		{
+			next->_beUnseenInLibrary();
+			next = next->nextObject();
+		}
+	}
+	//library.contents = KnownObjects::nil;
+}
+
+
+ulong MarkAndCompactGC::librariesArraySize()
+{
+	return ((ulong)vm.librariesArrayEnd() - (ulong)vm.librariesArrayStart()) / 4;
 }
 
 void MarkAndCompactGC::flushCodeCache()
@@ -311,32 +331,12 @@ void MarkAndCompactGC::followCountStartingAt(slot_t * root, int size, long base)
 	} while (true);
 }
 
-void MarkAndCompactGC::unseeLibraryObjects()
-{
-	SLLInfo  library;
-	oop_t * array = vm.librariesArrayStart();
-	ulong size = this->librariesArraySize();
-	for (ulong index = 0; index < size; index++)
-	{
-		library.contents = array->slot(index);
-		oop_t * next = library.firstObject();
-		while (library.isBelowNextFree(next)) {
-			next->_beUnseenInLibrary();
-		}
-		next = next->nextObject();
-	}
-	//library.contents = KnownObjects::nil;
-}
 
 bool MarkAndCompactGC::arenaIncludes(oop_t * object)
 {
 	return oldSpace.includes(object) || fromSpace.includes(object);
 }
 
-ulong MarkAndCompactGC::librariesArraySize()
-{
-	return ((ulong)vm.librariesArrayEnd() - (ulong)vm.librariesArrayStart()) / 4;
-}
 
 void MarkAndCompactGC::fixReferencesOrSetTombstone(oop_t * weakContainer)
 {
