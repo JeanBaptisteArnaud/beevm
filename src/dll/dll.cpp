@@ -39,13 +39,13 @@ void setMemory(Memory *aMemory)
 	memory->compactor = new(memory->compactor) MarkAndCompactGC();
 
 	memory->useHostVMVariables();
-	
+
 	memory->flipper->memory = memory;
-	memory->flipper->localSpace.loadFrom(GCSpaceInfo::newSized(32 * 1024));
+	memory->flipper->localSpace = GCSpace::dynamicNewUncommited(32 * 1024 * 1024);
 	memory->flipper->initialize();
 
 	memory->compactor->memory = memory;
-	memory->compactor->localSpace.loadFrom(GCSpaceInfo::newSized(32 * 1024));
+	memory->compactor->localSpace = GCSpace::dynamicNewUncommited(32 * 1024 * 1024);
 	memory->compactor->initialize();
 
 }

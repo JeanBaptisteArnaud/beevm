@@ -35,7 +35,7 @@ oop_t * Bee::headerToObjectCheckProxee(void * buffer)
 ulong Bee::_unthreadedHeaderSizeInBytes(ulong buffer)
 {
 	oop_t * object = ((oop_t *)(buffer + 8));
-	return 	object->_isProxy() || (!object->_isExtended()) ? 8 : 16;
+	return 	object->_isProxy() || !object->_isExtended() ? 8 : 16;
 }
 
 

@@ -22,6 +22,7 @@ typedef oop_t* slot_t;
 
 
 ulong* _commit(ulong limit, ulong delta);
+ulong* _reserve(ulong limit, ulong delta);
 void _decommit(ulong *limit, ulong *delta);
 void _free(ulong * limit, ulong *delta);
 

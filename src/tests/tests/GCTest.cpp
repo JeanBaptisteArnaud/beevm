@@ -51,7 +51,7 @@ Memory *GCTest::memoryForTesting()
 	memory->flipper->memory = memory;
 	memory->compactor->memory = memory;
 
-	GCSpace space = GCSpace::dynamicNew(32 * 1024);
+	GCSpace space = GCSpace::dynamicNewUncommited(32 * 1024 * 1024);
 	memory->flipper->localSpace.loadFrom(space);
 	memory->compactor->localSpace.loadFrom(space);
 

@@ -23,6 +23,7 @@ public:
 
 	static GCSpace  dynamicNew(ulong size);
 	static GCSpace* dynamicNewP(ulong size);
+	static GCSpace  dynamicNewUncommited(ulong size);
 
 	void dynamicFree();
 

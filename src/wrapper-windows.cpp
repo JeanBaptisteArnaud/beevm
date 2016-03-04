@@ -16,6 +16,11 @@ ulong* Bee::_commit(ulong limit, ulong delta)
 	return (ulong *) VirtualAlloc((ulong *) limit, delta, MEM_COMMIT, PAGE_READWRITE);
 }
 
+ulong* Bee::_reserve(ulong limit, ulong delta)
+{
+	return (ulong *) VirtualAlloc((ulong *) limit, delta, MEM_RESERVE, PAGE_READWRITE);
+}
+
 void Bee::_decommit(ulong *limit, ulong *delta)
 {
 	VirtualFree((void *) limit, (ulong) delta, MEM_DECOMMIT);

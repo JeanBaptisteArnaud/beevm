@@ -42,6 +42,17 @@ GCSpace* GCSpace::dynamicNewP(ulong size)
 	return result;
 }
 
+GCSpace GCSpace::dynamicNewUncommited(ulong size)
+{
+	GCSpaceInfo info((ulong)Bee::_reserve(0, size), size);
+	info.setCommitedLimit(info.getBase());
+
+	GCSpace result;
+	result.loadFrom(info);
+
+	return result;
+}
+
 void GCSpace::dynamicFree()
 {
 	Bee::_free(base, 0);
