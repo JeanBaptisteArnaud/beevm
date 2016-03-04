@@ -48,7 +48,7 @@ public:
 	oop_t* firstObject();
 	oop_t * firstObjectAfterMark();
 
-	void commitMoreMemory();
+	void commitMoreMemory(ulong neededLimit);
 	void commitMoreMemoryIfNeeded();
 	ulong commitSized(ulong total);
 	ulong commitDelta(ulong delta);

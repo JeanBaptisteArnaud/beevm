@@ -147,7 +147,7 @@ ulong* GCSpace::allocateUnsafe(ulong size)
 	ulong answer = asUObject(this->getNextFree());
 	ulong next = answer + size;
 	if (next > asUObject(commitedLimit))
-		this->commitMoreMemory();
+		this->commitMoreMemory(next);
 	this->setNextFree((ulong*)pointerConst(next));
 	return (ulong*)answer;
 }
@@ -213,13 +213,13 @@ oop_t * GCSpace::firstObjectAfterMark()
 }
 
 
-void GCSpace::commitMoreMemory()
+void GCSpace::commitMoreMemory(ulong neededLimit)
 {
-	if (asObject(nextFree) >= asObject(reservedLimit))
+	if (neededLimit >= asUObject(reservedLimit))
 		error("out of reserved space");
 
 	ulong padding = 0x8000;
-	ulong newLimit = (asUObject(nextFree) + padding) & -0x1000;
+	ulong newLimit = (neededLimit + padding) & -0x1000;
 
 	ulong limit = this->commitSized(newLimit - asUObject(regionBase));
 	if (limit != (asUObject(commitedLimit)))
