@@ -46,6 +46,11 @@
     <ClCompile Include="..\..\src\vm\DataStructures\VMVariables.cpp">
       <Filter>DataStructures</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\vm\DataStructures\SLLInfo.cpp">
+      <Filter>DataStructures</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vm\GarbageCollector\SanityChecker.cpp" />
+    <ClCompile Include="..\..\src\wrapper-windows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\vm\DataStructures\VMArray.h">
@@ -84,5 +89,9 @@
     <ClInclude Include="..\..\src\vm\DataStructures\VMVariables.h">
       <Filter>DataStructures</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\vm\DataStructures\SLLInfo.h">
+      <Filter>DataStructures</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\vm\GarbageCollector\SanityChecker.h" />
   </ItemGroup>
 </Project>

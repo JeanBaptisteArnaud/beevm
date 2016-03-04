@@ -41,11 +41,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetExt>.dll</TargetExt>
-    <LibraryPath>$(VC_LibraryPath_x86);C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10586.0\ucrt\x86</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10586.0\ucrt\x86</LibraryPath>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10586.0\ucrt</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetExt>.dll</TargetExt>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;C:\Program Files (x86)\Windows Kits\10\Lib\10.0.10586.0\ucrt\x86</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10586.0\ucrt</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -78,11 +80,14 @@
     <ClCompile Include="..\..\src\vm\DataStructures\Memory.cpp" />
     <ClCompile Include="..\..\src\vm\DataStructures\ObjectFormat.cpp" />
     <ClCompile Include="..\..\src\vm\DataStructures\ReferencedVMArray.cpp" />
+    <ClCompile Include="..\..\src\vm\DataStructures\SLLInfo.cpp" />
     <ClCompile Include="..\..\src\vm\DataStructures\VMArray.cpp" />
     <ClCompile Include="..\..\src\vm\DataStructures\VMVariables.cpp" />
     <ClCompile Include="..\..\src\vm\GarbageCollector\GarbageCollector.cpp" />
     <ClCompile Include="..\..\src\vm\GarbageCollector\GenerationalGC.cpp" />
     <ClCompile Include="..\..\src\vm\GarbageCollector\MarkAndCompactGC.cpp" />
+    <ClCompile Include="..\..\src\vm\GarbageCollector\SanityChecker.cpp" />
+    <ClCompile Include="..\..\src\wrapper-windows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\vm\DataStructures\Bee.h" />
@@ -92,11 +97,13 @@
     <ClInclude Include="..\..\src\vm\DataStructures\Memory.h" />
     <ClInclude Include="..\..\src\vm\DataStructures\ObjectFormat.h" />
     <ClInclude Include="..\..\src\vm\DataStructures\ReferencedVMArray.h" />
+    <ClInclude Include="..\..\src\vm\DataStructures\SLLInfo.h" />
     <ClInclude Include="..\..\src\vm\DataStructures\VMArray.h" />
     <ClInclude Include="..\..\src\vm\DataStructures\VMVariables.h" />
     <ClInclude Include="..\..\src\vm\GarbageCollector\GarbageCollector.h" />
     <ClInclude Include="..\..\src\vm\GarbageCollector\GenerationalGC.h" />
     <ClInclude Include="..\..\src\vm\GarbageCollector\MarkAndCompactGC.h" />
+    <ClInclude Include="..\..\src\vm\GarbageCollector\SanityChecker.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
