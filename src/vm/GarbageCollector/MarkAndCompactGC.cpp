@@ -338,7 +338,7 @@ bool MarkAndCompactGC::arenaIncludes(oop_t * object)
 }
 
 
-void MarkAndCompactGC::fixReferencesOrSetTombstone(oop_t * weakContainer)
+void MarkAndCompactGC::fixReferencesOrSetTombstone(oop_t *weakContainer)
 {
 	ulong size = this->arenaIncludes(weakContainer) ?
 		weakContainer->_unthreadedSize() : weakContainer->_size();

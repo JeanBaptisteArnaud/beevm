@@ -29,6 +29,7 @@ public:
 	// accessor
 	void debug();
 	ulong reservedSize();
+	ulong commitedSize();
 	ulong used();
 	
 	void loadFrom(GCSpace &from);

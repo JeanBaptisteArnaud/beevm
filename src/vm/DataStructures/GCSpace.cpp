@@ -106,6 +106,11 @@ ulong GCSpace::reservedSize()
 	return asUObject(reservedLimit) - asUObject(base);
 }
 
+ulong GCSpace::commitedSize()
+{
+	return asUObject(commitedLimit) - asUObject(base);
+}
+
 ulong GCSpace::used()
 {
 	return asUObject(nextFree) - asUObject(base);

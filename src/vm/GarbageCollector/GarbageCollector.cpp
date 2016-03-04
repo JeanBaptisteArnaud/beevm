@@ -113,6 +113,8 @@ void GarbageCollector::updateFromMemory()
 	fromSpace.loadFrom(*memory->fromSpace);
 	toSpace  .loadFrom(*memory->toSpace);
 	oldSpace .loadFrom(*memory->oldSpace);
+
+	this->tombstone(memory->residueObject);
 }
 
 void GarbageCollector::updateToMemory()

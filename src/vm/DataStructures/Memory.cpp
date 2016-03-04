@@ -62,8 +62,7 @@ void Memory::updateFromHostVM()
 	info = VMVariablesProxy::hostVMOldSpace();
 	 oldSpace->loadFrom(info);
 
-	 KnownObjects::emptyArray = emptyArray;
-	 flipper->tombstone(residueObject);
+	KnownObjects::emptyArray = emptyArray;
 }
 
 void Memory::updateToHostVM()
