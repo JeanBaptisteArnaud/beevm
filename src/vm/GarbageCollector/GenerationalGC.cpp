@@ -344,8 +344,6 @@ void GenerationalGC::followCountStartingAt(slot_t *root, int size, long start)
 						stack.push(smiConst(index));
 						stack.push(smiConst(limit));
 					}
-					// FIXME: this line was not in smalltalk:
-					//this->rememberIfWeak(object); // in the original I think it is a bug self rememberIfWeak: moved. and move before
 					
 					oop_t *moved = this->moveToOldOrTo(object);
 					objects[index-1] = moved; // was objects[index]
