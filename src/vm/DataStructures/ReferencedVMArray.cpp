@@ -27,7 +27,7 @@ void ReferencedVMArray::updateReference()
 }
 
 void ReferencedVMArray::emptyReserving(ulong size){
-	// VMArray::emptyReserving(size); FIXME: implement in superclass
+	 VMArray::emptyReserving(size);
 	this->updateReference();
 	this->setContentsMDA();
 }
