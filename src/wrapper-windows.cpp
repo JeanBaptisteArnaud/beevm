@@ -56,9 +56,9 @@ void Bee::getOsErrorMessage(ulong code, char buffer[], int buffer_length)
 void Bee::error(const char *message)
 {
 	debug(message);
-	ulong *bad = (ulong*)0xbad;
+	ulong *bad = (ulong*)0;
 	*bad;
-	ExitProcess(-1);
+	//ExitProcess(-1);
 }
 
 void Bee::debug(const char *message)
