@@ -3,10 +3,12 @@
 #define _SANITYCHECKER_H_
 
 #include <vector>
+#include <map>
 
 #include "../DataStructures/Bee.h"
 #include "../DataStructures/ObjectFormat.h" // remove when moving ObjectBitMap class
 #include "../DataStructures/GCSpace.h"  // remove when moving ObjectBitMap class
+#include "../DataStructures/Memory.h" 
 
 namespace Bee
 {
@@ -41,7 +43,14 @@ protected:
 	size_t size;
 };
 
-class SanityChecker
+class Checker
+{
+public:
+	void error(const char *msg);
+	void errorIn(oop_t *object, long index);
+};
+
+class SanityChecker : public Checker
 {
 public:
 	SanityChecker(GCSpace &aSpace);
@@ -50,11 +59,36 @@ public:
 	void checkSaneFollowing(oop_t *roots);
 	void checkAllSaneIn(GCSpace &space);
 	void checkSaneSlotsOf(oop_t *object);
-	void error(const char *msg);
-	void errorIn(oop_t *object, long index);
+
 
 	GCSpace space;
 	ObjectBitMap spaceMap;
+};
+
+class EqualChecker : public Checker
+{
+public:
+
+	void checkHeaderBits(oop_t *newObject, oop_t *oldCopy);
+	void checkSlotsOf(oop_t *newObject, oop_t *oldCopy);
+	void checkAllEqual(Memory *aMemory, GCSpace *space);
+
+	void newPosition(oop_t *oldObject, oop_t *newObject);
+
+	void reset();
+	void copyMemory(Memory *aMemory, GCSpace *space);
+
+
+	void errorInSlot(oop_t *object, long index, oop_t *oldCopy, oop_t *newSlot, oop_t *oldSlot);
+
+	std::map<oop_t*, oop_t*> newToOld, oldToNew;
+	uchar *copy;
+	int copyDelta;
+	Memory *memory;
+	GCSpace *old;
+
+	ulong *ccStart, *ccEnd;
+	static EqualChecker current;
 };
 
 }

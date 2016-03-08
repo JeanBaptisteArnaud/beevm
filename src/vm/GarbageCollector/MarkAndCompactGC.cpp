@@ -7,6 +7,7 @@
 #include "../DataStructures/Memory.h"
 #include "../DataStructures/SLLInfo.h"
 
+#include "SanityChecker.h"
 
 using namespace Bee;
 
@@ -74,6 +75,16 @@ void MarkAndCompactGC::unseeWellKnownObjects()
 	KnownObjects::stTrue->_beUnseenInLibrary();
 	KnownObjects::stFalse->_beUnseenInLibrary();
 	KnownObjects::frameMarker->_beUnseenInLibrary();
+
+	// added to our gc implementation
+	((oop_t*)memory)->_beUnseenInLibrary();
+	((oop_t*)memory->flipper)  ->_beUnseenInLibrary();
+	((oop_t*)memory->compactor)->_beUnseenInLibrary();
+
+//	((oop_t*)memory->fromSpace)->_beUnseenInSpace();
+//	((oop_t*)memory->toSpace)  ->_beUnseenInSpace();
+//	((oop_t*)memory->oldSpace) ->_beUnseenInSpace();
+
 
 	this->unseeCharacters();
 	this->unseeSKernelMeta();
@@ -175,6 +186,8 @@ void MarkAndCompactGC::setNewPositions(GCSpace * space)
 			oop_t * newPosition = (oop_t *)(asUObject(auxSpace.getNextFree()) + nextHeaderSize);
 			oop_t * reference = next->_getProxee();
 			oop_t * headerBits;
+
+			EqualChecker::current.newPosition(next, newPosition);
 
 			do {
 				headerBits = reference->slot(0);

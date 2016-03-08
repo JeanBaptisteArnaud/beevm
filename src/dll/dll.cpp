@@ -87,19 +87,7 @@ void scavengeHostVMFromSpace()
 
 }
 
-void copyMemory()
-{
-	ulong size = memory->oldSpace->commitedSize();
-	ulong base = asUObject(memory->oldSpace->base);
 
-	uchar *copy = (uchar*)VirtualAlloc(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-	memcpy(copy, (ulong*)base, size);
-
-	long distance = (ulong)copy - (ulong)base;
-	ostringstream message;
-	message << "distance from base to copy is 0x" << hex << distance;
-	debug(message.str().c_str());
-}
 
 void markAndCompactArena()
 {
@@ -107,7 +95,8 @@ void markAndCompactArena()
 	memory->updateFromHostVM();
 	debug((char*)status().c_str());
 
-	copyMemory();
+	EqualChecker::current.reset();
+	EqualChecker::current.copyMemory(memory, memory->oldSpace);
 
 	memory->collectOldSpace();
 	
@@ -116,7 +105,8 @@ void markAndCompactArena()
 	debug("mark and compact ended");
 	debug((char*)status().c_str());
 	
-	//debug("checking sanity... ");
+	debug("checking sanity... ");
+	EqualChecker::current.checkAllEqual(memory, memory->oldSpace);
 	//assertSaneObjects();
 	//debug("ok");
 }
