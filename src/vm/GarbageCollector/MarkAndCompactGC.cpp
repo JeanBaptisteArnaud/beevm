@@ -231,10 +231,11 @@ void MarkAndCompactGC::updateNativeRescuedEphemerons()
 
 void MarkAndCompactGC::allocateArrays()
 {
-	rememberedSet.emptyReserving(0x100);
+	// use different sizes so that we can recognize each other in memory when debugging
+	rememberedSet.emptyReserving(0x101);
 	literalsReferences.emptyReserving(0x200);
-	classCheckReferences.emptyReserving(0x100);
-	nativizedMethods.emptyReserving(0x100);
+	classCheckReferences.emptyReserving(0x102);
+	nativizedMethods.emptyReserving(0x103);
 	this->allocateWeakContainersArray();
 	this->allocateEphemeronsArray();
 	this->forgetNativeObjects();
@@ -245,14 +246,14 @@ void MarkAndCompactGC::allocateWeakContainersArray()
 {
 	tempArray.referer = vm.weakContainers();
 	tempArray.loadMDAFrom(&nativizedMethods);
-	tempArray.emptyReserving(0x100);
+	tempArray.emptyReserving(0x104);
 }
 
 void MarkAndCompactGC::allocateEphemeronsArray()
 {
 	tempArray.referer = vm.ephemerons();
 	tempArray.loadMDAFrom(&nativizedMethods);
-	tempArray.emptyReserving(0x100);
+	tempArray.emptyReserving(0x105);
 }
 
 void MarkAndCompactGC::forgetNativeObjects()
