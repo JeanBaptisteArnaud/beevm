@@ -243,7 +243,7 @@ void GenerationalGC::followCodeCacheReferences()
 	if (vm.globalCacheHasPointersToFrom())
 	{
 		vm.globalCacheHasPointersToFrom(false);
-		this->clearPolymorphicMethodCache();
+		this->clearGlobalLookupCache();
 	}
 
 	if (vm.anyCompiledMethodInFromSpace())

@@ -174,9 +174,9 @@ void GarbageCollector::rescueEphemerons()
 		this->someEphemeronsRescued();
 }
 
-void GarbageCollector::clearPolymorphicMethodCache()
+void GarbageCollector::clearGlobalLookupCache()
 {
-	for (ulong index = 1; index <= 4000; index++)
+	for (ulong index = 1; index <= 0x4000; index++)
 	{
 		vm.globalLookupCacheAtPut(index, KnownObjects::nil);
 	}

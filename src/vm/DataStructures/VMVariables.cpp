@@ -11,7 +11,7 @@ VMVariables::VMVariables()
 	debugFrameMarker = (oop_t*)0;
 
 	JIT_globalLookupCacheHasPointersToFrom = true;
-	JIT_globalLookupCache = new oop_t*[4000];
+	JIT_globalLookupCache = new oop_t*[0x4000];
 
 	// FIXME: initialize it with address of a real code cache
 	JIT_codeCache;
@@ -143,7 +143,7 @@ bool VMVariablesProxy::anyNativizedCompiledMethodInFromSpace()
 
 void VMVariablesProxy::anyNativizedCompiledMethodInFromSpace(bool value)
 {
-	*GC_anyNativizedCompiledMethodInFromSpace = value;
+	*GC_anyNativizedCompiledMethodInFromSpace = value ? 1 : 0;
 }
 
 ulong VMVariablesProxy::spacesDelta()

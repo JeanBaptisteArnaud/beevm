@@ -39,6 +39,7 @@ void MarkAndCompactGC::doCollect()
 	this->initAuxSpace();
 	this->unseeWellKnownObjects();
 	this->flushCodeCache();
+	this->clearGlobalLookupCache();
 	this->followAll();
 	this->setNewPositionsAndCompact();
 	this->updateOldSpace();
