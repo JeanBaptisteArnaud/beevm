@@ -275,7 +275,7 @@ ulong GCSpace::commitDelta(ulong delta)
 void GCSpace::decommitSlack()
 {
 	ulong limit  = (long)this->getNextFree();
-	ulong padded =  (limit + 0xFFF) && 0xFFFFF000;
+	ulong padded =  (limit + 0xFFF) & 0xFFFFF000;
 	long delta = (long)this->getCommitedLimit() - padded;
 	
 	if (delta < 0)
@@ -284,7 +284,7 @@ void GCSpace::decommitSlack()
 	if (delta > 0)
 	{
 		_decommit((ulong*)padded, (ulong*)delta);
-		this->setCommitedLimit((ulong*) padded);
+		this->setCommitedLimit((ulong*)pointerConst(padded));
 	}
 }
 
