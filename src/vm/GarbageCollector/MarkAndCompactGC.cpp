@@ -244,6 +244,7 @@ void MarkAndCompactGC::updateNativeRescuedEphemerons()
 
 void MarkAndCompactGC::allocateArrays()
 {
+	KnownObjects::emptyArray = memory->emptyArray;
 	// use different sizes so that we can recognize each other in memory when debugging
 	rememberedSet.emptyReserving(0x101);
 	literalsReferences.emptyReserving(0x200);
